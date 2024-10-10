@@ -1,0 +1,6 @@
+alembic==1.13.2
+python-dotenv==1.0.1
+SQLAlchemy==2.0.30
+asyncpg==0.29.0
+greenlet==3.0.3
+aio-pika==9.4.1

@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - ./docker_runtime/rabbitmq_data:/var/lib/rabbitmq
+    labels:
+      description: "RabbitMQ server"
+
+  postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_DB: svt
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./docker_runtime/postgres_data:/var/lib/postgresql/data
+    labels:
+      description: "PostgreSQL server"
