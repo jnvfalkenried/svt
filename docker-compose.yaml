@@ -26,3 +26,20 @@ services:
       - ./docker_runtime/postgres_data:/var/lib/postgresql/data
     labels:
       description: "PostgreSQL server"
+
+  producer:
+      build:
+        context: ./src
+        dockerfile: ./producer/Dockerfile
+      depends_on:
+        - rabbitmq
+        - postgres
+      environment:
+        RABBITMQ_SERVER: rabbitmq  # RabbitMQ hostname within Docker network
+        RABBITMQ_PORT: 5672
+        RABBITMQ_USER: admin
+        RABBITMQ_PASSWORD: admin
+      # volumes:
+      #   - ./src/producer:/app  # Mount your producer code inside the container
+      labels:
+        description: "TikTok Data Producer"
