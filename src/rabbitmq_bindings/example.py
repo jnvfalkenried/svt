@@ -8,16 +8,16 @@ sys.path.append(grandparent_dir)
 
 import asyncio
 
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 
-from src.helpers.rabbitmq import RabbitMQClient
+from helpers.rabbitmq import RabbitMQClient
 
-load_dotenv()
+# load_dotenv()
 
 
 async def main():
-    rabbitmq_alert_events_exchange = "alert_events_exchange"
-    rabbitmq_alert_events_queue = "alert_events_queue"
+    rabbitmq_exchange = "tiktok_data_exchange"
+    rabbitmq_queue = "hashtag_queue"
 
     rabbitmq_client = RabbitMQClient(
         os.getenv("RABBITMQ_SERVER"),
@@ -26,18 +26,24 @@ async def main():
         os.getenv("RABBITMQ_PASSWORD"),
     )
 
-    await rabbitmq_client.connect("bindings_alert_events_exchange")
+    while True:
+        try:
+            await rabbitmq_client.connect("tiktok_data_exchange")
+            break
+        except Exception as e:
+            # print(f"Error while initializing: {e}")
+            pass
 
     await rabbitmq_client.channel.declare_exchange(
-        name=rabbitmq_alert_events_exchange, type="topic", durable=True
+        name=rabbitmq_exchange, type="topic", durable=True
     )
     queue = await rabbitmq_client.channel.declare_queue(
-        name=rabbitmq_alert_events_queue, durable=True
+        name=rabbitmq_queue, durable=True
     )
-    await queue.bind(exchange=rabbitmq_alert_events_exchange, routing_key="#")
+    await queue.bind(exchange=rabbitmq_exchange, routing_key="#")
 
     print(
-        f"Queue {rabbitmq_alert_events_queue} is now bound to exchange {rabbitmq_alert_events_exchange} with routing key #"
+        f"Queue {rabbitmq_queue} is now bound to exchange {rabbitmq_exchange} with routing key #"
     )
 
     await rabbitmq_client.connection.close()

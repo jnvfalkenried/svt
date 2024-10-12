@@ -6,17 +6,16 @@ class Producer(RabbitMQClient):
     def __init__(self, rabbitmq_server, rabbitmq_port, user, password):
         super().__init__(rabbitmq_server, rabbitmq_port, user, password)
 
-        print("Producer initialized.")
-
     async def initialize(self):
         try:
             await self.connect("Producer")
-            self.exchange = await self.channel.declare_exchange(
-                "tiktok_data_exchange", type="topic", durable=True
-            )
+            self.exchange = await self.channel.get_exchange("tiktok_data_exchange")
             await self.channel.set_qos(prefetch_count=100)
+
+            print("Producer initialized.")
         except Exception as e:
-            print(f"Error while initializing: {e}")
+            pass
+            # print(f"Error while initializing: {e}")
 
     async def produce(self, message, routing_key):
         try:
