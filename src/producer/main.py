@@ -1,4 +1,8 @@
-#import pika
+# run with python main.py on producer dir  
+
+# to access db: run psql -h localhost -U admin -d svt
+
+
 import asyncio
 import json
 import aio_pika
