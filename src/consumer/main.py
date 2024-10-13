@@ -1,12 +1,34 @@
+import os
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+
 import asyncio
 import json
 import aio_pika
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+from sqlalchemy.orm import sessionmaker
+from src.postgresql.alchemy.models import Base, TikTokVideo, Author, Music, Challenge, VideoChallenge
+from dotenv import load_dotenv
 
-rabbitmq_host = 'localhost'
-rabbitmq_port = 5672
-rabbitmq_user = 'admin'
-rabbitmq_pass = 'admin'
-rabbitmq_queue = 'smth'
+# run this by python -m src.consumer.main in the root folder
+
+
+load_dotenv()
+
+# Database setup
+DATABASE_URL = (
+    f"postgresql+asyncpg://{os.getenv('POSTGRES_USER')}:{os.getenv('POSTGRES_PASSWORD')}"
+    f"@{os.getenv('POSTGRES_HOST')}:{os.getenv('POSTGRES_PORT')}/{os.getenv('POSTGRES_DB')}"
+)
+engine = create_async_engine(DATABASE_URL)
+AsyncSessionLocal = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+
+# RabbitMQ setup
+rabbitmq_host = os.getenv('RABBITMQ_HOST', 'localhost')
+rabbitmq_port = int(os.getenv('RABBITMQ_PORT', 5672))
+rabbitmq_user = os.getenv('RABBITMQ_USER', 'admin')
+rabbitmq_pass = os.getenv('RABBITMQ_PASS', 'admin')
+rabbitmq_queue = os.getenv('RABBITMQ_QUEUE', 'smth')
 
 async def process_tiktok_item(item):
     print("---")
