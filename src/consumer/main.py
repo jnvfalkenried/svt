@@ -9,12 +9,15 @@ rabbitmq_pass = 'admin'
 rabbitmq_queue = 'smth'
 
 async def process_tiktok_item(item):
+    print("---")
     print(f"Received TikTok data for video ID: {item.get('id', 'Unknown')}")
+    print("Some receieved data:") # we receieve the whole json but only print these for now
     print(f"Author: {item.get('author', {}).get('nickname', 'Unknown')}")
     print(f"Description: {item.get('desc', 'No description')}")
     print(f"Hashtags: {[challenge.get('title', '') for challenge in item.get('challenges', [])]}")
     print(f"Music: {item.get('music', {}).get('title', 'Unknown')}")
-    print(f"Stats: Views - {item.get('stats', {}).get('playCount', 0)}, Likes - {item.get('stats', {}).get('diggCount', 0)}")
+    #print(f"Stats: Views - {item.get('statsV2', {}).get('playCount', 0)}, Likes - {item.get('statsV2', {}).get('diggCount', 0)}, Comments - {item.get('statsV2', {}).get('commentCount', 0)}")
+    print(f"Stats: - {item.get('statsV2', {})}") 
     print("---")
 
 async def process_message(message: aio_pika.IncomingMessage):
