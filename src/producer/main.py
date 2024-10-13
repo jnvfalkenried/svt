@@ -21,28 +21,22 @@ with open(json_file_path, 'r') as file:
 
 async def send_message():
     try:
-        # Establish connection to RabbitMQ
         connection = await aio_pika.connect_robust(
             f"amqp://{rabbitmq_user}:{rabbitmq_pass}@{rabbitmq_host}:{rabbitmq_port}/"
         )
 
         async with connection:
-            # Creating a channel
             channel = await connection.channel()
-
-            # Declaring queue
             queue = await channel.declare_queue(rabbitmq_queue, durable=True)
-
-            # Convert the data to JSON string
             message = json.dumps(tiktok_data)
+            #print("message: ")
+            #print(message)
 
-            # Sending the message
+            # Send msg
             await channel.default_exchange.publish(
                 aio_pika.Message(body=message.encode(), delivery_mode=aio_pika.DeliveryMode.PERSISTENT),
                 routing_key=queue.name,
             )
-
-            #print(f"Sent TikTok data for video ID: {tiktok_data.get('id', 'unknown')} to queue: {rabbitmq_queue}")
             print(f"Sent {len(tiktok_data)} TikTok data items to queue: {rabbitmq_queue}")
 
     except aio_pika.AMQPException as e:

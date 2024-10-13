@@ -1,4 +1,5 @@
-[ {"author":{
+[{
+    "author":{
     "avatarLarger":"https://p16-sign-sg.tiktokcdn.com/aweme/1080x1080/tos-alisg-avt-0068/58ad9f325cba218013a68b194004724a.jpeg?lk3s=a5d48078&nonce=50559&refresh_token=ec3c93881483c2e8f4c7f14d9a44feee&x-expires=1727280000&x-signature=wtSo5N85IUjbQ0jSuro6yn25aIg%3D&shp=a5d48078&shcp=b59d6b55",
     "avatarMedium":"https://p16-sign-sg.tiktokcdn.com/aweme/720x720/tos-alisg-avt-0068/58ad9f325cba218013a68b194004724a.jpeg?lk3s=a5d48078&nonce=13691&refresh_token=11b70488530ada1d79e33b421298cfe5&x-expires=1727280000&x-signature=WBFAqg9zpFyhBO%2F7I8oxvAB5Is4%3D&shp=a5d48078&shcp=b59d6b55",
     "avatarThumb":"https://p16-sign-sg.tiktokcdn.com/aweme/100x100/tos-alisg-avt-0068/58ad9f325cba218013a68b194004724a.jpeg?lk3s=a5d48078&nonce=63411&refresh_token=e65d86197a107d19a1fdbd805f78f464&x-expires=1727280000&x-signature=wQrUE2IpGjBN9PIRFkMrGooFzBQ%3D&shp=a5d48078&shcp=b59d6b55",
@@ -20,8 +21,8 @@
     "ttSeller":false,
     "uniqueId":"ningchanunporn",
     "verified":false
- }} ,
- {"authorStats":{
+ },
+ "authorStats":{
     "diggCount":13200,
     "followerCount":141000,
     "followingCount":26,
@@ -29,8 +30,8 @@
     "heart":31800000,
     "heartCount":31800000,
     "videoCount":14400
- }},
- {"challenges":[
+},
+ "challenges":[
     {
        "coverLarger":"",
        "coverMedium":"",
@@ -127,8 +128,8 @@
        },
        "title":"fypシ"
     }
- ]},
- {"collected":false,
+ ],
+ "collected":false,
  "contents":[
     {
        "desc":"becbec's reactions are so funny. she always looks like she wants to run away from shyness 😅😂 #ปิ่นภักดิ์LiveReactEp8 #freenbecky #beckyarmstrong #เบ็คกี้รีเบคก้า #ขึ้นฟีด #fypシ",
@@ -148,8 +149,8 @@
           }
        ]
     }
- ]},
- {"createTime":1727096344,
+ ],
+ "createTime":1727096344,
  "desc":"becbec's reactions are so funny. she always looks like she wants to run away from shyness 😅😂 #ปิ่นภักดิ์LiveReactEp8 #freenbecky #beckyarmstrong #เบ็คกี้รีเบคก้า #ขึ้นฟีด #fypシ",
  "digged":false,
  "diversificationId":10088,
@@ -199,5 +200,5 @@
     "playCount":"18279",
     "repostCount":"0",
     "shareCount":"18"
- }}
-]
+ }
+}]
