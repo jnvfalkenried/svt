@@ -161,3 +161,7 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 docker_runtime/
+archive/multimodal_search/videos/
+archive/multimodal_search/key_frames/
+archive/multimodal_search/videos/
+archive/multimodal_search/embeddings/
