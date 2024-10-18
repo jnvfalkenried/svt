@@ -2,5 +2,7 @@ alembic==1.13.2
 python-dotenv==1.0.1
 SQLAlchemy==2.0.30
 asyncpg==0.29.0
-greenlet==3.0.3
+greenlet==2.0.2
 aio-pika==9.4.1
+TikTokApi==6.5.2
+playwright==1.37.0
