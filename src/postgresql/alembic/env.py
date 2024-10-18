@@ -12,8 +12,13 @@ from alembic import context
 # sys.path.append(os.path.dirname(grandparent_dir))
 from alchemy import models
 from dotenv import load_dotenv
+import os
+
+from alchemy.models import Base
 
 load_dotenv()
+
+target_metadata = Base.metadata
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
