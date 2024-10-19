@@ -29,10 +29,10 @@ services:
       description: "RabbitMQ Bindings"
 
   postgres:
-    image: postgres:13
+    image: pgvector/pgvector:pg14
     restart: always
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U admin']
+      test: ['CMD-SHELL', 'pg_isready']
       interval: 10s
       timeout: 5s
       retries: 5

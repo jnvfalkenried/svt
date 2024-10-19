@@ -8,7 +8,7 @@ import aio_pika
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.future import select
-from src.postgresql.alchemy.models import Base, TikTokVideo, Author, Music, Challenge, VideoChallenge
+from src.postgresql_old.alchemy.models import Base, TikTokVideo, Author, Music, Challenge, VideoChallenge
 from dotenv import load_dotenv
 
 load_dotenv()

@@ -1,4 +1,4 @@
-from project.database_models.base import Base
+from postgresql.database_models.base import Base
 from typing import Optional
 from sqlalchemy import Integer, String, Boolean, Index, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
