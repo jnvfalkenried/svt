@@ -1,6 +1,7 @@
 import datetime
 import os
 import sys
+import json
 
 import aio_pika
 from TikTokApi import TikTokApi
@@ -17,14 +18,12 @@ class TikTokProducer(RabbitMQClient):
     def __init__(self, rabbitmq_server, rabbitmq_port, user, password):
         super().__init__(rabbitmq_server, rabbitmq_port, user, password)
         self.connection_name = "tiktok_data_producer"
-        self.exchange_name = "tiktok_data_exchange"
+        self.exchange_name = os.environ.get("RABBITMQ_EXCHANGE", None)
 
     async def initialize(self):
         try:
             await self.connect(self.connection_name)
-            self.exchange = await self.channel.declare_exchange(
-                self.exchange_name, type="topic", durable=True
-            )
+            self.exchange = await self.channel.get_exchange(self.exchange_name)
             await self.channel.set_qos(prefetch_count=100)
 
             print(f"TikTokProducer initialized.")
@@ -34,7 +33,7 @@ class TikTokProducer(RabbitMQClient):
     async def produce_message(self, key, value):
         try:
             message = aio_pika.Message(
-                body=str(value).encode("utf-8"),
+                body=value.encode("utf-8"),
                 delivery_mode=aio_pika.DeliveryMode.PERSISTENT,
             )
             await self.exchange.publish(message, routing_key=str(key))
@@ -51,7 +50,7 @@ class TikTokProducer(RabbitMQClient):
             tag = api.hashtag(name=hashtag)
             async for video in tag.videos(count=num_videos):
                 await self.produce_message(
-                    key=f"tiktok.hashtag.{hashtag}", value=video.as_dict
+                    key=f"tiktok.hashtag.{hashtag}", value=json.dumps(video.as_dict)
                 )
         print(f"Finished getting videos for hashtag: {hashtag}")
 
@@ -64,7 +63,7 @@ class TikTokProducer(RabbitMQClient):
             async for video in api.trending.videos(count=num_videos):
                 await self.produce_message(
                     key=f"tiktok.trending.{datetime.datetime.now()}",
-                    value=video.as_dict,
+                    value=json.dumps(video.as_dict),
                 )
         print(f"Finished getting trending videos")
 
