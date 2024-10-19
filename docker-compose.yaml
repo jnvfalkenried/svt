@@ -30,10 +30,16 @@ services:
 
   postgres:
     image: postgres:13
+    restart: always
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U admin']
+      interval: 10s
+      timeout: 5s
+      retries: 5
     environment:
-      POSTGRES_DB: svt
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: admin
+      - PGUSER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=svt_db
     ports:
       - "5432:5432"
     volumes:
