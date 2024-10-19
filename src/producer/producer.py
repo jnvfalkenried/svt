@@ -1,6 +1,7 @@
 import datetime
 import os
 import sys
+import requests
 
 import aio_pika
 from TikTokApi import TikTokApi
@@ -82,3 +83,36 @@ class TikTokProducer(RabbitMQClient):
                     value=related_video.as_dict,
                 )
         print(f"Finished getting related videos for video: {video_url}")
+
+    async def get_video_byters(self, video):
+        """
+        Get video bytes for a given video url
+
+        Parameters:
+        video: TikTokApi.Video containing video url
+        """
+        s = requests.Session()
+        h = {
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
+            "range": "bytes=0-",
+            "accept-encoding": "identity;q=1, *;q=0",
+            "referer": "https://www.tiktok.com/",
+        }
+
+        video_url = video.as_dict['video']['bitrateInfo'][0]['PlayAddr']['UrlList'][-1]
+        audio_url = video.as_dict['music']['playUrl']
+
+        # Download the video stream
+        video_response = s.get(video_url, headers=h)
+
+        if video.as_dict['music']['title'] == "original sound":
+            # Download the audio stream
+            audio_response = s.get(audio_url, headers=h)
+
+        self.produce_message(
+            key=f"video_stream",
+            value={
+                "video": video_response.content,
+                "audio": audio_response.content if video.as_dict['music']['title'] == "original sound" else None
+            },
+        )
