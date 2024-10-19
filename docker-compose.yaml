@@ -13,18 +13,26 @@ services:
       - ./docker_runtime/rabbitmq_data:/var/lib/rabbitmq
     labels:
       description: "RabbitMQ server"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 10s
+      retries: 3
 
   rabbitmq-bindings:
     build:
       context: ./src
       dockerfile: ./rabbitmq_bindings/Dockerfile
     depends_on:
-      - rabbitmq
+      rabbitmq:
+        condition: service_healthy
     environment:
       RABBITMQ_SERVER: rabbitmq  # RabbitMQ hostname within Docker network
       RABBITMQ_PORT: ${RABBITMQ_PORT}
       RABBITMQ_USER: ${RABBITMQ_USER}
       RABBITMQ_PASSWORD: ${RABBITMQ_PASS}
+      RABBITMQ_QUEUE_PERSISTENT: ${RABBITMQ_QUEUE_PERSISTENT}
+      RABBITMQ_EXCHANGE: ${RABBITMQ_EXCHANGE}
     labels:
       description: "RabbitMQ Bindings"
 
@@ -32,7 +40,7 @@ services:
     image: postgres:13
     restart: always
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U admin']
+      test: ['CMD-SHELL', 'pg_isready']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -52,8 +60,8 @@ services:
         context: ./src
         dockerfile: ./producer/Dockerfile
       depends_on:
-        - rabbitmq
-        - postgres
+        rabbitmq:
+          condition: service_healthy
       environment:
         RABBITMQ_SERVER: rabbitmq  # RabbitMQ hostname within Docker network
         RABBITMQ_PORT: ${RABBITMQ_PORT}
@@ -68,13 +76,15 @@ services:
         context: ./src
         dockerfile: ./consumer/Dockerfile
       depends_on:
-        - rabbitmq
-        - postgres
+        rabbitmq:
+          condition: service_healthy
+        postgres: 
+          condition: service_healthy
       environment:
         RABBITMQ_SERVER: rabbitmq  # RabbitMQ hostname within Docker network
         RABBITMQ_PORT: ${RABBITMQ_PORT}
         RABBITMQ_USER: ${RABBITMQ_USER}
-        RABBITMQ_PASSWORD: ${RABBITMQ_PASS}
+        RABBITMQ_PASS: ${RABBITMQ_PASS}
         RABBITMQ_QUEUE_PERSISTENT: ${RABBITMQ_QUEUE_PERSISTENT}
         PGUSER: ${POSTGRES_USER}
         POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}

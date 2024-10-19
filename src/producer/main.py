@@ -3,7 +3,7 @@ import os
 
 from producer import TikTokProducer
 
-HASHTAGS = ["election", "election2024", "trump", "harris"]
+HASHTAGS = ["harris"]
 
 
 async def main():

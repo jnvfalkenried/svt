@@ -15,9 +15,9 @@ from sqlalchemy import pool
 
 from alembic import context
 
-from project.config.settings import DATABASE_URL
-from project.database_models.base import Base
-from project.database_models import *
+from postgresql.config.settings import DATABASE_URL
+from postgresql.database_models.base import Base
+from postgresql.database_models import *
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

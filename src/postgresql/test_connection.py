@@ -6,8 +6,8 @@ PROJECT_PATH = os.getenv("PROJECT_PATH")
 import sys
 sys.path.append(PROJECT_PATH)
 ################################################
-from project.config.settings import DATABASE_URL
-from project.config.db import get_async_session
+from postgresql.config.settings import DATABASE_URL
+from postgresql.config.db import get_async_session
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import text
 import asyncpg

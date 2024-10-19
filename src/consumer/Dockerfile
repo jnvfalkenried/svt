@@ -12,6 +12,9 @@ COPY ./consumer /app
 # Copy the helper directory contents into the container
 COPY ./helpers /app/helpers
 
+# Copying the db folder
+COPY ./postgresql /app/postgresql
+
 # Install any needed packages specified in requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
