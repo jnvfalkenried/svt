@@ -17,7 +17,7 @@ class TikTokProducer(RabbitMQClient):
     def __init__(self, rabbitmq_server, rabbitmq_port, user, password):
         super().__init__(rabbitmq_server, rabbitmq_port, user, password)
         self.connection_name = "tiktok_data_producer"
-        self.exchange_name = "tiktok_data_exchange"
+        self.exchange_name = os.environ.get("RABBITMQ_EXCHANGE", None)
 
     async def initialize(self):
         try:

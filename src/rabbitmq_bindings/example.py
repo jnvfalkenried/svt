@@ -16,14 +16,14 @@ from helpers.rabbitmq import RabbitMQClient
 
 
 async def main():
-    rabbitmq_exchange = "tiktok_data_exchange"
-    rabbitmq_queue = "hashtag_queue"
+    rabbitmq_exchange = os.getenv("RABBITMQ_EXCHANGE"),
+    rabbitmq_queue = os.getenv("RABBITMQ_QUEUE_PERSISTENT"),
 
     rabbitmq_client = RabbitMQClient(
         os.getenv("RABBITMQ_SERVER"),
         os.getenv("RABBITMQ_PORT"),
         os.getenv("RABBITMQ_USER"),
-        os.getenv("RABBITMQ_PASSWORD"),
+        os.getenv("RABBITMQ_PASSWORD")
     )
 
     while True:

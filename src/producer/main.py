@@ -14,7 +14,14 @@ async def main():
         os.getenv("RABBITMQ_PASSWORD"),
     )
 
-    await producer.initialize()
+    # await producer.initialize()
+
+    while True:
+        try: 
+            await producer.initialize()
+            break
+        except Exception as e:
+            print(f"Caught error: {e}")
 
     await asyncio.gather(
         *(producer.get_hashtag_videos(hashtag) for hashtag in HASHTAGS)

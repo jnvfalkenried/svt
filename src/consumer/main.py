@@ -8,7 +8,7 @@ import aio_pika
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.future import select
-from src.postgresql.alchemy.models import Base, TikTokVideo, Author, Music, Challenge, VideoChallenge
+from src.postgresql.alchemy.models import Base, Posts, Authors, Music, Challenges, PostsChallenges
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -22,11 +22,11 @@ engine = create_async_engine(DATABASE_URL)
 AsyncSessionLocal = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
 # RabbitMQ setup
-rabbitmq_host = os.getenv('RABBITMQ_HOST', 'localhost')
-rabbitmq_port = int(os.getenv('RABBITMQ_PORT', 5672))
-rabbitmq_user = os.getenv('RABBITMQ_USER', 'admin')
-rabbitmq_pass = os.getenv('RABBITMQ_PASS', 'admin')
-rabbitmq_queue = os.getenv('RABBITMQ_QUEUE', 'smth')
+rabbitmq_host = os.getenv('RABBITMQ_HOST')
+rabbitmq_port = int(os.getenv('RABBITMQ_PORT'))
+rabbitmq_user = os.getenv('RABBITMQ_USER')
+rabbitmq_pass = os.getenv('RABBITMQ_PASS')
+rabbitmq_queue = os.getenv('RABBITMQ_QUEUE_PERSISTENT')
 
 async def get_or_create(session, model, **kwargs):
     instance = await session.execute(select(model).filter_by(**kwargs))
@@ -42,7 +42,7 @@ async def get_or_create(session, model, **kwargs):
 async def process_tiktok_item(session, item):
     # Process Author
     author_data = item.get('author', {})
-    author = await get_or_create(session, Author,
+    author = await get_or_create(session, Authors,
         id=author_data.get('id'),
         nickname=author_data.get('nickname'),
         unique_id=author_data.get('uniqueId'),
@@ -62,7 +62,7 @@ async def process_tiktok_item(session, item):
     )
 
     # Process Video
-    video = TikTokVideo(
+    video = Posts(
         id=item.get('id'),
         desc=item.get('desc'),
         create_time=item.get('createTime'),
@@ -74,12 +74,12 @@ async def process_tiktok_item(session, item):
 
     # Process Challenges
     for challenge_data in item.get('challenges', []):
-        challenge = await get_or_create(session, Challenge,
+        challenge = await get_or_create(session, Challenges,
             id=challenge_data.get('id'),
             title=challenge_data.get('title'),
             desc=challenge_data.get('desc')
         )
-        video_challenge = VideoChallenge(video_id=video.id, challenge_id=challenge.id)
+        video_challenge = PostsChallenges(video_id=video.id, challenge_id=challenge.id)
         session.add(video_challenge)
 
     await session.commit()
