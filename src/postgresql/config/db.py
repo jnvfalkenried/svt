@@ -1,4 +1,4 @@
-from project.config.settings import DATABASE_URL
+from postgresql.config.settings import DATABASE_URL
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 from contextlib import asynccontextmanager

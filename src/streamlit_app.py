@@ -11,7 +11,7 @@ import plotly.express as px
 from sqlalchemy import create_engine
 from sqlalchemy.future import select
 from sqlalchemy.orm import sessionmaker
-from src.postgresql.alchemy.models import Author, TikTokVideo, Music, Challenge
+from src.postgresql_old.alchemy.models import Author, TikTokVideo, Music, Challenge
 from dotenv import load_dotenv
 
 load_dotenv()

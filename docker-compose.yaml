@@ -4,8 +4,8 @@ services:
   rabbitmq:
     image: rabbitmq:3-management
     environment:
-      RABBITMQ_DEFAULT_USER: admin
-      RABBITMQ_DEFAULT_PASS: admin
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
     ports:
       - "5672:5672"
       - "15672:15672"
@@ -13,33 +13,41 @@ services:
       - ./docker_runtime/rabbitmq_data:/var/lib/rabbitmq
     labels:
       description: "RabbitMQ server"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 10s
+      retries: 3
 
   rabbitmq-bindings:
     build:
       context: ./src
       dockerfile: ./rabbitmq_bindings/Dockerfile
     depends_on:
-      - rabbitmq
+      rabbitmq:
+        condition: service_healthy
     environment:
       RABBITMQ_SERVER: rabbitmq  # RabbitMQ hostname within Docker network
-      RABBITMQ_PORT: 5672
-      RABBITMQ_USER: admin
-      RABBITMQ_PASSWORD: admin
+      RABBITMQ_PORT: ${RABBITMQ_PORT}
+      RABBITMQ_USER: ${RABBITMQ_USER}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASS}
+      RABBITMQ_QUEUE_PERSISTENT: ${RABBITMQ_QUEUE_PERSISTENT}
+      RABBITMQ_EXCHANGE: ${RABBITMQ_EXCHANGE}
     labels:
       description: "RabbitMQ Bindings"
 
   postgres:
-    image: postgres:13
+    image: pgvector/pgvector:pg14
     restart: always
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U admin']
+      test: ['CMD-SHELL', 'pg_isready']
       interval: 10s
       timeout: 5s
       retries: 5
     environment:
-      - PGUSER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=svt_db
+      PGUSER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     ports:
       - "5432:5432"
     volumes:
@@ -52,14 +60,35 @@ services:
         context: ./src
         dockerfile: ./producer/Dockerfile
       depends_on:
-        - rabbitmq
-        - postgres
+        rabbitmq:
+          condition: service_healthy
       environment:
         RABBITMQ_SERVER: rabbitmq  # RabbitMQ hostname within Docker network
-        RABBITMQ_PORT: 5672
-        RABBITMQ_USER: admin
-        RABBITMQ_PASSWORD: admin
-      #volumes:
-      #  - ./src/producer:/app  # Mount your producer code inside the container for easier development
+        RABBITMQ_PORT: ${RABBITMQ_PORT}
+        RABBITMQ_USER: ${RABBITMQ_USER}
+        RABBITMQ_PASSWORD: ${RABBITMQ_PASS}
+        RABBITMQ_EXCHANGE: ${RABBITMQ_EXCHANGE}
       labels:
         description: "TikTok Data Producer"
+
+  consumer:
+      build:
+        context: ./src
+        dockerfile: ./consumer/Dockerfile
+      depends_on:
+        rabbitmq:
+          condition: service_healthy
+        postgres: 
+          condition: service_healthy
+      environment:
+        RABBITMQ_SERVER: rabbitmq  # RabbitMQ hostname within Docker network
+        RABBITMQ_PORT: ${RABBITMQ_PORT}
+        RABBITMQ_USER: ${RABBITMQ_USER}
+        RABBITMQ_PASS: ${RABBITMQ_PASS}
+        RABBITMQ_QUEUE_PERSISTENT: ${RABBITMQ_QUEUE_PERSISTENT}
+        PGUSER: ${POSTGRES_USER}
+        POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+        POSTGRES_DB: ${POSTGRES_DB}
+        POSTGRES_PORT: ${POSTGRES_PORT}
+      labels:
+        description: "TikTok Data Consumer"
