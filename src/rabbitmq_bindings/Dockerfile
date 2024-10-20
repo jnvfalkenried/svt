@@ -19,4 +19,4 @@ COPY ./helpers/ /app/helpers/
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Command to start your application
-CMD python example.py
+CMD python bindings.py

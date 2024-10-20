@@ -34,7 +34,7 @@ class TikTokProducer(RabbitMQClient):
     async def produce_message(self, key, value):
         try:
             message = aio_pika.Message(
-                body=value.encode("utf-8"),
+                body=value.encode("utf-8") if isinstance(value, str) else value,
                 delivery_mode=aio_pika.DeliveryMode.PERSISTENT,
             )
             await self.exchange.publish(message, routing_key=str(key))
@@ -53,6 +53,8 @@ class TikTokProducer(RabbitMQClient):
                 await self.produce_message(
                     key=f"tiktok.hashtag.{hashtag}", value=json.dumps(video.as_dict)
                 )
+
+                await self.get_video_bytes(video)
         print(f"Finished getting videos for hashtag: {hashtag}")
 
     async def trending_videos(self, num_videos=5):
@@ -79,11 +81,11 @@ class TikTokProducer(RabbitMQClient):
             async for related_video in video.related_videos(count=num_related_videos):
                 await self.produce_message(
                     key=f"tiktok.related_videos.{video_url}",
-                    value=related_video.as_dict,
+                    value=json.dumps(related_video.as_dict),
                 )
         print(f"Finished getting related videos for video: {video_url}")
 
-    async def get_video_byters(self, video):
+    async def get_video_bytes(self, video):
         """
         Get video bytes for a given video url
 
@@ -108,10 +110,9 @@ class TikTokProducer(RabbitMQClient):
             # Download the audio stream
             audio_response = s.get(audio_url, headers=h)
 
-        self.produce_message(
-            key=f"video_stream",
-            value={
-                "video": video_response.content,
-                "audio": audio_response.content if video.as_dict['music']['title'] == "original sound" else None
-            },
+        await self.produce_message(
+            key=f"tiktok.bytes.{video.as_dict['id']}",
+            # For now we are only sending the video bytes
+            value=video_response.content,
         )
+        # print(f"Finished getting video bytes for video: {video.as_dict['id']}")
