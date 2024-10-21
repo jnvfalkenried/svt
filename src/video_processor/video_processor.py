@@ -78,7 +78,7 @@ class TikTokVideoProcessor(RabbitMQClient):
         Handle the incoming message
         """
         try:
-            async with message.process(requeue=False):
+            async with message.process(requeue=True):
                 body = message.body
                 id = message.routing_key.split(".")[-1]
                 
@@ -149,7 +149,7 @@ class TikTokVideoProcessor(RabbitMQClient):
         embeddings_lst = []
         for key_frame in key_frames:
             try:
-                embeddings = self.get_image_video_text_embeddings(
+                embeddings = await self.get_image_video_text_embeddings(
                     project_id=self.google_project_id,
                     location=self.region,
                     frame=key_frame,
@@ -165,7 +165,7 @@ class TikTokVideoProcessor(RabbitMQClient):
 
         return embeddings_lst
     
-    def get_image_video_text_embeddings(
+    async def get_image_video_text_embeddings(
         self,
         project_id: str,
         location: str,
