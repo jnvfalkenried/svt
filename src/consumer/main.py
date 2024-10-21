@@ -42,45 +42,61 @@ async def get_or_create(session, model, **kwargs):
 async def process_tiktok_item(session, item):
     # Process Author
     author_data = item.get('author', {})
+    authorStats_data = item.get('authorStats', {})
     author = await get_or_create(session, Authors,
         id=author_data.get('id'),
         nickname=author_data.get('nickname'),
-        unique_id=author_data.get('uniqueId'),
         signature=author_data.get('signature'),
+        unique_id=author_data.get('uniqueId'),
         verified=author_data.get('verified'),
-        stats=author_data.get('stats')
+        digg_count=authorStats_data.get('diggCount'),
+        follower_count=authorStats_data.get('followerCount'),
+        following_count=authorStats_data.get('followingCount'),
+        heart_count=authorStats_data.get('heartCount'),
+        video_count=authorStats_data.get('videoCount')
     )
 
     # Process Music
     music_data = item.get('music', {})
     music = await get_or_create(session, Music,
         id=music_data.get('id'),
-        title=music_data.get('title'),
         author_name=music_data.get('authorName'),
+        title=music_data.get('title'),
         duration=music_data.get('duration'),
         original=music_data.get('original')
     )
 
     # Process Video
-    video = Posts(
+    post = Posts(
         id=item.get('id'),
-        desc=item.get('desc'),
-        create_time=item.get('createTime'),
+        created_at=item.get('createTime'),
+        description=item.get('desc'),
+        duet_enabled=item.get('duetEnabled'),
+        duet_from_id=item.get('duetInfo', {}).get('duetFromId'),
+        is_ad=item.get('isAd'),
+        can_repost=item.get('item_control', {}).get('can_repost'),
+        collect_count=item.get('statsV2', {}).get('collectCount'),
+        comment_count=item.get('statsV2', {}).get('commentCount'),
+        digg_count=item.get('statsV2', {}).get('diggCount'),
+        play_count=item.get('statsV2', {}).get('playCount'),
+        repost_count=item.get('statsV2', {}).get('repostCount'),
+        share_count=item.get('statsV2', {}).get('shareCount'),
         author_id=author.id,
-        music_id=music.id,
-        stats=item.get('stats')
+        music_id=music.id
     )
-    session.add(video)
+    session.add(post)
 
     # Process Challenges
     for challenge_data in item.get('challenges', []):
         challenge = await get_or_create(session, Challenges,
             id=challenge_data.get('id'),
             title=challenge_data.get('title'),
-            desc=challenge_data.get('desc')
+            description=challenge_data.get('desc'),
+            video_count=challenge_data.get('stats', {}).get('videoCount'),
+            view_count=challenge_data.get('stats', {}).get('viewCount')
         )
-        video_challenge = PostsChallenges(video_id=video.id, challenge_id=challenge.id)
-        session.add(video_challenge)
+        posts_challenges = PostsChallenges(post_id=post.id, challenge_id=challenge.id)
+        session.add(posts_challenges)
 
     await session.commit()
     print(f"Processed and stored TikTok data for video ID: {item.get('id', 'Unknown')}")

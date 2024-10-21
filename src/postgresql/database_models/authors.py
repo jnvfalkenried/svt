@@ -17,7 +17,7 @@ class Authors(Base):
     heart_count: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     video_count: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     
-    posts = relationship("Posts", back_populates="author")
+    posts = relationship("Posts", back_populates="authors")
     
     __table_args__ = (
         Index("authors_id", "id"),
