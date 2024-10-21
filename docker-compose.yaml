@@ -94,10 +94,10 @@ services:
     labels:
       description: "TikTok Data Consumer"
   
-  multimodal_search:
+  video-processor:
     build:
       context: ./src
-      dockerfile: ./multimodal_search/Dockerfile
+      dockerfile: ./video_processor/Dockerfile
     depends_on:
       rabbitmq:
         condition: service_healthy

@@ -57,6 +57,14 @@ async def main():
 
     print(f"Queue video_bytes is now bound to exchange {rabbitmq_exchange} with routing key: tiktok.bytes.#")
 
+    queue_embeddings = await rabbitmq_client.channel.declare_queue(
+        name="embeddings", durable=True
+    )
+
+    await queue_embeddings.bind(exchange=rabbitmq_exchange, routing_key="tiktok.embeddings.#")
+
+    print(f"Queue embeddings is now bound to exchange {rabbitmq_exchange} with routing key: tiktok.embeddings.#")
+
     await rabbitmq_client.connection.close()
 
 

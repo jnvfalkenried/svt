@@ -1,4 +1,4 @@
-# producer/Dockerfile
+# video_processor/Dockerfile
 
 # Use an official Python runtime as a parent image, need python 3.10 otherwise build will fail
 FROM python:3.10-slim
@@ -16,8 +16,8 @@ RUN apt-get update && apt-get install -y \
 # Set the working directory
 WORKDIR /app
 
-# Copy the multimodal_search directory contents into the container
-COPY ./multimodal_search /app
+# Copy the video_processor directory contents into the container
+COPY ./video_processor /app
 
 # Copy the helper directory contents into the container
 COPY ./helpers /app/helpers

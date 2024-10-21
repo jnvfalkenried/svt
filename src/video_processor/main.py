@@ -1,7 +1,7 @@
 import asyncio
 import os
 
-from multimodal_search_processor import TikTokVideoProcessor
+from video_processor import TikTokVideoProcessor
 
 async def main():
     processor = TikTokVideoProcessor(
