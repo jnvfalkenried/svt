@@ -1,15 +1,11 @@
 import datetime
-import os
-import sys
 import json
-import requests
+import os
 
 import aio_pika
+import requests
 from TikTokApi import TikTokApi
 
-current_dir = os.path.dirname(os.path.abspath(__file__))
-parent_dir = os.path.dirname(current_dir)
-sys.path.append(parent_dir)
 from helpers.rabbitmq import RabbitMQClient
 
 ms_token = os.environ.get("ms_token", None)
@@ -100,13 +96,13 @@ class TikTokProducer(RabbitMQClient):
             "referer": "https://www.tiktok.com/",
         }
 
-        video_url = video.as_dict['video']['bitrateInfo'][0]['PlayAddr']['UrlList'][-1]
-        audio_url = video.as_dict['music']['playUrl']
+        video_url = video.as_dict["video"]["bitrateInfo"][0]["PlayAddr"]["UrlList"][-1]
+        audio_url = video.as_dict["music"]["playUrl"]
 
         # Download the video stream
         video_response = s.get(video_url, headers=h)
 
-        if video.as_dict['music']['title'] == "original sound":
+        if video.as_dict["music"]["title"] == "original sound":
             # Download the audio stream
             audio_response = s.get(audio_url, headers=h)
 
