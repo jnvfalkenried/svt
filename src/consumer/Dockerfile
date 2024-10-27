@@ -19,4 +19,4 @@ COPY ./postgresql /app/postgresql
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Command to run your script
-CMD ["python", "-u", "main_new.py"]
+CMD ["python", "-u", "main.py"]

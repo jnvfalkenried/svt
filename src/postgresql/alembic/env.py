@@ -9,8 +9,9 @@ from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
-alembic_dir = os.path.dirname(current_dir)
-src_dir = os.path.dirname(alembic_dir)
+postgresql_dir = os.path.dirname(current_dir)
+src_dir = os.path.dirname(postgresql_dir)
+sys.path.append(src_dir)
 sys.path.append(os.path.dirname(src_dir))
 from dotenv import load_dotenv
 
