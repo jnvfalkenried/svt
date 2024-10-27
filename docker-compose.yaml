@@ -57,6 +57,25 @@ services:
     labels:
       description: "PostgreSQL server"
 
+  alembic:
+    build:
+      context: ./src
+      dockerfile: ./postgresql/Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./src/postgresql/alembic:/app/alembic
+      - ./src/postgresql/database_models:/app/database_models
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: ${POSTGRES_PORT}
+    labels:
+      description: "Alembic migration service"
+
   producer:
     build:
       context: ./src
@@ -65,7 +84,7 @@ services:
       rabbitmq:
         condition: service_healthy
       rabbitmq-bindings:
-        condition: completed_successfully
+        condition: service_completed_successfully
     environment:
       RABBITMQ_SERVER: rabbitmq  # RabbitMQ hostname within Docker network
       RABBITMQ_PORT: ${RABBITMQ_PORT}
@@ -83,9 +102,11 @@ services:
       rabbitmq:
         condition: service_healthy
       rabbitmq-bindings:
-        condition: completed_successfully
+        condition: service_completed_successfully
       postgres: 
         condition: service_healthy
+      alembic:
+        condition: service_completed_successfully
     environment:
       RABBITMQ_SERVER: rabbitmq  # RabbitMQ hostname within Docker network
       RABBITMQ_PORT: ${RABBITMQ_PORT}
@@ -108,7 +129,7 @@ services:
       rabbitmq:
         condition: service_healthy
       rabbitmq-bindings:
-        condition: completed_successfully
+        condition: service_completed_successfully
     environment:
       RABBITMQ_SERVER: rabbitmq  # RabbitMQ hostname within Docker network
       RABBITMQ_PORT: ${RABBITMQ_PORT}
