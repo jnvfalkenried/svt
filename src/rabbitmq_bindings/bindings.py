@@ -15,10 +15,10 @@ from helpers.rabbitmq import RabbitMQClient
 load_dotenv()
 
 # RabbitMQ configurations
-RMQ_EXCHANGE = "tiktok_data_exchange"
-RMQ_HASHTAG_QUEUE = "persistent_queue"
-RMQ_VIDEO_BYTES_QUEUE = "video_bytes"
-RMQ_EMBEDDINGS_QUEUE = "embeddings"
+RMQ_EXCHANGE = os.getenv("RABBITMQ_EXCHANGE")
+RMQ_HASHTAG_QUEUE = os.getenv("RABBITMQ_HASHTAG_QUEUE")
+RMQ_VIDEO_BYTES_QUEUE = os.getenv("RABBITMQ_VIDEO_BYTES_QUEUE")
+RMQ_EMBEDDINGS_QUEUE = os.getenv("RABBITMQ_EMBEDDINGS_QUEUE")
 
 
 async def main():
@@ -30,7 +30,7 @@ async def main():
     )
 
     # Connect to RabbitMQ
-    await rabbitmq_client.connect("tiktok_data_exchange")
+    await rabbitmq_client.connect("rmq_bindings")
 
     # Declare exchange
     await rabbitmq_client.channel.declare_exchange(
