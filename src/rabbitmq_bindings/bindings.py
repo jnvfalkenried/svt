@@ -14,57 +14,60 @@ from helpers.rabbitmq import RabbitMQClient
 
 load_dotenv()
 
+# RabbitMQ configurations
+RMQ_EXCHANGE = "tiktok_data_exchange"
+RMQ_HASHTAG_QUEUE = "persistent_queue"
+RMQ_VIDEO_BYTES_QUEUE = "video_bytes"
+RMQ_EMBEDDINGS_QUEUE = "embeddings"
+
 
 async def main():
-    rabbitmq_exchange = os.getenv("RABBITMQ_EXCHANGE")
-    rabbitmq_queue = os.getenv("RABBITMQ_QUEUE_PERSISTENT")
-
-    print("rabbitmq_exchange: ", rabbitmq_exchange)
-    print("rabbitmq_queue: ", rabbitmq_queue)
-
     rabbitmq_client = RabbitMQClient(
         os.getenv("RABBITMQ_SERVER"),
         os.getenv("RABBITMQ_PORT"),
         os.getenv("RABBITMQ_USER"),
-        os.getenv("RABBITMQ_PASSWORD")
+        os.getenv("RABBITMQ_PASSWORD"),
     )
 
-    while True:
-        try:
-            await rabbitmq_client.connect("tiktok_data_exchange")
-            break
-        except Exception as e:
-            # print(f"Error while initializing: {e}")
-            pass
+    # Connect to RabbitMQ
+    await rabbitmq_client.connect("tiktok_data_exchange")
 
+    # Declare exchange
     await rabbitmq_client.channel.declare_exchange(
-        name=rabbitmq_exchange, type="topic", durable=True
+        name=RMQ_EXCHANGE, type="topic", durable=True
     )
-    queue = await rabbitmq_client.channel.declare_queue(
-        name=rabbitmq_queue, durable=True
+
+    # Declare queues
+    queue_hashtag = await rabbitmq_client.channel.declare_queue(
+        name=RMQ_HASHTAG_QUEUE, durable=True
     )
-    await queue.bind(exchange=rabbitmq_exchange, routing_key="tiktok.hashtag.#")
+    await queue_hashtag.bind(exchange=RMQ_EXCHANGE, routing_key="tiktok.hashtag.#")
 
     print(
-        f"Queue {rabbitmq_queue} is now bound to exchange {rabbitmq_exchange} with routing key: tiktok.hashtag.#"
+        f"Queue {RMQ_HASHTAG_QUEUE} is now bound to exchange {RMQ_EXCHANGE} with routing key: tiktok.hashtag.#"
     )
 
     queue_video_bytes = await rabbitmq_client.channel.declare_queue(
-        name="video_bytes", durable=True
+        name=RMQ_VIDEO_BYTES_QUEUE, durable=True
     )
+    await queue_video_bytes.bind(exchange=RMQ_EXCHANGE, routing_key="tiktok.bytes.#")
 
-    await queue_video_bytes.bind(exchange=rabbitmq_exchange, routing_key="tiktok.bytes.#")
-
-    print(f"Queue video_bytes is now bound to exchange {rabbitmq_exchange} with routing key: tiktok.bytes.#")
+    print(
+        f"Queue {RMQ_VIDEO_BYTES_QUEUE} is now bound to exchange {RMQ_EXCHANGE} with routing key: tiktok.bytes.#"
+    )
 
     queue_embeddings = await rabbitmq_client.channel.declare_queue(
-        name="embeddings", durable=True
+        name=RMQ_EMBEDDINGS_QUEUE, durable=True
+    )
+    await queue_embeddings.bind(
+        exchange=RMQ_EXCHANGE, routing_key="tiktok.embeddings.#"
     )
 
-    await queue_embeddings.bind(exchange=rabbitmq_exchange, routing_key="tiktok.embeddings.#")
+    print(
+        f"Queue {RMQ_EMBEDDINGS_QUEUE} is now bound to exchange {RMQ_EXCHANGE} with routing key: tiktok.embeddings.#"
+    )
 
-    print(f"Queue embeddings is now bound to exchange {rabbitmq_exchange} with routing key: tiktok.embeddings.#")
-
+    # Close connection
     await rabbitmq_client.connection.close()
 
 
