@@ -1,13 +1,13 @@
+import asyncio
+import json
 import os
 import sys
-import asyncio
-import cv2
-import aio_pika
-import vertexai
-import json
-
-from scenedetect import SceneManager, AdaptiveDetector, StatsManager, open_video
 from typing import Optional
+
+import aio_pika
+import cv2
+import vertexai
+from scenedetect import AdaptiveDetector, SceneManager, StatsManager, open_video
 from vertexai.vision_models import (
     Image,
     MultiModalEmbeddingModel,
@@ -28,6 +28,7 @@ class TikTokVideoProcessor(RabbitMQClient):
     - Extracting key frames from TikTok videos
     - Generating embeddings for the key frames
     """
+
     def __init__(self, rabbitmq_server, rabbitmq_port, user, password):
         super().__init__(rabbitmq_server, rabbitmq_port, user, password)
         self.connection_name = "tiktok_video_processor"
@@ -81,7 +82,7 @@ class TikTokVideoProcessor(RabbitMQClient):
             async with message.process(requeue=True):
                 body = message.body
                 id = message.routing_key.split(".")[-1]
-                
+
                 key_frames = await self.extract_key_frames(body)
                 embeddings = await self.generate_embeddings(key_frames)
                 await self.produce_message(f"tiktok.embeddings.{id}", embeddings)
@@ -105,17 +106,17 @@ class TikTokVideoProcessor(RabbitMQClient):
 
         video = open_video("temp.mp4")
         scene_manager = SceneManager(stats_manager=StatsManager())
-        scene_manager.add_detector(
-            AdaptiveDetector()
-        )
-        scene_manager.detect_scenes(video, show_progress=False)  # show_progress=True will the progress of splitting the video
+        scene_manager.add_detector(AdaptiveDetector())
+        scene_manager.detect_scenes(
+            video, show_progress=False
+        )  # show_progress=True will the progress of splitting the video
         scene_list = scene_manager.get_scene_list()
 
         key_frames = []
 
         cap = cv2.VideoCapture("temp.mp4")
-        
-        if len(scene_list)== 0:
+
+        if len(scene_list) == 0:
             cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
             res, frame = cap.read()
             if res:
@@ -130,7 +131,7 @@ class TikTokVideoProcessor(RabbitMQClient):
         cap.release()
 
         print(f"Extracted {len(key_frames)} key frames")
-        
+
         # Delete the temp file
         os.remove("temp.mp4")
 
@@ -164,7 +165,7 @@ class TikTokVideoProcessor(RabbitMQClient):
                 embeddings_lst.append([i for i in range(1408)])
 
         return embeddings_lst
-    
+
     async def get_image_video_text_embeddings(
         self,
         project_id: str,

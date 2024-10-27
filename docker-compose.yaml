@@ -121,23 +121,23 @@ services:
     labels:
       description: "TikTok Data Consumer"
   
-  # video-processor:
-  #   build:
-  #     context: ./src
-  #     dockerfile: ./video_processor/Dockerfile
-  #   depends_on:
-  #     rabbitmq:
-  #       condition: service_healthy
-  #     rabbitmq-bindings:
-  #       condition: service_completed_successfully
-  #   environment:
-  #     RABBITMQ_SERVER: rabbitmq  # RabbitMQ hostname within Docker network
-  #     RABBITMQ_PORT: ${RABBITMQ_PORT}
-  #     RABBITMQ_USER: ${RABBITMQ_USER}
-  #     RABBITMQ_PASS: ${RABBITMQ_PASS}
-  #     RABBITMQ_EXCHANGE: ${RABBITMQ_EXCHANGE}
-  #     GOOGLE_APPLICATION_CREDENTIALS: /app/.ssh/google-credentials.json
-  #   volumes:
-  #     - ${HOME_DIR}/.ssh:/app/.ssh
-  #   labels:
-  #     description: "TikTok Multimodal Search Producer/Consumer"
+  video-processor:
+    build:
+      context: ./src
+      dockerfile: ./video_processor/Dockerfile
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      rabbitmq-bindings:
+        condition: service_completed_successfully
+    environment:
+      RABBITMQ_SERVER: rabbitmq  # RabbitMQ hostname within Docker network
+      RABBITMQ_PORT: ${RABBITMQ_PORT}
+      RABBITMQ_USER: ${RABBITMQ_USER}
+      RABBITMQ_PASS: ${RABBITMQ_PASS}
+      RABBITMQ_EXCHANGE: ${RABBITMQ_EXCHANGE}
+      GOOGLE_APPLICATION_CREDENTIALS: /app/.ssh/google-credentials.json
+    volumes:
+      - ${HOME_DIR}/.ssh:/app/.ssh
+    labels:
+      description: "TikTok Multimodal Search Producer/Consumer"
