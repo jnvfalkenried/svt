@@ -3,6 +3,7 @@ import os
 import sys
 import json
 import requests
+import pickle
 
 import aio_pika
 from TikTokApi import TikTokApi
@@ -106,13 +107,22 @@ class TikTokProducer(RabbitMQClient):
         # Download the video stream
         video_response = s.get(video_url, headers=h)
 
+        # Don't download the audio stream if it is music because of copyright issues
         if video.as_dict['music']['title'] == "original sound":
             # Download the audio stream
             audio_response = s.get(audio_url, headers=h)
 
+        body = pickle.dumps(
+            {
+                "video": video_response.content,
+                # "audio": audio_response.content,
+                "description": video.as_dict['desc'],
+            }
+        )
+
         await self.produce_message(
             key=f"tiktok.bytes.{video.as_dict['id']}",
             # For now we are only sending the video bytes
-            value=video_response.content,
+            value=body,
         )
         # print(f"Finished getting video bytes for video: {video.as_dict['id']}")
