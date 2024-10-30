@@ -24,7 +24,7 @@ class Posts(Base):
     music_id: Mapped[Optional[str]] = mapped_column(ForeignKey("music.id"), nullable=True)
     
     challenges = relationship("Challenges", secondary="posts_challenges", back_populates="posts")
-    author = relationship("Author", back_populates="posts")
+    authors = relationship("Authors", back_populates="posts")
     music = relationship("Music", back_populates="posts")
     
     __table_args__ = (
