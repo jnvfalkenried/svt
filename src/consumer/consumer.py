@@ -122,13 +122,13 @@ class TikTokConsumer(RabbitMQClient):
 
         # Process Challenges
         for challenge_data in item.get('challenges', []):
-            challenge = await self.get_or_create(session, Challenges,
-                id=challenge_data.get('id'),
+            await Challenges.add_or_update(
+                session,
+                challenge_id=challenge_data.get('id'),
                 title=challenge_data.get('title'),
                 description=challenge_data.get('desc'),
-                video_count=challenge_data.get('stats', {}).get('videoCount'),
-                view_count=challenge_data.get('stats', {}).get('viewCount')
             )
+            challenge = await session.get(Challenges, challenge_data.get('id'))
             posts_challenges = PostsChallenges(post_id=post.id, challenge_id=challenge.id)
             session.add(posts_challenges)
 

@@ -1,11 +1,11 @@
-#### THIS STEP IS ONLY REQUIRED IN WINDOWS #####
+# #### THIS STEP IS ONLY REQUIRED IN WINDOWS #####
 import os
 from dotenv import load_dotenv
 load_dotenv()
 PROJECT_PATH = os.getenv("PROJECT_PATH")
 import sys
 sys.path.append(PROJECT_PATH)
-################################################
+# ################################################
 import asyncio
 from logging.config import fileConfig
 

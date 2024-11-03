@@ -55,6 +55,24 @@ services:
     labels:
       description: "PostgreSQL server"
 
+  alembic:
+    build: 
+      context: ./src
+      dockerfile: ./postgresql/Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./src/postgresql:/app/postgresql
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: ${POSTGRES_PORT}
+    labels:
+      description: "Alembic Migration Service"
+
   producer:
     build:
       context: ./src
