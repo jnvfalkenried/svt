@@ -1,0 +1,5 @@
+aio-pika==9.4.3
+streamlit==1.39.0
+pyngrok==7.2.0
+SQLAlchemy==2.0.30
+python-dotenv==1.0.1
