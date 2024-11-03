@@ -190,7 +190,8 @@ class TikTokVideoProcessor(RabbitMQClient):
 
                 # For testing purposes
                 print("Using dummy embeddings")
-                embeddings_lst.append([i for i in range(1408)])
+                embeddings_lst.append([[i for i in range(1408)],
+                                       [i for i in range(1408)]])
 
         return embeddings_lst
     
@@ -230,12 +231,9 @@ class TikTokVideoProcessor(RabbitMQClient):
 
         # Initialize vertexai
         vertexai.init(project=self.google_project_id, location=self.region, credentials=credentials)
-        print(credentials.token)
-        print(credentials.valid)
-        print(credentials.service_account_email)
 
         model = MultiModalEmbeddingModel.from_pretrained("multimodalembedding")
-        image = Image.load_from_file("temp.jpg")
+        image = Image.load_from_file(f"temp_{thread_id}.jpg")
         # video = Video.load_from_file(video_path)
 
         embeddings = model.get_embeddings(
@@ -247,8 +245,6 @@ class TikTokVideoProcessor(RabbitMQClient):
         )
 
         # Delete the temp file
-        os.remove("temp.jpg")
-
-        print(f"Embeddings generated: {len(embeddings)}")
+        os.remove(f"temp_{thread_id}.jpg")
 
         return embeddings.image_embedding, embeddings.text_embedding
