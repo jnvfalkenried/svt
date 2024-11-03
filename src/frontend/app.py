@@ -1,107 +1,139 @@
-# src/streamlit_app.py
-
 import os
-import sys
-project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-sys.path.insert(0, project_root)
-
 import streamlit as st
-import pandas as pd
-import plotly.express as px
-from sqlalchemy import create_engine
-from sqlalchemy.future import select
-from sqlalchemy.orm import sessionmaker
-from postgresql.database_models import Authors, Posts, Music, PostsChallenges
-from dotenv import load_dotenv
+import streamlit_authenticator as stauth
 from pyngrok import ngrok
+from dotenv import load_dotenv
+import logging
+import yaml
+from yaml.loader import SafeLoader
 
-load_dotenv()
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
-DATABASE_URL = (
-    f"postgresql://{os.getenv('POSTGRES_USER')}:{os.getenv('POSTGRES_PASSWORD')}"
-    f"@{os.getenv('POSTGRES_HOST')}:{os.getenv('POSTGRES_PORT')}/{os.getenv('POSTGRES_DB')}"
-)
-engine = create_engine(DATABASE_URL)
-Session = sessionmaker(bind=engine)
+def setup_ngrok():
+    load_dotenv()  # Load environment variables from .env file
+    NGROK_AUTH_TOKEN = os.getenv("NGROK_AUTH_TOKEN")
 
-# Start Ngrok tunnel on Streamlit's port (8501)
-NGROK_AUTH_TOKEN = os.getenv("NGROK_AUTH_TOKEN")
-ngrok.set_auth_token(NGROK_AUTH_TOKEN)
-public_url = ngrok.connect(8501)
-st.write(f"App is publicly available at: {public_url}")
+    if NGROK_AUTH_TOKEN is None:
+        logger.warning("Ngrok Auth Token is not set.")
+        return None
+    else:
+        try:
+            ngrok.set_auth_token(NGROK_AUTH_TOKEN)
+            tunnels = ngrok.get_tunnels()
+            if tunnels:
+                public_url = tunnels[0].public_url  # Use the first active tunnel
+                logger.info(f"App is publicly available at: {public_url}")
+                return public_url
+            else:
+                public_url = ngrok.connect(8501)
+                logger.info(f"App is publicly available at: {public_url}")
+                return public_url
+        except Exception as e:
+            logger.error(f"Failed to set up Ngrok: {e}")
+            return None
 
-# Authentication function
-def check_credentials(username, password):
-    # Define your credentials here
-    return username == "admin" and password == "password"
+def login():
+    with open('./config.yaml') as file:
+        config = yaml.load(file, Loader=SafeLoader)
 
-# Create login form
-if "authenticated" not in st.session_state or not st.session_state.authenticated:
-    st.title("Login")
-    username = st.text_input("Username")
-    password = st.text_input("Password", type="password")
+    # Pre-hashing all plain text passwords once
+    stauth.Hasher.hash_passwords(config['credentials'])
+
+    with open('./config.yaml', 'w') as file:
+        yaml.dump(config, file, default_flow_style=False)
+
+    authenticator = stauth.Authenticate(
+        config['credentials'],
+        config['cookie']['name'],
+        config['cookie']['key'],
+        config['cookie']['expiry_days']
+    )
+    if st.session_state['authentication_status']:
+        st.sidebar.success("You are logged in! Select a page above.")
+
+        st.write(f"# Welcome {st.session_state['name']} to the TikTok Fake News Detector")
+        st.write("""
+            Welcome to the **TikTok Fake News Detector** application. This tool is designed to help users identify and analyze 
+            the credibility of news content shared on TikTok. With the rise of misinformation on social media platforms, this 
+            app aims to provide a solution for fact-checking and determining the authenticity of information.
+        """)
+        st.write("### Key Features")
+        st.write("""
+        - **Statistics**: View insightful statistics on detected fake news trends.
+        - **Search**: Use keywords or upload images to search for content authenticity.
+        - **About**: Learn more about this application and the technology behind it.
+        """)
+    elif st.session_state['authentication_status'] is False:
+        st.error('Username/password is incorrect')
+    elif st.session_state['authentication_status'] is None:
+        try:
+            authenticator.login()
+        except Exception as e:
+            st.error(e)
+        st.warning('Please enter your username and password')
+
+def logout():
+    with open('./config.yaml') as file:
+        config = yaml.load(file, Loader=SafeLoader)
+
+    # Pre-hashing all plain text passwords once
+    stauth.Hasher.hash_passwords(config['credentials'])
+
+    with open('./config.yaml', 'w') as file:
+        yaml.dump(config, file, default_flow_style=False)
+
+    authenticator = stauth.Authenticate(
+        config['credentials'],
+        config['cookie']['name'],
+        config['cookie']['key'],
+        config['cookie']['expiry_days']
+    )
+    st.write(f"# Goodbye {st.session_state['name']}")
+    authenticator.logout()
     
-    if st.button("Login"):
-        if check_credentials(username, password):
-            st.session_state.authenticated = True
-            st.success("Logged in successfully!")
-        else:
-            st.error("Invalid username or password.")
-else:
-    # Main app code goes here after successful login
-    st.title("TikTok Stats Dashboard")
 
-    def get_authors():
-        with Session() as session:
-            result = session.execute(select(Authors))
-            authors = result.scalars().all()
-            return [{
-                "id": author.id,
-                "nickname": author.nickname,
-                "followers": author.stats.get("followerCount", 0) if author.stats else 0,
-                "hearts": author.stats.get("heartCount", 0) if author.stats else 0
-            } for author in authors]
+def main():
+    st.set_page_config(
+        page_title="TikTok Fake News Detector",
+        page_icon=":material/newspaper:",
+    )
+    # Set up Ngrok only if it hasn't been set up before
+    if 'ngrok_url' not in st.session_state:
+        public_url = setup_ngrok()
+        if public_url:
+            st.session_state.ngrok_url = public_url
 
-    def get_videos():
-        with Session() as session:
-            result = session.execute(select(Posts))
-            videos = result.scalars().all()
-            return [{
-                "id": video.id,
-                "desc": video.desc,
-                "play_count": video.stats.get("playCount", 0) if video.stats else 0,
-                "digg_count": video.stats.get("diggCount", 0) if video.stats else 0
-            } for video in videos]
+    if "authentication_status" not in st.session_state:
+        st.session_state.authentication_status = None
 
-    st.header("Author Statistics")
-    authors_data = get_authors()
-    authors_df = pd.DataFrame(authors_data)
+    login_page = st.Page(login, title="Log in", icon=":material/login:")
+    logout_page = st.Page(logout, title="Log out", icon=":material/logout:")
 
-    if not authors_df.empty:
-        fig_authors = px.bar(authors_df, x="nickname", y=["followers", "hearts"], title="Author Followers and Hearts")
-        st.plotly_chart(fig_authors)
+    dashboard = st.Page("pages/trends.py", title="TikTok Trends", icon=":material/dashboard:")
+    alerts = st.Page("pages/alerts.py", title="Alerts", icon=":material/notification_important:")
+
+    search = st.Page("pages/search.py", title="Multimodal Search", icon=":material/search:")
+    # history = st.Page("tools/history.py", title="History", icon=":material/history:")
+
+    bugs = st.Page("pages/bugs.py", title="Bug reports", icon=":material/bug_report:")
+    about = st.Page("pages/about.py", title="About", icon=":material/info:")
+
+
+    if st.session_state.authentication_status:
+        pg = st.navigation(
+            {
+                "Account": [logout_page],
+                "Reports": [dashboard, alerts],
+                "Tools": [search],
+                "Help": [bugs, about],
+            }
+        )
     else:
-        st.write("No author data available.")
+        pg = st.navigation([login_page])
 
-    st.header("Video Statistics")
-    videos_data = get_videos()
-    videos_df = pd.DataFrame(videos_data)
+    pg.run()
 
-    if not videos_df.empty:
-        fig_videos = px.scatter(videos_df, x="play_count", y="digg_count", hover_data=["desc"], title="Video Play Count vs Digg Count")
-        st.plotly_chart(fig_videos)
-    else:
-        st.write("No video data available.")
-
-    st.header("Top Authors")
-    if not authors_df.empty:
-        top_authors = authors_df.nlargest(10, "followers")
-        st.table(top_authors[["nickname", "followers", "hearts"]])
-    else:
-        st.write("No author data available for the top authors table.")
-
-    st.header("Recent Videos")
-    if not videos_df.empty:
-        st.table(videos_df.head(10))
-    else:
-        st.write("No video data available for the recent videos table.")
+if __name__ == "__main__":
+    main()

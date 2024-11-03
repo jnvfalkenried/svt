@@ -128,6 +128,15 @@ services:
       RABBITMQ_USER: ${RABBITMQ_USER}
       RABBITMQ_PASS: ${RABBITMQ_PASS}
       RABBITMQ_EXCHANGE: ${RABBITMQ_EXCHANGE}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      NGROK_AUTH_TOKEN: ${NGROK_AUTH_TOKEN}
+    volumes:
+      - ./src/frontend:/app
+      - ./src/postgresql/database_models:/postgresql/database_models
     labels:
       description: "Streamlit Frontend"
     ports:
