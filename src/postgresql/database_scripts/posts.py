@@ -32,6 +32,7 @@ async def insert_post(
                 :can_repost, :collect_count, :comment_count, :digg_count,
                 :play_count, :repost_count, :share_count, :author_id, :music_id
             )
+            ON CONFLICT (id) DO NOTHING
             """
         ).params(
             id=id,

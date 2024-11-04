@@ -8,7 +8,8 @@ async def insert_challenge(
         text(
             """
             INSERT INTO challenges (id, title, description, video_count, view_count) 
-            VALUES (:id, :author_name, :description, :video_count, :view_count)
+            VALUES (:id, :title, :description, :video_count, :view_count)
+            ON CONFLICT (id) DO NOTHING
             """
         ).params(
             id=id,

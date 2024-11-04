@@ -25,6 +25,7 @@ async def insert_author(
                 :id, :nickname, :signature, :unique_id, :verified, :digg_count, 
                 :follower_count, :following_count, :heart_count, :video_count
             )
+            ON CONFLICT (id) DO NOTHING
             """
         ).params(
             id=id,

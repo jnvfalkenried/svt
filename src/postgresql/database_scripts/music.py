@@ -9,6 +9,7 @@ async def insert_music(
             """
             INSERT INTO music (id, author_name, title, duration, original) 
             VALUES (:id, :author_name, :title, :duration, :original)
+            ON CONFLICT (id) DO NOTHING
             """
         ).params(
             id=id,
