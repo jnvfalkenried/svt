@@ -19,3 +19,10 @@ postgresql (pgvector for storing embeddings)
     ```bash
         alembic upgrade head
     ```
+
+## Code Quality Tools:
+To keep your code clean, organized, and easy to maintain, here are some handy tools to consider (first 2 is highly recommended):
+* Black: A strict, no-nonsense code formatter for Python that enforces consistent style. (VSCode Extension ID: ms-python.black-formatter)
+* isort: Automatically sorts your imports, making them cleaner and easier to read. (VSCode Extension ID: ms-python.isort)
+* Pylance: A fast, feature-packed language server for Python that boosts code analysis and autocomplete. (VSCode Extension ID: ms-python.vscode-pylance)
+* autoDocstring: A useful extension for automatically generating docstrings for functions, saving you time and improving documentation. (VSCode Extension ID: njpwerner.autodocstring)
