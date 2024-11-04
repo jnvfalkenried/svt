@@ -16,14 +16,21 @@ RUN apt-get update && apt-get install -y \
 # Set the working directory
 WORKDIR /app
 
+# Workaround for quicker development.
+# Installing required packages before copying the rest of the code avoids re-installing them on every code change.
+# https://docs.docker.com/build/cache/
+
+# Copy requirements.txt into the container at /app
+COPY ./video_processor/requirements.txt /app/requirements.txt
+
+# Install any needed packages specified in requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+
 # Copy the video_processor directory contents into the container
 COPY ./video_processor /app
 
 # Copy the helper directory contents into the container
 COPY ./helpers /app/helpers
-
-# Install any needed packages specified in requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
 
 # Command to run your script
 CMD ["python", "-u", "main.py"]
