@@ -1,12 +1,15 @@
 import asyncio
 import json
 import os
+import pickle
 import sys
+import threading
 from typing import Optional
 
 import aio_pika
 import cv2
 import vertexai
+from google.oauth2 import service_account
 from scenedetect import AdaptiveDetector, SceneManager, StatsManager, open_video
 from vertexai.vision_models import (
     Image,
@@ -80,16 +83,28 @@ class TikTokVideoProcessor(RabbitMQClient):
         """
         try:
             async with message.process(requeue=True):
-                body = message.body
+                body = pickle.loads(message.body)
                 id = message.routing_key.split(".")[-1]
 
-                key_frames = await self.extract_key_frames(body)
-                embeddings = await self.generate_embeddings(key_frames)
+                # Run the blocking tasks in a separate thread to avoid blocking the main event loop
+                key_frames = await asyncio.to_thread(
+                    self.extract_key_frames, body["video"]
+                )
+                print(f"Extracted {len(key_frames)} key frames")
+
+                # TODO: Calculate similarity between key frames and filter out similar frames
+                embeddings = await asyncio.to_thread(
+                    self.generate_embeddings, key_frames, body["description"]
+                )
+                print(f"Generated {len(embeddings)} embeddings")
+
+                # Produce the message in the main thread (since it's non-blocking)
                 await self.produce_message(f"tiktok.embeddings.{id}", embeddings)
         except Exception as e:
             print(f"Error processing message: {e}")
 
-    async def extract_key_frames(self, video):
+    # The following methods are blocking, doesn't benefit from being async
+    def extract_key_frames(self, video):
         """
         Extract key frames from the video
 
@@ -99,12 +114,17 @@ class TikTokVideoProcessor(RabbitMQClient):
         Returns:
         - key_frames: list: The list of key frames
         """
-
+        thread_id = threading.get_ident()
         # Save the video to a temp file
-        with open("temp.mp4", "wb") as f:
+        # This is not really elegant, but it works for now
+        with open(f"temp_{thread_id}.mp4", "wb") as f:
             f.write(video)
 
-        video = open_video("temp.mp4")
+        try:
+            video = open_video(f"temp_{thread_id}.mp4")
+        except Exception as e:
+            print(f"Error opening video: {e}")
+            return []
         scene_manager = SceneManager(stats_manager=StatsManager())
         scene_manager.add_detector(AdaptiveDetector())
         scene_manager.detect_scenes(
@@ -114,68 +134,85 @@ class TikTokVideoProcessor(RabbitMQClient):
 
         key_frames = []
 
-        cap = cv2.VideoCapture("temp.mp4")
+        try:
+            cap = cv2.VideoCapture(f"temp_{thread_id}.mp4")
 
-        if len(scene_list) == 0:
-            cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
-            res, frame = cap.read()
-            if res:
-                key_frames.append(frame)
+            if len(scene_list) == 0:
+                cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+                res, frame = cap.read()
+                if res:
+                    key_frames.append(frame)
 
-        for scene in scene_list:
-            start_frame = scene[0].get_frames()
-            cap.set(cv2.CAP_PROP_POS_FRAMES, start_frame)
-            res, frame = cap.read()
-            if res:
-                key_frames.append(frame)
-        cap.release()
-
-        print(f"Extracted {len(key_frames)} key frames")
+            for scene in scene_list:
+                # TODO: Select middle frame not the first frame
+                start_frame = scene[0].get_frames()
+                cap.set(cv2.CAP_PROP_POS_FRAMES, start_frame)
+                res, frame = cap.read()
+                if res:
+                    key_frames.append(frame)
+        except Exception as e:
+            print(f"Error extracting key frames: {e}")
+        finally:
+            cap.release()
 
         # Delete the temp file
-        os.remove("temp.mp4")
+        os.remove(f"temp_{thread_id}.mp4")
 
         return key_frames
 
-    async def generate_embeddings(self, key_frames):
+    def generate_embeddings(self, key_frames, description=None):
         """
         Generate embeddings for the key frames
 
         Parameters:
         - key_frames: list: The list of key frames
+        - description: str: The description
 
         Returns:
         - embeddings: list: The list of embeddings
         """
         embeddings_lst = []
-        for key_frame in key_frames:
+        for i, key_frame in enumerate(key_frames):
             try:
-                embeddings = await self.get_image_video_text_embeddings(
-                    project_id=self.google_project_id,
-                    location=self.region,
-                    frame=key_frame,
-                    dimension=1408,
+                # Embed the descitption only one time
+                if i == 0:
+                    description = description
+                else:
+                    description = None
+                # TODO: Add API limiter
+                image_embeddings, text_embeddings = (
+                    self.get_image_video_text_embeddings(
+                        # project_id=self.google_project_id,
+                        # location=self.region,
+                        frame=key_frame,
+                        contextual_text=description,
+                        dimension=1408,
+                    )
                 )
-                embeddings_lst.append(embeddings)
+                embeddings_lst.append(image_embeddings)
+                if text_embeddings:
+                    embeddings_lst.append(text_embeddings)
             except Exception as e:
                 print(f"Error generating embeddings: {e}")
 
                 # For testing purposes
                 print("Using dummy embeddings")
-                embeddings_lst.append([i for i in range(1408)])
+                embeddings_lst.append(
+                    [[i for i in range(1408)], [i for i in range(1408)]]
+                )
 
         return embeddings_lst
 
-    async def get_image_video_text_embeddings(
+    def get_image_video_text_embeddings(
         self,
-        project_id: str,
-        location: str,
+        # project_id: str,
+        # location: str,
         frame,
         # video_path: str,
         contextual_text: Optional[str] = None,
         dimension: Optional[int] = 1408,
         # video_segment_config: Optional[VideoSegmentConfig] = None,
-    ) -> MultiModalEmbeddingResponse:
+    ) -> tuple[list, list]:
         """Example of how to generate multimodal embeddings from image, video, and text.
 
         Args:
@@ -189,18 +226,26 @@ class TikTokVideoProcessor(RabbitMQClient):
             video_segment_config: Define specific segments to generate embeddings for.
                 https://cloud.google.com/vertex-ai/docs/generative-ai/embeddings/get-multimodal-embeddings#video-best-practices
         """
-
-        cv2.imwrite("temp.jpg", frame)
-
-        vertexai.init(project=project_id, location=location)
+        thread_id = threading.get_ident()
+        # This is not really elegant, but it works for now
+        cv2.imwrite(f"temp_{thread_id}.jpg", frame)
 
         # Check if file exists
         file_path = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS")
         if not os.path.exists(file_path):
             print("Google credentials file not found")
 
+        credentials = service_account.Credentials.from_service_account_file(file_path)
+
+        # Initialize vertexai
+        vertexai.init(
+            project=self.google_project_id,
+            location=self.region,
+            credentials=credentials,
+        )
+
         model = MultiModalEmbeddingModel.from_pretrained("multimodalembedding")
-        image = Image.load_from_file("temp.jpg")
+        image = Image.load_from_file(f"temp_{thread_id}.jpg")
         # video = Video.load_from_file(video_path)
 
         embeddings = model.get_embeddings(
@@ -209,11 +254,9 @@ class TikTokVideoProcessor(RabbitMQClient):
             # video_segment_config=video_segment_config,
             contextual_text=contextual_text,
             dimension=dimension,
-        ).image_embedding
+        )
 
         # Delete the temp file
-        os.remove("temp.jpg")
+        os.remove(f"temp_{thread_id}.jpg")
 
-        print(f"Embeddings generated: {len(embeddings)}")
-
-        return embeddings
+        return embeddings.image_embedding, embeddings.text_embedding
