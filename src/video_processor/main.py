@@ -3,6 +3,7 @@ import os
 
 from video_processor import TikTokVideoProcessor
 
+
 async def main():
     processor = TikTokVideoProcessor(
         os.getenv("RABBITMQ_SERVER"),
@@ -17,6 +18,7 @@ async def main():
             break
 
     await processor.consume_messages()
+
 
 if __name__ == "__main__":
     print("Starting Multimodal Search Processor")

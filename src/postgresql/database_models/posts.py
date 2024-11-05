@@ -1,12 +1,13 @@
-from postgresql.database_models.base import Base
 from typing import Optional
-from sqlalchemy import Integer, String, Boolean, Index, ForeignKey
+
+from database_models.base import Base
+from sqlalchemy import Boolean, ForeignKey, Index, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 
 class Posts(Base):
     __tablename__ = "posts"
-    
+
     id: Mapped[str] = mapped_column(String, primary_key=True, unique=True)
     created_at: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     description: Mapped[Optional[str]] = mapped_column(String, nullable=True)
@@ -20,18 +21,24 @@ class Posts(Base):
     play_count: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     repost_count: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     share_count: Mapped[Optional[str]] = mapped_column(String, nullable=True)
-    author_id: Mapped[Optional[str]] = mapped_column(ForeignKey("authors.id"), nullable=True)
-    music_id: Mapped[Optional[str]] = mapped_column(ForeignKey("music.id"), nullable=True)
-    
-    challenges = relationship("Challenges", secondary="posts_challenges", back_populates="posts")
+    author_id: Mapped[Optional[str]] = mapped_column(
+        ForeignKey("authors.id"), nullable=True
+    )
+    music_id: Mapped[Optional[str]] = mapped_column(
+        ForeignKey("music.id"), nullable=True
+    )
+
+    challenges = relationship(
+        "Challenges", secondary="posts_challenges", back_populates="posts"
+    )
     authors = relationship("Authors", back_populates="posts")
     music = relationship("Music", back_populates="posts")
-    
+
     __table_args__ = (
         Index("posts_id", "id"),
         Index("posts_created_at", "created_at"),
     )
-    
+
     def __repr__(self):
         return (
             f"Post("

@@ -1,16 +1,16 @@
-import os
-import sys
 import asyncio
-import cv2
-import aio_pika
-import vertexai
 import json
+import os
 import pickle
+import sys
 import threading
-from google.oauth2 import service_account
-
-from scenedetect import SceneManager, AdaptiveDetector, StatsManager, open_video
 from typing import Optional
+
+import aio_pika
+import cv2
+import vertexai
+from google.oauth2 import service_account
+from scenedetect import AdaptiveDetector, SceneManager, StatsManager, open_video
 from vertexai.vision_models import (
     Image,
     MultiModalEmbeddingModel,
@@ -31,6 +31,7 @@ class TikTokVideoProcessor(RabbitMQClient):
     - Extracting key frames from TikTok videos
     - Generating embeddings for the key frames
     """
+
     def __init__(self, rabbitmq_server, rabbitmq_port, user, password):
         super().__init__(rabbitmq_server, rabbitmq_port, user, password)
         self.connection_name = "tiktok_video_processor"
@@ -84,13 +85,17 @@ class TikTokVideoProcessor(RabbitMQClient):
             async with message.process(requeue=True):
                 body = pickle.loads(message.body)
                 id = message.routing_key.split(".")[-1]
-                
+
                 # Run the blocking tasks in a separate thread to avoid blocking the main event loop
-                key_frames = await asyncio.to_thread(self.extract_key_frames, body["video"])
+                key_frames = await asyncio.to_thread(
+                    self.extract_key_frames, body["video"]
+                )
                 print(f"Extracted {len(key_frames)} key frames")
 
                 # TODO: Calculate similarity between key frames and filter out similar frames
-                embeddings = await asyncio.to_thread(self.generate_embeddings, key_frames, body["description"])
+                embeddings = await asyncio.to_thread(
+                    self.generate_embeddings, key_frames, body["description"]
+                )
                 print(f"Generated {len(embeddings)} embeddings")
 
                 # Produce the message in the main thread (since it's non-blocking)
@@ -114,25 +119,25 @@ class TikTokVideoProcessor(RabbitMQClient):
         # This is not really elegant, but it works for now
         with open(f"temp_{thread_id}.mp4", "wb") as f:
             f.write(video)
-        
+
         try:
             video = open_video(f"temp_{thread_id}.mp4")
         except Exception as e:
             print(f"Error opening video: {e}")
             return []
         scene_manager = SceneManager(stats_manager=StatsManager())
-        scene_manager.add_detector(
-            AdaptiveDetector()
-        )
-        scene_manager.detect_scenes(video, show_progress=False)  # show_progress=True will the progress of splitting the video
+        scene_manager.add_detector(AdaptiveDetector())
+        scene_manager.detect_scenes(
+            video, show_progress=False
+        )  # show_progress=True will the progress of splitting the video
         scene_list = scene_manager.get_scene_list()
 
         key_frames = []
-        
+
         try:
             cap = cv2.VideoCapture(f"temp_{thread_id}.mp4")
-            
-            if len(scene_list)== 0:
+
+            if len(scene_list) == 0:
                 cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
                 res, frame = cap.read()
                 if res:
@@ -149,7 +154,7 @@ class TikTokVideoProcessor(RabbitMQClient):
             print(f"Error extracting key frames: {e}")
         finally:
             cap.release()
-        
+
         # Delete the temp file
         os.remove(f"temp_{thread_id}.mp4")
 
@@ -175,12 +180,14 @@ class TikTokVideoProcessor(RabbitMQClient):
                 else:
                     description = None
                 # TODO: Add API limiter
-                image_embeddings, text_embeddings = self.get_image_video_text_embeddings(
-                    # project_id=self.google_project_id,
-                    # location=self.region,
-                    frame=key_frame,
-                    contextual_text=description,
-                    dimension=1408,
+                image_embeddings, text_embeddings = (
+                    self.get_image_video_text_embeddings(
+                        # project_id=self.google_project_id,
+                        # location=self.region,
+                        frame=key_frame,
+                        contextual_text=description,
+                        dimension=1408,
+                    )
                 )
                 embeddings_lst.append(image_embeddings)
                 if text_embeddings:
@@ -190,11 +197,12 @@ class TikTokVideoProcessor(RabbitMQClient):
 
                 # For testing purposes
                 print("Using dummy embeddings")
-                embeddings_lst.append([[i for i in range(1408)],
-                                       [i for i in range(1408)]])
+                embeddings_lst.append(
+                    [[i for i in range(1408)], [i for i in range(1408)]]
+                )
 
         return embeddings_lst
-    
+
     def get_image_video_text_embeddings(
         self,
         # project_id: str,
@@ -230,7 +238,11 @@ class TikTokVideoProcessor(RabbitMQClient):
         credentials = service_account.Credentials.from_service_account_file(file_path)
 
         # Initialize vertexai
-        vertexai.init(project=self.google_project_id, location=self.region, credentials=credentials)
+        vertexai.init(
+            project=self.google_project_id,
+            location=self.region,
+            credentials=credentials,
+        )
 
         model = MultiModalEmbeddingModel.from_pretrained("multimodalembedding")
         image = Image.load_from_file(f"temp_{thread_id}.jpg")
