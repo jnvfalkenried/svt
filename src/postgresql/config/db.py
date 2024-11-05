@@ -1,19 +1,7 @@
-import os
-import sys
-
-current_dir = os.path.dirname(os.path.abspath(__file__))
-src_dir = os.path.dirname(current_dir)
-sys.path.append(os.path.dirname(src_dir))
-from dotenv import load_dotenv
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
-load_dotenv()
-
-DATABASE_URL = (
-    f"postgresql+asyncpg://{os.getenv('POSTGRES_USER')}:{os.getenv('POSTGRES_PASSWORD')}"
-    f"@{os.getenv('POSTGRES_HOST')}:{os.getenv('POSTGRES_PORT')}/{os.getenv('POSTGRES_DB')}"
-)
+from postgresql.config.settings import DATABASE_URL
 
 # Create an instance of the database engine
 engine = create_async_engine(

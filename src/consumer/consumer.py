@@ -10,7 +10,7 @@ from postgresql.database_scripts.challenges import insert_challenge
 from postgresql.database_scripts.music import insert_music
 from postgresql.database_scripts.posts import insert_post
 from postgresql.database_scripts.posts_challenges import insert_post_challenge
-from postgresql.db import session
+from postgresql.config.db import session
 
 
 class TikTokConsumer(RabbitMQClient):

@@ -65,8 +65,7 @@ services:
       postgres:
         condition: service_healthy
     volumes:
-      - ./src/postgresql/alembic:/app/alembic
-      - ./src/postgresql/database_models:/app/database_models
+      - ./src/postgresql:/app/postgresql
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}

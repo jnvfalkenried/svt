@@ -1,22 +1,15 @@
 import asyncio
-import os
-import sys
 from logging.config import fileConfig
 
 from alembic import context
+from dotenv import load_dotenv
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
-current_dir = os.path.dirname(os.path.abspath(__file__))
-postgresql_dir = os.path.dirname(current_dir)
-src_dir = os.path.dirname(postgresql_dir)
-sys.path.append(src_dir)
-sys.path.append(os.path.dirname(src_dir))
-from dotenv import load_dotenv
-
-from src.postgresql.database_models import *
-from src.postgresql.database_models.base import Base
+from postgresql.config.settings import DATABASE_URL
+from postgresql.database_models import *
+from postgresql.database_models.base import Base
 
 load_dotenv()
 
@@ -24,11 +17,6 @@ config = context.config
 
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
-
-DATABASE_URL = (
-    f"postgresql+asyncpg://{os.getenv('POSTGRES_USER')}:{os.getenv('POSTGRES_PASSWORD')}"
-    f"@{os.getenv('POSTGRES_HOST')}:{os.getenv('POSTGRES_PORT')}/{os.getenv('POSTGRES_DB')}"
-)
 
 config.set_main_option("sqlalchemy.url", DATABASE_URL)
 print(f"!!! INFO Running Alembic on URL: '{DATABASE_URL}'")
