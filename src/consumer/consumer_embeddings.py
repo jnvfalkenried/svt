@@ -6,7 +6,6 @@ from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 import aio_pika
-
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.dialects.postgresql import insert
 
@@ -25,9 +24,7 @@ class EmbeddingsConsumer(RabbitMQClient):
         super().__init__(rabbitmq_server, rabbitmq_port, user, password)
         self.connection_name = "embeddings_consumer"
         self.exchange_name = os.environ.get("RABBITMQ_EXCHANGE")
-        #self.input_queue = "video_embeddings_queue"  # Changed queue name
-        self.input_queue = "embeddings"  # Changed queue name
-        #self.routing_key = "tiktok.embeddings.*"
+        self.input_queue = "embeddings"
         
         # Initialize database connection using env variables
         db_url = f"postgresql+asyncpg://{os.environ.get('POSTGRES_USER')}:{os.environ.get('POSTGRES_PASSWORD')}@{os.environ.get('POSTGRES_HOST')}:{os.environ.get('POSTGRES_PORT')}/{os.environ.get('POSTGRES_DB')}"
@@ -49,15 +46,13 @@ class EmbeddingsConsumer(RabbitMQClient):
             await self.connect(self.connection_name)
             
             print("Connected to RabbitMQ, declaring exchange...")
-            # Declare the exchange instead of getting it
             self.exchange = await self.channel.declare_exchange(
                 self.exchange_name,
-                type="topic",  # Use topic exchange for pattern matching
+                type="topic",
                 durable=True
             )
             print(f"Declared exchange: {self.exchange_name}")
             
-            # Declare the queue and bind it to the exchange
             self.queue = await self.channel.declare_queue(
                 self.input_queue,
                 durable=True
@@ -70,7 +65,55 @@ class EmbeddingsConsumer(RabbitMQClient):
         except Exception as e:
             print(f"Error initializing EmbeddingsConsumer: {str(e)}")
             raise
-    
+
+    async def get_next_element_id(self, session, post_id):
+        # This function gets the highest video embeddings id that exists in the DB, otherwise returns 0
+        """Get the next available element_id for a given post_id"""
+        result = await session.execute(
+            select(func.coalesce(func.max(VideoEmbeddings.element_id), 0))
+            .where(VideoEmbeddings.post_id == post_id)
+        )
+        max_element_id = await result.scalar()
+        return max_element_id + 1
+
+    async def process_tiktok_item(self, session, item, post_id):
+        print("post id: ", post_id)
+        print("item: ", item)
+        try:
+            # Get the next available element_id
+            element_id = await self.get_next_element_id(session, post_id)
+
+            if (element_id == 1):
+                # if the next element ID is one, store the description first
+                embedding = item[1]
+            else:
+                # Store the video embedding
+                embedding = item[0]
+            
+            # Create the insert statement with the new structure
+            stmt = insert(VideoEmbeddings).values(
+                post_id=post_id,
+                element_id=element_id,
+                embedding=embedding
+            ).on_conflict_do_update(
+                index_elements=['post_id', 'element_id'],  # As it is Composite primary key
+                set_={
+                    "embedding": embedding
+                }
+            )
+
+            await session.execute(stmt)
+            await session.commit()
+            print(f"Upserted embedding for post {post_id} with element_id {element_id}")
+
+        except IntegrityError as e:
+            print(f"Integrity error processing message for post {post_id}: {e}")
+            await session.rollback()
+        except Exception as e:
+            print(f"Error processing TikTok item: {e}")
+            await session.rollback()
+            raise
+
     async def consume_messages(self):
         try:
             await self.queue.consume(callback=self.process_message)
@@ -82,50 +125,18 @@ class EmbeddingsConsumer(RabbitMQClient):
         except Exception as e:
            print(f"Error consuming messages: {e}")
 
-    async def process_tiktok_item(self, session, item, id):
-        print("post id: ", id)
-        print("item: ", item)
-        try:
-            video_embedding = item[0]
-            description_embedding = item[1]
-
-            stmt = insert(VideoEmbeddings).values(
-                    id=id,
-                    embedding=video_embedding,
-                    description_embedding=description_embedding,
-                ).on_conflict_do_update(
-                    index_elements=['id'],  # Conflict based on the primary key (id)
-                    set_={
-                        "video_embedding": video_embedding,
-                        "description_embedding": description_embedding,
-                        "description": "Generated from video keyframe",
-                        "updated_at": func.now()
-                    }
-                )
-
-            await session.execute(stmt)
-                
-            # Commit the transaction
-            await session.commit()
-            print(f"Upserted {len(item['embeddings'])} embeddings for post {id}")
-
-        except IntegrityError as e:
-            print(f"Integrity error processing message for post {id}: {e}")
-        except Exception as e:
-            print(f"Error processing TikTok item: {e}")
-
     async def process_message(self, message: aio_pika.IncomingMessage):
         try:
             async with message.process():
-                id = message.routing_key.split(".")[-1]
+                post_id = message.routing_key.split(".")[-1]
                 tiktok_data = json.loads(message.body)
                 async with self.async_session() as session:
                     if isinstance(tiktok_data, list):
                         print(f"Received a list of {len(tiktok_data)} TikTok data items")
                         for item in tiktok_data:
-                            await self.process_tiktok_item(session, item, id)
+                            await self.process_tiktok_item(session, item, post_id)
                     else:
-                        await self.process_tiktok_item(session, tiktok_data, id)
+                        await self.process_tiktok_item(session, tiktok_data, post_id)
         except Exception as e:
             print(f"Error processing message: {e}")
 
@@ -136,7 +147,7 @@ async def main():
     for attempt in range(max_retries):
         try:
             consumer = EmbeddingsConsumer(
-                rabbitmq_server=os.environ['RABBITMQ_HOST'],  # Use square brackets to raise KeyError if not found
+                rabbitmq_server=os.environ['RABBITMQ_HOST'],
                 rabbitmq_port=int(os.environ['RABBITMQ_PORT']),
                 user=os.environ['RABBITMQ_USER'],
                 password=os.environ['RABBITMQ_PASS']
@@ -145,7 +156,7 @@ async def main():
             print(f"Attempting to initialize consumer (attempt {attempt + 1}/{max_retries})")
             await consumer.initialize()
             await consumer.consume_messages()
-            break  # If we get here, everything worked
+            break
             
         except Exception as e:
             print(f"Attempt {attempt + 1} failed: {str(e)}")
@@ -157,5 +168,4 @@ async def main():
                 raise
 
 if __name__ == "__main__":
-
     asyncio.run(main())
