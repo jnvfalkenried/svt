@@ -26,3 +26,26 @@ To keep your code clean, organized, and easy to maintain, here are some handy to
 * isort: Automatically sorts your imports, making them cleaner and easier to read. (VSCode Extension ID: ms-python.isort)
 * Pylance: A fast, feature-packed language server for Python that boosts code analysis and autocomplete. (VSCode Extension ID: ms-python.vscode-pylance)
 * autoDocstring: A useful extension for automatically generating docstrings for functions, saving you time and improving documentation. (VSCode Extension ID: njpwerner.autodocstring)
+
+## .env skeleton, fill in your values
+
+```env
+# RabbitMQ Configuration
+RABBITMQ_HOST=
+RABBITMQ_PORT=
+RABBITMQ_USER=
+RABBITMQ_PASS=
+RABBITMQ_EXCHANGE=
+RABBITMQ_HASHTAG_QUEUE=
+RABBITMQ_VIDEO_BYTES_QUEUE=
+RABBITMQ_EMBEDDINGS_QUEUE=
+
+# PostgreSQL Configuration
+POSTGRES_HOST=
+POSTGRES_PORT=
+POSTGRES_USER=
+POSTGRES_PASSWORD=
+POSTGRES_DB=
+
+# Other environment variables
+HOME_DIR=
