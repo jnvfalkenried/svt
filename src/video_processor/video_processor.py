@@ -10,7 +10,7 @@ import threading
 from google.oauth2 import service_account
 
 from scenedetect import SceneManager, AdaptiveDetector, StatsManager, open_video
-from typing import Optional
+from typing import Tuple, List, Optional
 from vertexai.vision_models import (
     Image,
     MultiModalEmbeddingModel,
@@ -204,7 +204,7 @@ class TikTokVideoProcessor(RabbitMQClient):
         contextual_text: Optional[str] = None,
         dimension: Optional[int] = 1408,
         # video_segment_config: Optional[VideoSegmentConfig] = None,
-    ) -> tuple[list, list]:
+    ) -> Tuple[List, List]:
         """Example of how to generate multimodal embeddings from image, video, and text.
 
         Args:

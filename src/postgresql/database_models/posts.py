@@ -26,6 +26,7 @@ class Posts(Base):
     challenges = relationship("Challenges", secondary="posts_challenges", back_populates="posts")
     authors = relationship("Authors", back_populates="posts")
     music = relationship("Music", back_populates="posts")
+    video_embeddings = relationship("VideoEmbeddings", back_populates="post")
     
     __table_args__ = (
         Index("posts_id", "id"),
