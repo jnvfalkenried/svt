@@ -1,11 +1,13 @@
-from postgresql.database_models.base import Base
 from typing import Optional
-from sqlalchemy import Integer, String, Boolean, Index
+
+from database_models.base import Base
+from sqlalchemy import Boolean, Index, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 
 class Authors(Base):
     __tablename__ = "authors"
-    
+
     id: Mapped[str] = mapped_column(String, primary_key=True, unique=True)
     nickname: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     signature: Mapped[Optional[str]] = mapped_column(String, nullable=True)
@@ -16,15 +18,15 @@ class Authors(Base):
     following_count: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     heart_count: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     video_count: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
-    
+
     posts = relationship("Posts", back_populates="authors")
-    
+
     __table_args__ = (
         Index("authors_id", "id"),
         Index("authors_unique_id", "unique_id"),
         Index("follower_counts", "follower_count"),
     )
-    
+
     def __repr__(self):
         return (
             f"Author("

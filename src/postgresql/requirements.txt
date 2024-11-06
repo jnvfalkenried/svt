@@ -1,0 +1,5 @@
+alembic==1.13.2
+SQLAlchemy==2.0.30
+asyncpg==0.29.0
+greenlet==2.0.2
+python-dotenv==1.0.1
