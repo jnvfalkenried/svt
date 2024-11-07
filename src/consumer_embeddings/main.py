@@ -2,7 +2,7 @@ import os
 import asyncio
 
 from dotenv import load_dotenv
-from consumer import TikTokConsumer
+from consumer_embeddings import EmbeddingsConsumer
 
 load_dotenv()
 
@@ -11,8 +11,9 @@ rabbitmq_port = int(os.getenv("RABBITMQ_PORT"))
 rabbitmq_user = os.getenv("RABBITMQ_USER")
 rabbitmq_pass = os.getenv("RABBITMQ_PASS")
 
+
 async def main():
-    consumer = TikTokConsumer(
+    consumer = EmbeddingsConsumer(
         rabbitmq_host,
         rabbitmq_port,
         rabbitmq_user,
@@ -28,6 +29,6 @@ async def main():
 
 
 if __name__ == "__main__":
-    print("Starting consumer")
+    print("Starting embeddings consumer")
     asyncio.run(main())
     print("Consumer stopped")
