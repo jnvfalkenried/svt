@@ -8,7 +8,7 @@ from sqlalchemy.orm import relationship
 class VideoEmbeddings(Base):
     __tablename__ = 'video_embeddings'
     
-    post_id = Column(String, ForeignKey('posts.id'), primary_key=True)
+    post_id = Column(String, ForeignKey('posts.id', ondelete='CASCADE'), primary_key=True)
     element_id = Column(Integer, primary_key=True)
     embedding = Column(Vector(1408))
 

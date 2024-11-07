@@ -4,7 +4,7 @@ import os
 import pickle
 import sys
 import threading
-from typing import Optional
+from typing import Optional, Tuple, List
 
 import aio_pika
 import cv2

@@ -33,7 +33,7 @@ class Posts(Base):
     )
     authors = relationship("Authors", back_populates="posts")
     music = relationship("Music", back_populates="posts")
-    video_embeddings = relationship("VideoEmbeddings", back_populates="post")
+    video_embeddings = relationship("VideoEmbeddings", back_populates="posts")
    
     __table_args__ = (
         Index("posts_id", "id"),

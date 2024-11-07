@@ -41,6 +41,7 @@ class EmbeddingsConsumer(RabbitMQClient):
         self.channel = None
 
     async def initialize(self):
+        print("Consumer Embeddings: Initialized")
         try:
             print(f"Connecting to RabbitMQ at {self.rabbitmq_server}:{self.rabbitmq_port} with user {self.user}")
             await self.connect(self.connection_name)

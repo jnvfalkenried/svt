@@ -16,8 +16,9 @@ services:
     healthcheck:
       test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
       interval: 10s
-      timeout: 10s
-      retries: 3
+      timeout: 30s
+      retries: 5
+      start_period: 20s
 
   rabbitmq-bindings:
     build:
@@ -26,6 +27,7 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
+    command: sh -c "sleep 10 && python bindings.py" #binding will have to wait for rabbitmq first
     environment:
       RABBITMQ_SERVER: rabbitmq  # RabbitMQ hostname within Docker network
       RABBITMQ_PORT: ${RABBITMQ_PORT}
@@ -42,7 +44,7 @@ services:
     image: pgvector/pgvector:pg14
     restart: always
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready']
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
       interval: 10s
       timeout: 5s
       retries: 5
