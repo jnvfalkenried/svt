@@ -49,7 +49,8 @@ class TikTokConsumer(RabbitMQClient):
         try:
             async with message.process(requeue=True):
                 tiktok_data = json.loads(message.body.decode("utf-8"))
-                print(f"Processing message: {tiktok_data}")
+                print("Persistent consumer script: Processing tiktok hashtag data")
+                #print(f"Processing message: {tiktok_data}")
                 await self.process_tiktok_item(tiktok_data)
         except Exception as e:
             print(f"Error processing message: {e}")

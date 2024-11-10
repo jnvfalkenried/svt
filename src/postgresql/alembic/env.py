@@ -6,6 +6,14 @@ from dotenv import load_dotenv
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
+import os 
+import sys
+
+current_dir = os.path.dirname(os.path.abspath(__file__))  # alembic directory
+src_dir = os.path.dirname(os.path.dirname(current_dir))  # go up two levels to get to src
+sys.path.append(src_dir)
+
+print(f"Added to Python path: {src_dir}")
 
 from postgresql.config.settings import DATABASE_URL
 from postgresql.database_models import *

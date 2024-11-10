@@ -4,7 +4,7 @@ import os
 import pickle
 import sys
 import threading
-from typing import Optional
+from typing import Optional, Tuple, List
 
 import aio_pika
 import cv2
@@ -212,7 +212,7 @@ class TikTokVideoProcessor(RabbitMQClient):
         contextual_text: Optional[str] = None,
         dimension: Optional[int] = 1408,
         # video_segment_config: Optional[VideoSegmentConfig] = None,
-    ) -> tuple[list, list]:
+    ) -> Tuple[List, List]:
         """Example of how to generate multimodal embeddings from image, video, and text.
 
         Args:
