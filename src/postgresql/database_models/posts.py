@@ -1,6 +1,6 @@
 from typing import Optional
 
-from database_models.base import Base
+from .base import Base
 from sqlalchemy import Boolean, ForeignKey, Index, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -33,7 +33,8 @@ class Posts(Base):
     )
     authors = relationship("Authors", back_populates="posts")
     music = relationship("Music", back_populates="posts")
-
+    video_embeddings = relationship("VideoEmbeddings", back_populates="posts", cascade="all, delete-orphan")
+   
     __table_args__ = (
         Index("posts_id", "id"),
         Index("posts_created_at", "created_at"),

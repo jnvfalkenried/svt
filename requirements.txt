@@ -6,3 +6,4 @@ greenlet==2.0.2
 aio-pika==9.4.1
 TikTokApi==6.5.2
 playwright==1.37.0
+pgvector==0.2.5
