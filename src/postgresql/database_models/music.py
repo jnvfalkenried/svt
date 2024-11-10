@@ -1,6 +1,6 @@
 from typing import Optional
 
-from database_models.base import Base
+from .base import Base
 from sqlalchemy import Boolean, Index, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 

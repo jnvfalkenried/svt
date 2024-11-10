@@ -12,7 +12,7 @@ class VideoEmbeddings(Base):
     element_id = Column(Integer, primary_key=True)
     embedding = Column(Vector(1408))
 
-    post = relationship("Posts", back_populates="video_embeddings")
+    posts = relationship("Posts", back_populates="video_embeddings")
 
     # Helper method for finding similar videos
     @classmethod

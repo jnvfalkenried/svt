@@ -4,7 +4,7 @@ import json
 import asyncio
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import configure_mappers, sessionmaker
 import aio_pika
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.dialects.postgresql import insert
@@ -34,6 +34,8 @@ class EmbeddingsConsumer(RabbitMQClient):
             class_=AsyncSession,
             expire_on_commit=False
         )
+
+        configure_mappers()
         
         # Initialize these as None
         self.exchange = None
@@ -74,15 +76,15 @@ class EmbeddingsConsumer(RabbitMQClient):
             select(func.coalesce(func.max(VideoEmbeddings.element_id), 0))
             .where(VideoEmbeddings.post_id == post_id)
         )
-        max_element_id = await result.scalar()
+        max_element_id = result.scalar()
         return max_element_id + 1
 
     async def process_tiktok_item(self, session, item, post_id):
-        print("post id: ", post_id)
-        print("item: ", item)
         try:
             # Get the next available element_id
             element_id = await self.get_next_element_id(session, post_id)
+
+            embedding = None
 
             if (element_id == 1):
                 # if the next element ID is one, store the description first
@@ -90,12 +92,13 @@ class EmbeddingsConsumer(RabbitMQClient):
             else:
                 # Store the video embedding
                 embedding = item[0]
+
+            print(f"Processing embedding for post_id: {post_id}, element_id: {element_id}")
             
-            # Create the insert statement with the new structure
             stmt = insert(VideoEmbeddings).values(
                 post_id=post_id,
                 element_id=element_id,
-                embedding=embedding
+                embedding=embedding,
             ).on_conflict_do_update(
                 index_elements=['post_id', 'element_id'],  # As it is Composite primary key
                 set_={
@@ -131,6 +134,7 @@ class EmbeddingsConsumer(RabbitMQClient):
             async with message.process():
                 post_id = message.routing_key.split(".")[-1]
                 tiktok_data = json.loads(message.body)
+                
                 async with self.async_session() as session:
                     if isinstance(tiktok_data, list):
                         print(f"Received a list of {len(tiktok_data)} TikTok data items")

@@ -7,7 +7,7 @@ FROM python:3.10-slim
 WORKDIR /app
 
 # Copy the producer directory contents into the container
-COPY ./consumer /app
+COPY ./consumer_embeddings /app
 
 # Copy the helper directory contents into the container
 COPY ./helpers /app/helpers

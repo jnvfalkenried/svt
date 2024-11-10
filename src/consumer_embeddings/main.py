@@ -6,7 +6,7 @@ from consumer_embeddings import EmbeddingsConsumer
 
 load_dotenv()
 
-rabbitmq_host = os.getenv("RABBITMQ_HOST")
+rabbitmq_host = os.getenv("RABBITMQ_SERVER")
 rabbitmq_port = int(os.getenv("RABBITMQ_PORT"))
 rabbitmq_user = os.getenv("RABBITMQ_USER")
 rabbitmq_pass = os.getenv("RABBITMQ_PASS")

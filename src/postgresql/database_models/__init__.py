@@ -5,3 +5,8 @@ from postgresql.database_models.music import *
 from postgresql.database_models.posts import *
 from postgresql.database_models.posts_challenges import *
 from postgresql.database_models.video_embeddings import *
+
+__all__ = ['Base', 'Posts', 'VideoEmbeddings']
+
+from sqlalchemy.orm import configure_mappers
+configure_mappers()

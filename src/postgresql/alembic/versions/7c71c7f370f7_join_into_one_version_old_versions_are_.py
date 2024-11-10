@@ -24,6 +24,7 @@ def upgrade():
         sa.Column('post_id', sa.String(), nullable=False),
         sa.Column('element_id', sa.Integer(), nullable=False),
         sa.Column('embedding', Vector(1408)),
+        sa.Column('inserted_at', sa.DateTime(), server_default=sa.text('now()'), nullable=True),
         sa.ForeignKeyConstraint(['post_id'], ['posts.id'], ondelete='CASCADE'),
         sa.PrimaryKeyConstraint('post_id', 'element_id')
     )
