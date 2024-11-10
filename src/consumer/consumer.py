@@ -6,7 +6,7 @@ import aio_pika
 
 from helpers.rabbitmq import RabbitMQClient
 from postgresql.database_scripts.authors import insert_author
-from postgresql.database_scripts.challenges import insert_challenge
+from postgresql.database_scripts.challenges import insert_or_update_challenge
 from postgresql.database_scripts.music import insert_music
 from postgresql.database_scripts.posts import insert_post
 from postgresql.database_scripts.posts_challenges import insert_post_challenge
@@ -110,14 +110,10 @@ class TikTokConsumer(RabbitMQClient):
 
                     # Process Challenges
                     for challenge_data in item.get("challenges", []):
-                        await insert_challenge(
+                        await insert_or_update_challenge(
                             id=challenge_data.get("id"),
                             title=challenge_data.get("title"),
                             description=challenge_data.get("desc"),
-                            video_count=challenge_data.get("stats", {}).get(
-                                "videoCount"
-                            ),
-                            view_count=challenge_data.get("stats", {}).get("viewCount"),
                             session=s,
                         )
 

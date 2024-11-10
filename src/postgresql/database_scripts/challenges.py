@@ -1,21 +1,20 @@
 from sqlalchemy import text
 
 
-async def insert_challenge(
-    id: str, title: str, description: str, video_count: int, view_count: int, session
+async def insert_or_update_challenge(
+    id: str, title: str, description: str, session
 ) -> None:
     await session.execute(
         text(
             """
-            INSERT INTO challenges (id, title, description, video_count, view_count) 
-            VALUES (:id, :title, :description, :video_count, :view_count)
-            ON CONFLICT (id) DO NOTHING
+            INSERT INTO challenges (id, title, description, hashtag_count) 
+            VALUES (:id, :title, :description, 1)
+            ON CONFLICT (id) DO UPDATE
+            SET hashtag_count = challenges.hashtag_count + 1
             """
         ).params(
             id=id,
             title=title,
             description=description,
-            video_count=video_count,
-            view_count=view_count,
         )
     )

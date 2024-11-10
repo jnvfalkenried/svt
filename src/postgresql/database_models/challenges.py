@@ -11,8 +11,7 @@ class Challenges(Base):
     id: Mapped[str] = mapped_column(String, primary_key=True, unique=True)
     title: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     description: Mapped[Optional[str]] = mapped_column(String, nullable=True)
-    video_count: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
-    view_count: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    hashtag_count: Mapped[int] = mapped_column(Integer, default=1, nullable=True)
 
     posts = relationship(
         "Posts", secondary="posts_challenges", back_populates="challenges"
@@ -28,7 +27,6 @@ class Challenges(Base):
             f"Challenge("
             f"id={self.id}, "
             f"title={self.title!r}, "
-            f"video_count={self.video_count!r}, "
-            f"view_count={self.view_count!r}"
+            f"hashtag_count={self.hashtag_count!r}"
             f")"
         )
