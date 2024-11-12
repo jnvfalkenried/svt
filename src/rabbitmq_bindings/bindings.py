@@ -16,9 +16,11 @@ load_dotenv()
 
 # RabbitMQ configurations
 RMQ_EXCHANGE = os.getenv("RABBITMQ_EXCHANGE")
+RMQ_TASKS_EXCHANGE = os.getenv("RMQ_TASKS_EXCHANGE")
 RMQ_HASHTAG_QUEUE = os.getenv("RABBITMQ_HASHTAG_QUEUE")
 RMQ_VIDEO_BYTES_QUEUE = os.getenv("RABBITMQ_VIDEO_BYTES_QUEUE")
 RMQ_EMBEDDINGS_QUEUE = os.getenv("RABBITMQ_EMBEDDINGS_QUEUE")
+RMQ_PRODUCER_TASKS_QUEUE = os.getenv("RABBITMQ_PRODUCER_TASKS_QUEUE")
 
 
 async def main():
@@ -32,9 +34,13 @@ async def main():
     # Connect to RabbitMQ
     await rabbitmq_client.connect("rmq_bindings")
 
-    # Declare exchange
+    # Declare exchanges
     await rabbitmq_client.channel.declare_exchange(
         name=RMQ_EXCHANGE, type="topic", durable=True
+    )
+
+    await rabbitmq_client.channel.declare_exchange(
+        name=RMQ_TASKS_EXCHANGE, type="topic", durable=True
     )
 
     # Declare queues
@@ -65,6 +71,17 @@ async def main():
 
     print(
         f"Queue {RMQ_EMBEDDINGS_QUEUE} is now bound to exchange {RMQ_EXCHANGE} with routing key: tiktok.embeddings.#"
+    )
+
+    producer_tasks_queue = await rabbitmq_client.channel.declare_queue(
+        name=RMQ_PRODUCER_TASKS_QUEUE, durable=True
+    )
+    await producer_tasks_queue.bind(
+        exchange=RMQ_TASKS_EXCHANGE, routing_key="producer.#"
+    )
+
+    print(
+        f"Queue {RMQ_PRODUCER_TASKS_QUEUE} is now bound to exchange {RMQ_TASKS_EXCHANGE} with routing key: producer.#"
     )
 
     # Close connection
