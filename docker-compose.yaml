@@ -34,9 +34,11 @@ services:
       RABBITMQ_USER: ${RABBITMQ_USER}
       RABBITMQ_PASSWORD: ${RABBITMQ_PASS}
       RABBITMQ_EXCHANGE: ${RABBITMQ_EXCHANGE}
+      RMQ_TASKS_EXCHANGE: ${RMQ_TASKS_EXCHANGE}
       RABBITMQ_HASHTAG_QUEUE: ${RABBITMQ_HASHTAG_QUEUE}
       RABBITMQ_VIDEO_BYTES_QUEUE: ${RABBITMQ_VIDEO_BYTES_QUEUE}
       RABBITMQ_EMBEDDINGS_QUEUE: ${RABBITMQ_EMBEDDINGS_QUEUE}
+      RMQ_PRODUCER_TASKS_QUEUE: ${RMQ_PRODUCER_TASKS_QUEUE}
     labels:
       description: "RabbitMQ Bindings"
 
@@ -78,6 +80,34 @@ services:
     labels:
       description: "Alembic migration service"
 
+  tasks-manager:
+    build:
+      context: ./src
+      dockerfile: ./tasks_manager/Dockerfile
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      rabbitmq-bindings:
+        condition: service_completed_successfully
+      postgres: 
+        condition: service_healthy
+      alembic:
+        condition: service_completed_successfully
+    environment:
+      RABBITMQ_SERVER: rabbitmq  # RabbitMQ hostname within Docker network
+      RABBITMQ_PORT: ${RABBITMQ_PORT}
+      RABBITMQ_USER: ${RABBITMQ_USER}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASS}
+      RABBITMQ_EXCHANGE: ${RABBITMQ_EXCHANGE}
+      RMQ_TASKS_EXCHANGE: ${RMQ_TASKS_EXCHANGE}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: ${POSTGRES_PORT}
+    labels:
+      description: "Tasks Manager (Scheduler) for reccurent tasks"
+
   producer:
     build:
       context: ./src
@@ -100,34 +130,6 @@ services:
     build:
       context: ./src
       dockerfile: ./consumer/Dockerfile
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
-      rabbitmq-bindings:
-        condition: service_completed_successfully
-      postgres: 
-        condition: service_healthy
-      alembic:
-        condition: service_completed_successfully
-    environment:
-      RABBITMQ_SERVER: rabbitmq  # RabbitMQ hostname within Docker network
-      RABBITMQ_PORT: ${RABBITMQ_PORT}
-      RABBITMQ_USER: ${RABBITMQ_USER}
-      RABBITMQ_PASS: ${RABBITMQ_PASS}
-      #RABBITMQ_HOST: ${RABBITMQ_HOST}
-      RABBITMQ_HASHTAG_QUEUE: ${RABBITMQ_HASHTAG_QUEUE}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_HOST: postgres
-      POSTGRES_PORT: ${POSTGRES_PORT}
-    labels:
-      description: "TikTok Data Consumer"
-
-  embeddings-consumer:
-    build:
-      context: ./src
-      dockerfile: ./consumer_embeddings/Dockerfile
     depends_on:
       rabbitmq:
         condition: service_healthy

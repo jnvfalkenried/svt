@@ -1,0 +1,6 @@
+aio-pika==9.4.3
+APScheduler==3.10.4
+python-dotenv==1.0.1
+SQLAlchemy==2.0.30
+asyncpg==0.29.0
+pgvector==0.2.5
