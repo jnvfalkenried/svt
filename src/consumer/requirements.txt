@@ -3,3 +3,4 @@ SQLAlchemy==2.0.30
 asyncpg==0.29.0
 aio-pika==9.4.1
 pgvector==0.2.5
+loguru==0.7.2

@@ -1,8 +1,8 @@
 import asyncio
 import os
 
-from manager import TasksManager
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from manager import TasksManager, logger
 
 
 async def main():
@@ -18,15 +18,15 @@ async def main():
     scheduler = AsyncIOScheduler()
 
     # update hashtags to monitor every 30 minutes
-    # scheduler.add_job(tasks_manager.update_hashtags_to_monitor, "interval", minutes=30)
+    scheduler.add_job(tasks_manager.update_hashtags_to_monitor, "interval", minutes=30)
 
     # send tasks to queue at 10:00 and 16:00
-    # scheduler.add_job(tasks_manager.send_tasks_to_queue, "cron", hour=0, minute=1)
-    # scheduler.add_job(tasks_manager.send_tasks_to_queue, "cron", hour=8, minute=1)
-    # scheduler.add_job(tasks_manager.send_tasks_to_queue, "cron", hour=16, minute=1)
+    scheduler.add_job(tasks_manager.send_tasks_to_queue, "cron", hour=0, minute=1)
+    scheduler.add_job(tasks_manager.send_tasks_to_queue, "cron", hour=8, minute=1)
+    scheduler.add_job(tasks_manager.send_tasks_to_queue, "cron", hour=16, minute=1)
 
-    scheduler.add_job(tasks_manager.update_hashtags_to_monitor, "interval", minutes=1)
-    scheduler.add_job(tasks_manager.send_tasks_to_queue, "interval", minutes=1)
+    scheduler.add_job(tasks_manager.update_hashtags_to_monitor)
+    scheduler.add_job(tasks_manager.send_tasks_to_queue, "interval", minutes=5)
 
     scheduler.start()
 
@@ -35,6 +35,6 @@ async def main():
 
 
 if __name__ == "__main__":
-    print("Starting Tasks Manager")
+    logger.info("Tasks Manager started")
     asyncio.run(main())
-    print("Tasks Manager stopped")
+    logger.info("Tasks Manager stopped")

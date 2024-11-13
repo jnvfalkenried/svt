@@ -105,6 +105,12 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_HOST: postgres
       POSTGRES_PORT: ${POSTGRES_PORT}
+    volumes:
+      - ./src/tasks_manager/main.py:/app/main.py
+      - ./src/tasks_manager/manager.py:/app/manager.py
+      - ./src/helpers:/app/helpers
+      - ./src/postgresql:/app/postgresql
+      - ./docker_runtime/logs:/app/logs
     labels:
       description: "Tasks Manager (Scheduler) for reccurent tasks"
 
@@ -123,6 +129,12 @@ services:
       RABBITMQ_USER: ${RABBITMQ_USER}
       RABBITMQ_PASSWORD: ${RABBITMQ_PASS}
       RABBITMQ_EXCHANGE: ${RABBITMQ_EXCHANGE}
+      RMQ_PRODUCER_TASKS_QUEUE: ${RMQ_PRODUCER_TASKS_QUEUE}
+    volumes:
+      - ./src/producer/main.py:/app/main.py
+      - ./src/producer/producer.py:/app/producer.py
+      - ./src/helpers:/app/helpers
+      - ./docker_runtime/logs:/app/logs
     labels:
       description: "TikTok Data Producer"
 
@@ -144,13 +156,18 @@ services:
       RABBITMQ_PORT: ${RABBITMQ_PORT}
       RABBITMQ_USER: ${RABBITMQ_USER}
       RABBITMQ_PASS: ${RABBITMQ_PASS}
-      #RABBITMQ_HOST: ${RABBITMQ_HOST}
       RABBITMQ_HASHTAG_QUEUE: ${RABBITMQ_HASHTAG_QUEUE}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_HOST: postgres
       POSTGRES_PORT: ${POSTGRES_PORT}
+    volumes:
+      - ./src/consumer/main.py:/app/main.py
+      - ./src/consumer/consumer.py:/app/producer.py
+      - ./src/helpers:/app/helpers
+      - ./src/postgresql:/app/postgresql
+      - ./docker_runtime/logs:/app/logs
     labels:
       description: "Embeddings Consumer"
 

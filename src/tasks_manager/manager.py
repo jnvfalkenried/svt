@@ -4,11 +4,12 @@ import os
 
 import aio_pika
 
+from helpers.logging import setup_logger
 from helpers.rabbitmq import RabbitMQClient
 from postgresql.config.db import session
 from postgresql.database_scripts.active_hashtags import get_active_hashtags
 
-ms_token = os.environ.get("ms_token", None)
+logger = setup_logger("tasks_manager")
 
 
 class TasksManager(RabbitMQClient):
@@ -24,9 +25,12 @@ class TasksManager(RabbitMQClient):
             self.exchange = await self.channel.get_exchange(self.exchange_name)
             await self.channel.set_qos(prefetch_count=100)
 
-            print(f"TasksManager initialized.")
+            logger.info(f"Initialized TasksManager")
+            logger.debug(
+                f"Initialization details: {self.connection_name}, {self.exchange_name}"
+            )
         except Exception as e:
-            print(f"Error while initializing TasksManager: {e}")
+            logger.error(f"Error initializing TasksManager: {e}")
 
     async def produce_message(self, key, value):
         try:
@@ -35,22 +39,23 @@ class TasksManager(RabbitMQClient):
                 delivery_mode=aio_pika.DeliveryMode.PERSISTENT,
             )
             await self.exchange.publish(message, routing_key=str(key))
-            print(f"Message delivered to {self.exchange} with key {key}")
+            logger.info(f"Produced message with key: {key}")
+            logger.debug(f"Message details: {key}: {value}")
         except Exception as e:
-            print(f"Error producing message: {e}")
+            logger.error(f"Error producing message: {e}")
 
     async def update_hashtags_to_monitor(self):
         async with session() as s:
             self.hashtags_to_monitor = await get_active_hashtags(s)
-            print(f"Hashtags to monitor: {self.hashtags_to_monitor}")
+            logger.info(f"Updated hashtags to monitor: {self.hashtags_to_monitor}")
 
     async def send_tasks_to_queue(self):
         for hashtag in self.hashtags_to_monitor:
             task_data = {
                 "hashtag": hashtag,
+                "num_videos": 500,
                 "timestamp": datetime.datetime.now().isoformat(),
             }
             await self.produce_message(
                 key="producer.hashtag_search", value=json.dumps(task_data)
             )
-            print(f"Task sent for hashtag: {hashtag}")
