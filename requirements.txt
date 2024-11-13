@@ -7,3 +7,5 @@ aio-pika==9.4.1
 TikTokApi==6.5.2
 playwright==1.37.0
 pgvector==0.2.5
+APScheduler==3.10.4
+loguru==0.7.2
