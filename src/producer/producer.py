@@ -1,4 +1,4 @@
-import datetime
+import asyncio
 import json
 import os
 import pickle
@@ -7,26 +7,32 @@ import aio_pika
 import requests
 from TikTokApi import TikTokApi
 
+from helpers.logging import setup_logger
 from helpers.rabbitmq import RabbitMQClient
 
-ms_token = os.environ.get("ms_token", None)
+logger = setup_logger("producer")
 
 
 class TikTokProducer(RabbitMQClient):
     def __init__(self, rabbitmq_server, rabbitmq_port, user, password):
         super().__init__(rabbitmq_server, rabbitmq_port, user, password)
         self.connection_name = "tiktok_data_producer"
-        self.exchange_name = os.environ.get("RABBITMQ_EXCHANGE", None)
+        self.exchange_name = os.environ.get("RABBITMQ_EXCHANGE")
+        self.tasks_queue = os.environ.get("RMQ_PRODUCER_TASKS_QUEUE")
 
     async def initialize(self):
         try:
             await self.connect(self.connection_name)
             self.exchange = await self.channel.get_exchange(self.exchange_name)
+            self.tasks_queue = await self.channel.get_queue(name=self.tasks_queue)
             await self.channel.set_qos(prefetch_count=100)
 
-            print(f"TikTokProducer initialized.")
+            logger.info(f"Initialized TikTokProducer")
+            logger.debug(
+                f"Initialization details: {self.connection_name}, {self.exchange_name}, {self.tasks_queue}"
+            )
         except Exception as e:
-            print(f"Error while initializing TikTokProducer: {e}")
+            logger.error(f"Error initializing TikTokProducer: {e}")
 
     async def produce_message(self, key, value):
         try:
@@ -35,16 +41,52 @@ class TikTokProducer(RabbitMQClient):
                 delivery_mode=aio_pika.DeliveryMode.PERSISTENT,
             )
             await self.exchange.publish(message, routing_key=str(key))
-            print(f"Message delivered to {self.exchange} with key {key}")
+            logger.debug(
+                f"Produced message with key: {key} \n Message details: {key}: {value}"
+            )
         except Exception as e:
-            print(f"Error producing message: {e}")
+            logger.error(f"Error producing message: {e}")
+
+    async def consume_tasks(self):
+        try:
+            await self.tasks_queue.consume(callback=self.process_tasks)
+            logger.info(f"Consuming tasks from queue: {self.tasks_queue.name}")
+            try:
+                await asyncio.Future()
+            finally:
+                await self.connection.close()
+        except Exception as e:
+            logger.error(f"Error consuming tasks: {e}")
+
+    async def process_tasks(self, message: aio_pika.IncomingMessage):
+        try:
+            async with message.process(requeue=True):
+                routing_key = message.routing_key
+                task_type = routing_key.split(".")[1]
+                task_params = json.loads(message.body.decode("utf-8"))
+
+                logger.info(f"Processing {task_type} task: {task_params}")
+
+                if task_type == "hashtag_search":
+                    await self.get_hashtag_videos(
+                        hashtag=task_params["hashtag"],
+                        num_videos=task_params["num_videos"],
+                    )
+        except Exception as e:
+            logger.error(f"Error processing task, rescheduling: {e}")
 
     async def get_hashtag_videos(self, hashtag, num_videos=5):
-        print(f"Getting videos for hashtag: {hashtag}")
+        logger.info(f"Getting {num_videos} videos for hashtag: {hashtag}")
+
         async with TikTokApi() as api:
-            await api.create_sessions(
-                ms_tokens=[ms_token], num_sessions=1, sleep_after=3
-            )
+            await api.create_sessions(num_sessions=1, sleep_after=3)
+
+            # Wait for the session to be created, not sure we really need this
+            for attempt in range(3):
+                if hasattr(api, "num_sessions"):
+                    break
+                await asyncio.sleep(1)
+
             tag = api.hashtag(name=hashtag)
             async for video in tag.videos(count=num_videos):
                 await self.produce_message(
@@ -52,35 +94,7 @@ class TikTokProducer(RabbitMQClient):
                 )
 
                 await self.get_video_bytes(video)
-        print(f"Finished getting videos for hashtag: {hashtag}")
-
-    async def trending_videos(self, num_videos=5):
-        print(f"Getting trending videos")
-        async with TikTokApi() as api:
-            await api.create_sessions(
-                ms_tokens=[ms_token], num_sessions=1, sleep_after=3
-            )
-            async for video in api.trending.videos(count=num_videos):
-                await self.produce_message(
-                    key=f"tiktok.trending.{datetime.datetime.now()}",
-                    value=json.dumps(video.as_dict),
-                )
-        print(f"Finished getting trending videos")
-
-    async def get_related_videos(self, video_url, num_related_videos=5):
-        print(f"Getting related videos for video: {video_url}")
-        async with TikTokApi() as api:
-            await api.create_sessions(
-                ms_tokens=[ms_token], num_sessions=1, sleep_after=3
-            )
-            video = api.video(url=video_url)
-
-            async for related_video in video.related_videos(count=num_related_videos):
-                await self.produce_message(
-                    key=f"tiktok.related_videos.{video_url}",
-                    value=json.dumps(related_video.as_dict),
-                )
-        print(f"Finished getting related videos for video: {video_url}")
+        logger.info(f"Finished getting videos for hashtag: {hashtag}")
 
     async def get_video_bytes(self, video):
         """
@@ -89,36 +103,43 @@ class TikTokProducer(RabbitMQClient):
         Parameters:
         video: TikTokApi.Video containing video url
         """
-        s = requests.Session()
-        h = {
-            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
-            "range": "bytes=0-",
-            "accept-encoding": "identity;q=1, *;q=0",
-            "referer": "https://www.tiktok.com/",
-        }
-
-        video_url = video.as_dict["video"]["bitrateInfo"][0]["PlayAddr"]["UrlList"][-1]
-        audio_url = video.as_dict["music"]["playUrl"]
-
-        # Download the video stream
-        video_response = s.get(video_url, headers=h)
-
-        # Don't download the audio stream if it is music because of copyright issues
-        if video.as_dict["music"]["title"] == "original sound":
-            # Download the audio stream
-            audio_response = s.get(audio_url, headers=h)
-
-        body = pickle.dumps(
-            {
-                "video": video_response.content,
-                # "audio": audio_response.content,
-                "description": video.as_dict["desc"],
+        try:
+            s = requests.Session()
+            h = {
+                "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
+                "range": "bytes=0-",
+                "accept-encoding": "identity;q=1, *;q=0",
+                "referer": "https://www.tiktok.com/",
             }
-        )
+
+            video_url = video.as_dict["video"]["bitrateInfo"][0]["PlayAddr"]["UrlList"][
+                -1
+            ]
+            audio_url = video.as_dict["music"]["playUrl"]
+
+            # Download the video stream
+            video_response = s.get(video_url, headers=h)
+
+            # Don't download the audio stream if it is music because of copyright issues
+            if video.as_dict["music"]["title"] == "original sound":
+                # Download the audio stream
+                audio_response = s.get(audio_url, headers=h)
+
+            body = pickle.dumps(
+                {
+                    "video": video_response.content,
+                    # "audio": audio_response.content,
+                    "description": video.as_dict["desc"],
+                }
+            )
+        except Exception as e:
+            logger.error(
+                f"Error getting video bytes: {e} for video: \n {video.as_dict}"
+            )
+            return
 
         await self.produce_message(
             key=f"tiktok.bytes.{video.as_dict['id']}",
             # For now we are only sending the video bytes
             value=body,
         )
-        # print(f"Finished getting video bytes for video: {video.as_dict['id']}")
