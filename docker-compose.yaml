@@ -14,7 +14,7 @@ services:
     labels:
       description: "RabbitMQ server"
     healthcheck:
-      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"] # Check if RabbitMQ port are open
       interval: 10s
       timeout: 30s
       retries: 5
@@ -27,7 +27,7 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
-    command: sh -c "sleep 10 && python bindings.py" #binding will have to wait for rabbitmq first
+    # command: sh -c "sleep 10 && python bindings.py" #binding will have to wait for rabbitmq first
     environment:
       RABBITMQ_SERVER: rabbitmq  # RabbitMQ hostname within Docker network
       RABBITMQ_PORT: ${RABBITMQ_PORT}
