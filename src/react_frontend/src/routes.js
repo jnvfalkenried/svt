@@ -2,9 +2,13 @@ import React from 'react'
 
 const Overview = React.lazy(() => import('./views/overview/Overview'))
 
-// Search
+// Our components
 const HashtagSearch = React.lazy(() => import('./views/hashtag_search/HashtagSearch'))
+const About = React.lazy(() => import('./views/about/About'))
+const Reports = React.lazy(() => import('./views/reports/Reports'))
+const MonitoredHashtags = React.lazy(() => import('./views/monitored_hashtags/MonitoredHashtags'))
 
+// Old components
 const Dashboard = React.lazy(() => import('./views/dashboard/Dashboard'))
 const Colors = React.lazy(() => import('./views/theme/colors/Colors'))
 const Typography = React.lazy(() => import('./views/theme/typography/Typography'))
@@ -57,7 +61,12 @@ const Widgets = React.lazy(() => import('./views/widgets/Widgets'))
 
 const routes = [
   { path: '/', exact: true, name: 'Home' },
-  { path: '/hashtag_search', name: 'Hashtag Search', element: HashtagSearch },
+  { path: '/trends', name: 'Trends', element: Dashboard },
+  { path: '/hashtag_search', name: 'Search', element: HashtagSearch },
+  { path: '/monitored_hashtags', name: 'Monitored Hashtags', element: MonitoredHashtags },
+  { path: '/reports', name: 'Reports', element: Reports },
+  { path: '/fetched_data', name: 'Fetched Data', element: Overview },
+  { path: '/about', name: 'About', element: About },
   { path: '/overview', name: 'Overview', element: Overview },
   { path: '/dashboard', name: 'Dashboard', element: Dashboard },
   { path: '/theme', name: 'Theme', element: Colors, exact: true },
