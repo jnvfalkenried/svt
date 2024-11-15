@@ -189,6 +189,7 @@ services:
       RABBITMQ_PORT: ${RABBITMQ_PORT}
       RABBITMQ_USER: ${RABBITMQ_USER}
       RABBITMQ_PASS: ${RABBITMQ_PASS}
+      #RABBITMQ_HOST: ${RABBITMQ_HOST}
       RABBITMQ_EXCHANGE: ${RABBITMQ_EXCHANGE}
       RABBITMQ_EMBEDDINGS_QUEUE: ${RABBITMQ_EMBEDDINGS_QUEUE}
       POSTGRES_USER: ${POSTGRES_USER}
@@ -196,6 +197,7 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_HOST: postgres
       POSTGRES_PORT: ${POSTGRES_PORT}
+    #command: python -u /app/consumer_embeddings/consumer_embeddings.py
     labels:
       description: "TikTok Embeddings Consumer"
   

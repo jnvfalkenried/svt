@@ -84,14 +84,14 @@ class EmbeddingsConsumer(RabbitMQClient):
             # Get the next available element_id
             element_id = await self.get_next_element_id(session, post_id)
 
-            embedding = None
+            embedding = item
 
-            if (element_id == 1):
-                # if the next element ID is one, store the description first
-                embedding = item[1]
-            else:
-                # Store the video embedding
-                embedding = item[0]
+            # if (element_id == 1):
+            #     # if the next element ID is one, store the description first
+            #     embedding = item[1]
+            # else:
+            #     # Store the video embedding
+            #     embedding = item[0]
 
             print(f"Processing embedding for post_id: {post_id}, element_id: {element_id}")
             
@@ -108,7 +108,7 @@ class EmbeddingsConsumer(RabbitMQClient):
 
             await session.execute(stmt)
             await session.commit()
-            print(f"Upserted embedding for post {post_id} with element_id {element_id}")
+            print(f"Inserted embedding for post {post_id} with element_id {element_id}")
 
         except IntegrityError as e:
             print(f"Integrity error processing message for post {post_id}: {e}")
