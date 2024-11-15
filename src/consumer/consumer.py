@@ -4,13 +4,16 @@ import os
 
 import aio_pika
 
+from helpers.logging import setup_logger
 from helpers.rabbitmq import RabbitMQClient
+from postgresql.config.db import session
 from postgresql.database_scripts.authors import insert_author
 from postgresql.database_scripts.challenges import insert_or_update_challenge
 from postgresql.database_scripts.music import insert_music
 from postgresql.database_scripts.posts import insert_post
 from postgresql.database_scripts.posts_challenges import insert_post_challenge
-from postgresql.config.db import session
+
+logger = setup_logger("consumer")
 
 
 class TikTokConsumer(RabbitMQClient):
@@ -22,38 +25,47 @@ class TikTokConsumer(RabbitMQClient):
         password,
     ):
         super().__init__(rabbitmq_server, rabbitmq_port, user, password)
+        self.connection_name = "tiktok_data_consumer"
         self.input_queue = os.environ.get("RABBITMQ_HASHTAG_QUEUE")
 
     async def initialize(self):
         try:
-            await self.connect("TikTokConsumer")
+            await self.connect(self.connection_name)
             self.queue = await self.channel.get_queue(name=self.input_queue)
             await self.channel.set_qos(prefetch_count=100)
 
-            print("TikTokConsumer initialized.")
+            logger.info(f"Initialized TikTokConsumer")
+            logger.debug(
+                f"Initialization details: {self.connection_name}, {self.input_queue}"
+            )
         except Exception as e:
-            print(f"Error while initializing: {e}")
+            logger.error(f"Error initializing TikTokConsumer: {e}")
 
     async def consume_messages(self):
         try:
             await self.queue.consume(callback=self.process_message)
-            print("Waiting for messages.")
+            logger.info(f"Consuming messages from queue: {self.queue.name}")
             try:
                 await asyncio.Future()
             finally:
                 await self.connection.close()
         except Exception as e:
-            print(f"Error consuming messages: {e}")
+            logger.error(f"Error consuming tasks: {e}")
 
     async def process_message(self, message: aio_pika.IncomingMessage):
         try:
             async with message.process(requeue=True):
+                routing_key = message.routing_key
+                hashtag = routing_key.split(".")[2]
                 tiktok_data = json.loads(message.body.decode("utf-8"))
-                print("Persistent consumer script: Processing tiktok hashtag data")
-                #print(f"Processing message: {tiktok_data}")
+
+                logger.info(
+                    f"Processing video {tiktok_data.get('id')} for hashtag {hashtag}"
+                )
+
                 await self.process_tiktok_item(tiktok_data)
         except Exception as e:
-            print(f"Error processing message: {e}")
+            logger.error(f"Error processing video: {e}")
 
     async def process_tiktok_item(self, item):
         # Process TikTok item and store in database within a transaction block
@@ -98,12 +110,12 @@ class TikTokConsumer(RabbitMQClient):
                         duet_from_id=item.get("duetInfo", {}).get("duetFromId"),
                         is_ad=item.get("isAd"),
                         can_repost=item.get("item_control", {}).get("can_repost"),
-                        collect_count=item.get("statsV2", {}).get("collectCount"),
-                        comment_count=item.get("statsV2", {}).get("commentCount"),
-                        digg_count=item.get("statsV2", {}).get("diggCount"),
-                        play_count=item.get("statsV2", {}).get("playCount"),
-                        repost_count=item.get("statsV2", {}).get("repostCount"),
-                        share_count=item.get("statsV2", {}).get("shareCount"),
+                        # collect_count=item.get("statsV2", {}).get("collectCount"),
+                        # comment_count=item.get("statsV2", {}).get("commentCount"),
+                        # digg_count=item.get("statsV2", {}).get("diggCount"),
+                        # play_count=item.get("statsV2", {}).get("playCount"),
+                        # repost_count=item.get("statsV2", {}).get("repostCount"),
+                        # share_count=item.get("statsV2", {}).get("shareCount"),
                         author_id=author_data.get("id"),
                         music_id=music_data.get("id"),
                         session=s,
@@ -124,11 +136,13 @@ class TikTokConsumer(RabbitMQClient):
                             session=s,
                         )
 
-                    print(
+                    logger.debug(
                         f"Processed and stored TikTok data for video ID: {item.get('id', 'Unknown')}"
                     )
 
                 except Exception as e:
-                    print(f"Error in transaction, rolling back: {e}")
+                    logger.error(
+                        f"Error in transaction while processing TikTok item, rolling back: {e}"
+                    )
                     await s.rollback()
                     raise

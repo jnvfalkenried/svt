@@ -31,7 +31,7 @@ def upgrade() -> None:
     sa.Column('following_count', sa.Integer(), nullable=True),
     sa.Column('heart_count', sa.Integer(), nullable=True),
     sa.Column('video_count', sa.Integer(), nullable=True),
-    sa.Column('inserted_at', sa.DateTime(), nullable=True),
+    sa.Column('inserted_at', sa.DateTime(), server_default=sa.text('now()'), nullable=True),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('id')
     )
@@ -44,7 +44,7 @@ def upgrade() -> None:
     sa.Column('description', sa.String(), nullable=True),
     sa.Column('video_count', sa.Integer(), nullable=True),
     sa.Column('view_count', sa.Integer(), nullable=True),
-    sa.Column('inserted_at', sa.DateTime(), nullable=True),
+    sa.Column('inserted_at', sa.DateTime(), server_default=sa.text('now()'), nullable=True),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('id')
     )
@@ -56,7 +56,7 @@ def upgrade() -> None:
     sa.Column('title', sa.String(), nullable=True),
     sa.Column('original', sa.Boolean(), nullable=True),
     sa.Column('duration', sa.Integer(), nullable=True),
-    sa.Column('inserted_at', sa.DateTime(), nullable=True),
+    sa.Column('inserted_at', sa.DateTime(), server_default=sa.text('now()'), nullable=True),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('id')
     )
@@ -78,7 +78,7 @@ def upgrade() -> None:
     sa.Column('share_count', sa.String(), nullable=True),
     sa.Column('author_id', sa.String(), nullable=True),
     sa.Column('music_id', sa.String(), nullable=True),
-    sa.Column('inserted_at', sa.DateTime(), nullable=True),
+    sa.Column('inserted_at', sa.DateTime(), server_default=sa.text('now()'), nullable=True),
     sa.ForeignKeyConstraint(['author_id'], ['authors.id'], ),
     sa.ForeignKeyConstraint(['music_id'], ['music.id'], ),
     sa.PrimaryKeyConstraint('id'),
@@ -89,7 +89,7 @@ def upgrade() -> None:
     op.create_table('posts_challenges',
     sa.Column('post_id', sa.String(), nullable=False),
     sa.Column('challenge_id', sa.String(), nullable=False),
-    sa.Column('inserted_at', sa.DateTime(), nullable=True),
+    sa.Column('inserted_at', sa.DateTime(), server_default=sa.text('now()'), nullable=True),
     sa.ForeignKeyConstraint(['challenge_id'], ['challenges.id'], ),
     sa.ForeignKeyConstraint(['post_id'], ['posts.id'], ),
     sa.PrimaryKeyConstraint('post_id', 'challenge_id')

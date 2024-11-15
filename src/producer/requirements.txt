@@ -1,3 +1,4 @@
 aio-pika==9.4.3
 playwright==1.37.0
 TikTokApi==6.5.2
+loguru==0.7.2

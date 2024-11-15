@@ -1,8 +1,10 @@
-from .base import Base
-from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy import String, Boolean
-from sqlalchemy.schema import PrimaryKeyConstraint
 from typing import Optional
+
+from sqlalchemy import Boolean, String
+from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.schema import PrimaryKeyConstraint
+
+from .base import Base
 
 
 class ActiveHashtags(Base):

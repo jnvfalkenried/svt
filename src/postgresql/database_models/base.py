@@ -6,4 +6,5 @@ class Base(DeclarativeBase):
     inserted_at = mapped_column(
         DateTime,
         default=func.now(),
+        server_default=func.current_timestamp(),
     )

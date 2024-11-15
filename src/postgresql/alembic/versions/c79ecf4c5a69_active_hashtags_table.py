@@ -24,7 +24,7 @@ def upgrade() -> None:
     sa.Column('id', sa.String(), nullable=False),
     sa.Column('title', sa.String(), nullable=True),
     sa.Column('active', sa.Boolean(), nullable=False),
-    sa.Column('inserted_at', sa.DateTime(), nullable=True),
+    sa.Column('inserted_at', sa.DateTime(), server_default=sa.text('now()'), nullable=True),
     sa.PrimaryKeyConstraint('id', 'active')
     )
     op.drop_index('idx_video_embeddings_post_id', table_name='video_embeddings')

@@ -15,12 +15,7 @@ class Posts(Base):
     duet_from_id: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     is_ad: Mapped[Optional[bool]] = mapped_column(Boolean, nullable=True)
     can_repost: Mapped[Optional[bool]] = mapped_column(Boolean, nullable=True)
-    collect_count: Mapped[Optional[str]] = mapped_column(String, nullable=True)
-    comment_count: Mapped[Optional[str]] = mapped_column(String, nullable=True)
-    digg_count: Mapped[Optional[str]] = mapped_column(String, nullable=True)
-    play_count: Mapped[Optional[str]] = mapped_column(String, nullable=True)
-    repost_count: Mapped[Optional[str]] = mapped_column(String, nullable=True)
-    share_count: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    
     author_id: Mapped[Optional[str]] = mapped_column(
         ForeignKey("authors.id"), nullable=True
     )
