@@ -62,7 +62,6 @@ const HashtagCard = ({ tag }) => (
     <CCardBody className="p-4">
       <div className="d-flex justify-content-between align-items-center mb-4">
         <div className="d-flex align-items-center">
-          <CIcon icon={cilPencil} size="lg" className="text-primary me-2" />
           <h4 className="mb-0">#{tag.title}</h4>
         </div>
         {/* <CButton color="danger" variant="ghost" size="sm" onClick={() => removeHashtag(tag.id)}> */}
