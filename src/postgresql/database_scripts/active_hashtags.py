@@ -1,25 +1,29 @@
-from sqlalchemy import text
+from sqlalchemy import text, select
+from postgresql.database_models import ActiveHashtags
 
 
 async def get_active_hashtags(session) -> list:
-    query = await session.execute(
-        text("select title from active_hashtags where active is true")
+    result = await session.execute(
+        select(ActiveHashtags).where(ActiveHashtags.active == True)
     )
-    response = query.fetchall()
-    return [i[0] for i in response]
+    hashtags = result.scalars().all()
+    return hashtags
 
 async def insert_or_update_active_hashtag(id: str, title: str, session) -> None:
-    active = True
-    # TODO: Update on conflict
-    await session.execute(
-        text(
-            """
-            INSERT INTO active_hashtags (id, title, active) 
-            VALUES (:id, :title, :active)
-            """
-        ).params(
-            id=id,
-            title=title,
-            active=active
-        )
+    # Create new hashtag instance
+    new_hashtag = ActiveHashtags(
+        id=id,
+        title=title,
+        active=True
     )
+    
+    try:
+        # Add the new hashtag
+        session.add(new_hashtag)
+
+        await session.flush()
+        print("Successfully flushed new hashtag")  # Debug print
+    except Exception as e:
+        print(f"Error in insert_or_update_active_hashtag: {e}")
+        print(f"Error type: {type(e)}")
+        raise e

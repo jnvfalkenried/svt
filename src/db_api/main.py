@@ -7,7 +7,7 @@ from sqlalchemy.future import select
 from sqlalchemy import func
 from postgresql.config.db import session
 from postgresql.database_models import Authors, Posts, ActiveHashtags, Challenges
-from postgresql.database_scripts.active_hashtags import insert_or_update_active_hashtag
+from postgresql.database_scripts.active_hashtags import insert_or_update_active_hashtag, get_active_hashtags
 
 app = FastAPI()
 
@@ -69,22 +69,24 @@ async def get_top_authors():
 @app.post("/hashtag")
 async def add_hashtag(hashtag_request: HashtagRequest):
     hashtag = hashtag_request.hashtag
-    # Run a query to add a hashtag
+    print(f"Attempting to add hashtag: {hashtag}")  # Debug log
+    
     async with session() as s:
-        async with s.begin():
-            try:
-                uuid_str = str(uuid.uuid4())
-                await insert_or_update_active_hashtag(id=uuid_str, title=hashtag, session=s)
-                return {"message": "Hashtag added successfully"}
-            except Exception as e:
-                print(f"Error in transaction, rolling back: {e}")
-                await s.rollback()
-                raise HTTPException(status_code=500, detail="Failed to add hashtag")
+        try:
+            uuid_str = str(uuid.uuid4())
+            await insert_or_update_active_hashtag(id=uuid_str, title=hashtag, session=s)
+            await s.commit()
+            print(f"Successfully added hashtag: {hashtag}")  # Debug log
+            return {"message": "Hashtag added successfully"}
+        except Exception as e:
+            await s.rollback()
+            print(f"Error adding hashtag: {e}")
+            raise HTTPException(status_code=500, detail=str(e))
         
 @app.get("/hashtags")
 async def get_hashtags():
-    # Run a query to get all active hashtags
     async with session() as s:
-        result = await s.execute(select(ActiveHashtags))
-        hashtags = result.scalars().all()
+        hashtags = await get_active_hashtags(s)
+        print(f"Retrieved hashtags: {hashtags}")  # Debug log
         return hashtags
+    
