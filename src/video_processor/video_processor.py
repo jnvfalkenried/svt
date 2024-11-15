@@ -9,6 +9,7 @@ from typing import Optional, Tuple, List
 import aio_pika
 import cv2
 import vertexai
+from ratelimit import limits, sleep_and_retry
 from google.oauth2 import service_account
 from scenedetect import AdaptiveDetector, SceneManager, StatsManager, open_video
 from vertexai.vision_models import (
@@ -160,6 +161,8 @@ class TikTokVideoProcessor(RabbitMQClient):
 
         return key_frames
 
+    @sleep_and_retry
+    @limits(calls=120, period=60)
     def generate_embeddings(self, key_frames, description=None):
         """
         Generate embeddings for the key frames
@@ -179,7 +182,6 @@ class TikTokVideoProcessor(RabbitMQClient):
                     description = description
                 else:
                     description = None
-                # TODO: Add API limiter
                 image_embeddings, text_embeddings = (
                     self.get_image_video_text_embeddings(
                         # project_id=self.google_project_id,
@@ -189,17 +191,16 @@ class TikTokVideoProcessor(RabbitMQClient):
                         dimension=1408,
                     )
                 )
-                embeddings_lst.append(image_embeddings)
+                
                 if text_embeddings:
                     embeddings_lst.append(text_embeddings)
+                embeddings_lst.append(image_embeddings)   
             except Exception as e:
                 print(f"Error generating embeddings: {e}")
 
                 # For testing purposes
                 print("Using dummy embeddings")
-                embeddings_lst.append(
-                    [[i for i in range(1408)], [i for i in range(1408)]]
-                )
+                embeddings_lst = [[i for i in range(1408)], [i for i in range(1408)]]
 
         return embeddings_lst
 
@@ -234,6 +235,7 @@ class TikTokVideoProcessor(RabbitMQClient):
         file_path = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS")
         if not os.path.exists(file_path):
             print("Google credentials file not found")
+            raise FileNotFoundError("Google credentials file not found")
 
         credentials = service_account.Credentials.from_service_account_file(file_path)
 
@@ -244,7 +246,7 @@ class TikTokVideoProcessor(RabbitMQClient):
             credentials=credentials,
         )
 
-        model = MultiModalEmbeddingModel.from_pretrained("multimodalembedding")
+        model = MultiModalEmbeddingModel.from_pretrained("multimodalembedding@001")
         image = Image.load_from_file(f"temp_{thread_id}.jpg")
         # video = Video.load_from_file(video_path)
 
