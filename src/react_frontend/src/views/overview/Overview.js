@@ -39,7 +39,7 @@ const Overview = () => {
         setErrorStats(error.message)
         setLoadingStats(false)
       })
-  }, [])
+  }, [stats, loadingStats, errorStats])
 
   useEffect(() => {
     // Call the FastAPI top_authors endpoint
@@ -58,7 +58,7 @@ const Overview = () => {
         setErrorAuthors(error.message)
         setLoadingAuthors(false)
       })
-  }, [])
+  }, [authors, loadingAuthors, errorAuthors])
 
   return (
     <>

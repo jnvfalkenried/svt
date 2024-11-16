@@ -1,5 +1,6 @@
-import React from 'react'
-import { Link } from 'react-router-dom'
+import React, { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { useDispatch } from 'react-redux'
 import {
   CButton,
   CCard,
@@ -16,7 +17,38 @@ import {
 import CIcon from '@coreui/icons-react'
 import { cilLockLocked, cilUser } from '@coreui/icons'
 
+import AuthService from '../../../services/AuthService'
+
 const Login = () => {
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
+  const dispatch = useDispatch() // Initialize dispatch
+  const navigate = useNavigate()
+
+  const handleLogin = (e) => {
+    e.preventDefault()
+
+    try {
+      // Call the login method from AuthService
+      const response = AuthService.login(username, password)
+      // Dispatch the login action to update the redux store
+      dispatch({ type: 'set', isAuthenticated: true })
+      // Save the authentication state in localStorage
+      localStorage.setItem('auth', JSON.stringify(response.data))
+      console.log(response.data)
+      // Redirect to the dashboard page
+      navigate('/dashboard')
+    } catch (error) {
+      setError(error.response?.data?.message || 'Login failed. Please try again.')
+    }
+  }
+
+  const handleForgotPassword = () => {
+    // Redirect to forgot password page
+    navigate('/forgot-password')
+  }
+
   return (
     <div className="bg-body-tertiary min-vh-100 d-flex flex-row align-items-center">
       <CContainer>
@@ -25,14 +57,19 @@ const Login = () => {
             <CCardGroup>
               <CCard className="p-4">
                 <CCardBody>
-                  <CForm>
+                  <CForm onSubmit={handleLogin}>
                     <h1>Login</h1>
                     <p className="text-body-secondary">Sign In to your account</p>
                     <CInputGroup className="mb-3">
                       <CInputGroupText>
                         <CIcon icon={cilUser} />
                       </CInputGroupText>
-                      <CFormInput placeholder="Username" autoComplete="username" />
+                      <CFormInput
+                        placeholder="Username"
+                        autoComplete="username"
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                      />
                     </CInputGroup>
                     <CInputGroup className="mb-4">
                       <CInputGroupText>
@@ -42,16 +79,23 @@ const Login = () => {
                         type="password"
                         placeholder="Password"
                         autoComplete="current-password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
                       />
                     </CInputGroup>
+                    {error && (
+                      <div className="text-danger mb-3" style={{ textAlign: 'center' }}>
+                        {error}
+                      </div>
+                    )}
                     <CRow>
                       <CCol xs={6}>
-                        <CButton color="primary" className="px-4">
+                        <CButton color="primary" className="px-4" type="submit">
                           Login
                         </CButton>
                       </CCol>
                       <CCol xs={6} className="text-right">
-                        <CButton color="link" className="px-0">
+                        <CButton color="link" className="px-0" onClick={handleForgotPassword}>
                           Forgot password?
                         </CButton>
                       </CCol>

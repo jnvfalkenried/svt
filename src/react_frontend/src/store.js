@@ -3,6 +3,7 @@ import { legacy_createStore as createStore } from 'redux'
 const initialState = {
   sidebarShow: true,
   theme: 'light',
+  isAuthenticated: localStorage.getItem('auth') === 'true',
 }
 
 const changeState = (state = initialState, { type, ...rest }) => {
