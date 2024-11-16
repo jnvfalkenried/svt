@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react'
-import { CCard, CCardBody, CCardHeader, CRow, CCol, CButton, CSpinner } from '@coreui/react'
+import React, { useState } from 'react'
+import { CCard, CCardBody, CCardHeader, CRow, CCol, CButton, CSpinner, CBadge } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
-import { cilSearch, cilImage, cilX } from '@coreui/icons'
+import { cilSearch, cilImage, cilX, cilCheckCircle, cilHeart, cilPeople } from '@coreui/icons'
 
 const MultimodalSearch = () => {
   const [searchQuery, setSearchQuery] = useState('')
@@ -10,7 +10,6 @@ const MultimodalSearch = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [searchResults, setSearchResults] = useState([])
   const [error, setError] = useState('')
-  const [isValid, setIsValid] = useState(false)
 
   const handleImageSelect = (event) => {
     const file = event.target.files[0]
@@ -25,12 +24,20 @@ const MultimodalSearch = () => {
     setPreviewUrl('')
   }
 
-  useEffect(() => {
-    setIsValid(!!searchQuery || !!selectedImage)
-  }, [searchQuery, selectedImage])
+  const formatDate = (timestamp) => {
+    if (!timestamp) return 'Unknown date'
+    const date = new Date(timestamp * 1000)
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    })
+  }
 
   const handleSearch = async () => {
-    if (!isValid) {
+    if (!searchQuery && !selectedImage) {
       setError('Please enter a search query or select an image')
       return
     }
@@ -52,19 +59,13 @@ const MultimodalSearch = () => {
         console.log('Adding image to form:', selectedImage.name)
       }
 
-      console.log('FormData contents:')
-      for (let pair of formData.entries()) {
-        console.log(pair[0] + ': ' + pair[1])
-      }
-
       const response = await fetch('http://localhost/search/multimodal', {
         method: 'POST',
         body: formData,
-        headers: { Accept: 'application/json' },
-        credentials: 'same-origin',
+        headers: {
+          Accept: 'application/json',
+        },
       })
-
-      console.log('Response status:', response.status)
 
       let data
       const contentType = response.headers.get('content-type')
@@ -79,8 +80,6 @@ const MultimodalSearch = () => {
       if (!response.ok) {
         throw new Error(data.detail || 'Search failed')
       }
-
-      console.log('Search results:', data)
 
       if (Array.isArray(data) && data.length === 0) {
         setError('No results found')
@@ -97,6 +96,36 @@ const MultimodalSearch = () => {
     } finally {
       setIsLoading(false)
     }
+  }
+
+  const renderAuthorInfo = (author) => {
+    if (!author) return 'Unknown Author'
+    return (
+      <div className="author-info">
+        <div className="d-flex align-items-center gap-2">
+          <strong>{author.nickname || author.unique_id}</strong>{' '}
+          {author.verified && (
+            <CBadge color="info" className="px-2">
+              <CIcon icon={cilCheckCircle} size="sm" /> Verified
+            </CBadge>
+          )}
+        </div>
+        <div className="d-flex gap-3 text-muted small mt-1">
+          {author.follower_count !== undefined && (
+            <span>
+              <CIcon icon={cilPeople} size="sm" /> {author.follower_count.toLocaleString()}
+              followers
+            </span>
+          )}
+          {author.heart_count !== undefined && (
+            <span>
+              <CIcon icon={cilHeart} size="sm" /> {author.heart_count.toLocaleString()} likes
+            </span>
+          )}
+        </div>
+        {author.signature && <small className="text-muted d-block mt-1">{author.signature}</small>}
+      </div>
+    )
   }
 
   return (
@@ -134,8 +163,7 @@ const MultimodalSearch = () => {
               <CButton
                 color="primary"
                 onClick={handleSearch}
-                disabled={isLoading || !isValid}
-                title={!isValid ? 'Please enter a search query or select an image' : ''}
+                disabled={isLoading || (!searchQuery && !selectedImage)}
               >
                 {isLoading ? (
                   <CSpinner size="sm" />
@@ -181,18 +209,47 @@ const MultimodalSearch = () => {
             </CCol>
           ) : searchResults.length > 0 ? (
             searchResults.map((result) => (
-              <CCol
-                key={`${result.post_id}-${result.element_id}`}
-                xs={12}
-                md={6}
-                lg={4}
-                className="mb-4"
-              >
+              <CCol key={`${result.post_id}-${result.element_id}`} xs={12} className="mb-4">
                 <CCard>
                   <CCardBody>
-                    <p className="text-muted mb-1">Distance: {result.distance.toFixed(3)}</p>
-                    <p className="mb-2">{result.description}</p>
-                    <small className="text-muted">By {result.author?.username || 'Unknown'}</small>
+                    <div className="d-flex justify-content-between align-items-start mb-3">
+                      <div className="flex-grow-1">{renderAuthorInfo(result.author)}</div>
+                      <div className="text-end ms-3">
+                        <p className="text-muted mb-1">
+                          Similarity: {(1 - result.distance).toFixed(3)}
+                        </p>
+                        {result.created_at && (
+                          <small className="text-muted d-block">
+                            Posted: {formatDate(result.created_at)}
+                          </small>
+                        )}
+                      </div>
+                    </div>
+                    <div className="post-content">
+                      <p className="mb-2">{result.description}</p>
+                      <div className="d-flex gap-2 mt-2 flex-wrap">
+                        {result.duet_enabled && (
+                          <CBadge color="success" className="px-2">
+                            Duet Enabled
+                          </CBadge>
+                        )}
+                        {result.is_ad && (
+                          <CBadge color="warning" className="px-2">
+                            Advertisement
+                          </CBadge>
+                        )}
+                        {result.can_repost && (
+                          <CBadge color="info" className="px-2">
+                            Repostable
+                          </CBadge>
+                        )}
+                        {result.music_id && (
+                          <CBadge color="dark" className="px-2">
+                            Has Music
+                          </CBadge>
+                        )}
+                      </div>
+                    </div>
                   </CCardBody>
                 </CCard>
               </CCol>
