@@ -1,6 +1,6 @@
 # main.py
 import uuid
-from fastapi import FastAPI, HTTPException, File, UploadFile
+from fastapi import FastAPI, HTTPException, File, UploadFile, Form
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.future import select
@@ -15,12 +15,20 @@ from scipy.spatial.distance import cosine
 app = FastAPI()
 
 # CORS configuration
+# app.add_middleware(
+#     CORSMiddleware,
+#     allow_origins=["*"],  # Allow all origins for development (change to specific URLs in production)
+#     allow_credentials=True,
+#     allow_methods=["*"],  # Allow all HTTP methods (GET, POST, etc.)
+#     allow_headers=["*"],  # Allow all headers
+# )
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allow all origins for development (change to specific URLs in production)
-    allow_credentials=True,
-    allow_methods=["*"],  # Allow all HTTP methods (GET, POST, etc.)
-    allow_headers=["*"],  # Allow all headers
+    allow_origins=["*"],
+    allow_credentials=True,  # Change this to True to allow credentials
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["*"],  # Allow all headers to be more permissive
 )
 
 class HashtagRequest(BaseModel):
@@ -95,13 +103,20 @@ async def get_hashtags():
 
 @app.post("/search/multimodal")
 async def multimodal_search(
-    query: str = None,
-    image: UploadFile = File(None),
+    query: str = Form(default=None),
+    image: UploadFile = File(default=None),
     limit: int = 10
 ):
+    print(f"Received request - query: {query}, image present: {image is not None}")
+    
+    # Validate inputs
+    if not query and not image:
+        raise HTTPException(
+            status_code=400,
+            detail="Either query text or image is required"
+        )
+    
     try:
-        print(f"Received search request - query: {query}, image: {image is not None}")  # Debug log
-        
         # Initialize the embedding model
         model = MultiModalEmbeddingModel.from_pretrained("multimodalembedding@001")
         
@@ -109,15 +124,16 @@ async def multimodal_search(
         query_embedding = None
         
         if query:
-            print("Generating text embedding...")  # Debug log
+            print(f"Processing text query: {query}")
             embeddings = model.get_embeddings(
                 contextual_text=query,
                 dimension=1408
             )
             query_embedding = embeddings.text_embedding
+            print("Text embedding generated successfully")
             
         if image:
-            print("Processing uploaded image...")  # Debug log
+            print("Processing uploaded image")
             contents = await image.read()
             with open("temp_search.jpg", "wb") as f:
                 f.write(contents)
@@ -128,39 +144,56 @@ async def multimodal_search(
                 dimension=1408
             )
             query_embedding = embeddings.image_embedding
+            print("Image embedding generated successfully")
             
             import os
             os.remove("temp_search.jpg")
-            
-        if not query_embedding:
-            raise HTTPException(status_code=400, detail="Either query text or image is required")
 
-        print("Searching database...")  # Debug log
+        if not query_embedding:
+            raise HTTPException(
+                status_code=500,
+                detail="Failed to generate embedding"
+            )
+
+        print("Starting database search")
         async with session() as s:
+            from sqlalchemy import text
+            
             try:
-                # First try a simple query to test connection
-                test_query = "SELECT 1"
-                await s.execute(test_query)
+                # Convert numpy array to list if necessary
+                if isinstance(query_embedding, np.ndarray):
+                    query_embedding = query_embedding.tolist()
                 
-                # Now try the actual search query
+                # Convert embedding list to PostgreSQL array string format
+                vector_str = '[' + ','.join(str(x) for x in query_embedding) + ']'
+                print(f"Vector string length: {len(vector_str)}")
+                
+                # Query with the formatted vector string
+                query = text("""
+                    SELECT 
+                        p.id,
+                        p.description,
+                        p.author_id,
+                        ve.element_id,
+                        ve.embedding <-> cast(:query_vector as vector) as distance
+                    FROM 
+                        video_embeddings ve
+                        JOIN posts p ON ve.post_id = p.id
+                    ORDER BY distance ASC
+                    LIMIT :search_limit
+                """)
+                
+                # Execute with properly formatted vector string
                 results = await s.execute(
-                    """
-                    SELECT p.id, p.description, p.author_id, ve.element_id, 
-                           1 - (ve.embedding <=> :embedding::vector) as similarity
-                    FROM video_embeddings ve
-                    JOIN posts p ON ve.post_id = p.id
-                    WHERE 1 - (ve.embedding <=> :embedding::vector) > 0.7
-                    ORDER BY similarity DESC
-                    LIMIT :limit
-                    """,
+                    query,
                     {
-                        "embedding": list(query_embedding),  # Convert numpy array to list
-                        "limit": limit
+                        "query_vector": vector_str,
+                        "search_limit": limit
                     }
                 )
                 
                 matches = results.fetchall()
-                print(f"Found {len(matches)} matches")  # Debug log
+                print(f"Found {len(matches)} matches")
                 
                 if not matches:
                     return []
@@ -168,23 +201,23 @@ async def multimodal_search(
                 # Get author details
                 author_ids = [match.author_id for match in matches]
                 authors = await s.execute(
-                    select(Authors).where(Authors.id.in_(author_ids))
+                    text("SELECT * FROM authors WHERE id = ANY(:ids)"),
+                    {"ids": author_ids}
                 )
-                authors_dict = {author.id: author for author in authors.scalars()}
+                authors_dict = {author.id: author for author in authors}
                 
                 return [{
                     "post_id": match.id,
                     "description": match.description,
-                    "similarity": float(match.similarity),
+                    "distance": float(match.distance),
                     "element_id": match.element_id,
-                    "author": authors_dict[match.author_id]
+                    "author": authors_dict.get(match.author_id)
                 } for match in matches]
                 
             except Exception as db_error:
-                print(f"Database error: {str(db_error)}")  # Debug log
+                print(f"Database error: {str(db_error)}")
                 raise HTTPException(status_code=500, detail=f"Database error: {str(db_error)}")
             
     except Exception as e:
-        print(f"Search error: {str(e)}")  # Debug log
+        print(f"Search error: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
-    
