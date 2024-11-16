@@ -32,40 +32,24 @@ const _nav = [
     name: 'Trends',
     to: '/trends',
     icon: <CIcon icon={cilGraph} customClassName="nav-icon" />,
-    badge: {
-      color: 'info',
-      text: 'NEW',
-    },
   },
   {
     component: CNavItem,
     name: 'Search',
     to: '/hashtag_search',
     icon: <CIcon icon={cilSearch} customClassName="nav-icon" />,
-    badge: {
-      color: 'info',
-      text: 'NEW',
-    },
   },
   {
     component: CNavItem,
     name: 'Monitored Hashtags',
     to: '/monitored_hashtags',
     icon: <CIcon icon={cilLoopCircular} customClassName="nav-icon" />,
-    badge: {
-      color: 'info',
-      text: 'NEW',
-    },
   },
   {
     component: CNavItem,
     name: 'Reports',
     to: '/reports',
     icon: <CIcon icon={cilBarChart} customClassName="nav-icon" />,
-    badge: {
-      color: 'info',
-      text: 'NEW',
-    },
   },
   {
     component: CNavItem,
@@ -78,10 +62,6 @@ const _nav = [
     name: 'About this application',
     to: '/about',
     icon: <CIcon icon={cilLightbulb} customClassName="nav-icon" />,
-    badge: {
-      color: 'info',
-      text: 'NEW',
-    },
   },
   {
     component: CNavTitle,
