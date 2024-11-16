@@ -11,9 +11,10 @@ import {
   CInputGroup,
   CInputGroupText,
   CRow,
+  CFormCheck,
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
-import { cilLockLocked, cilUser } from '@coreui/icons'
+import { cilLockLocked, cilUser, cilGroup } from '@coreui/icons'
 
 import AuthService from '../../../services/AuthService'
 
@@ -24,7 +25,19 @@ const Register = () => {
   const [repeatPassword, setRepeatPassword] = useState('')
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+  const [roles, setRoles] = useState([])
   const navigate = useNavigate()
+
+  const validateFields = () => {
+    console.log(roles)
+    if (!username || !email || !password || !repeatPassword || roles.length === 0) {
+      setError('All fields are required')
+      return false
+    } else {
+      setError('')
+      return true
+    }
+  }
 
   const validatePassword = () => {
     if (password !== repeatPassword) {
@@ -39,21 +52,46 @@ const Register = () => {
   const handleSubmit = (e) => {
     e.preventDefault()
 
+    // Validate fields
+    if (!validateFields()) {
+      return
+    }
+
     // Validate password
     if (!validatePassword()) {
       return
     }
 
-    try {
-      AuthService.register(username, email, password)
-      setSuccess('Registration successful. Redirecting to login page...')
-      // Show success message for 3 seconds, then redirect to login page
-      setTimeout(() => {
-        navigate('/login')
-      }, 3000)
-    } catch (error) {
-      setError(error.response?.data?.message || 'Registration failed. Please try again.')
-    }
+    AuthService.register(username, email, password, JSON.stringify(roles))
+      .then((response) => {
+        setSuccess('Account created successfully. Please login.')
+
+        // Redirect to login page after 2 seconds
+        setTimeout(() => {
+          navigate('/login')
+        }, 2000)
+      })
+      .catch((error) => {
+        if (error.response) {
+          console.log('Error in response', error.response)
+          setError('An error occurred. Please try again.')
+        } else if (error.request) {
+          console.log('Error in request', error.request)
+          setError('Network error. Please try again.')
+        } else {
+          console.log('Error in else', error.message)
+          setError('An error occurred. Please try again.')
+        }
+      })
+  }
+
+  const handleRoleChange = (role) => {
+    setRoles(
+      (prevRoles) =>
+        prevRoles.includes(role)
+          ? prevRoles.filter((r) => r !== role) // Remove role
+          : [...prevRoles, role], // Add role
+    )
   }
 
   return (
@@ -86,6 +124,7 @@ const Register = () => {
                       onChange={(e) => setEmail(e.target.value)}
                     />
                   </CInputGroup>
+
                   <CInputGroup className="mb-3">
                     <CInputGroupText>
                       <CIcon icon={cilLockLocked} />
@@ -109,6 +148,36 @@ const Register = () => {
                       value={repeatPassword}
                       onChange={(e) => setRepeatPassword(e.target.value)}
                     />
+                  </CInputGroup>
+                  <CInputGroup className="mb-3">
+                    <CInputGroupText>
+                      <CIcon icon={cilGroup} />
+                    </CInputGroupText>
+                    <CCol className="d-flex justify-content-center align-items-center">
+                      <CFormCheck
+                        inline
+                        type="checkbox"
+                        id="admin"
+                        label="Admin"
+                        checked={roles.includes('admin')}
+                        onChange={() => handleRoleChange('admin')}
+                      />
+                      <CFormCheck
+                        inline
+                        id="user"
+                        label="User"
+                        checked={roles.includes('user')}
+                        onChange={() => handleRoleChange('user')}
+                      />
+                      <CFormCheck
+                        inline
+                        type="checkbox"
+                        id="dev"
+                        label="Dev"
+                        checked={roles.includes('dev')}
+                        onChange={() => handleRoleChange('dev')}
+                      />
+                    </CCol>
                   </CInputGroup>
                   {error && (
                     <div className="text-danger mb-3" style={{ textAlign: 'center' }}>

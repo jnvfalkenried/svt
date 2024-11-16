@@ -1,6 +1,6 @@
 # main.py
 import uuid
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.future import select
@@ -8,6 +8,7 @@ from sqlalchemy import func
 from postgresql.config.db import session
 from postgresql.database_models import Authors, Posts, ActiveHashtags, Challenges, Users
 from postgresql.database_scripts.active_hashtags import insert_or_update_active_hashtag, get_active_hashtags
+from postgresql.database_scripts.users import insert_user
 
 from auth import verify_token, create_access_token, hash_password, verify_password
 
@@ -29,14 +30,14 @@ class UserRequest(BaseModel):
     username: str
     email: str
     password: str
-    roles: list
+    roles: str
 
-class LoignRequest(BaseModel):
+class LoginRequest(BaseModel):
     username: str
     password: str
 
 @app.get("/authors")
-async def get_authors():
+async def get_authors(current_user: Users = Depends(verify_token)):
     # Run a query to get all authors
     async with session() as s:
         result = await s.execute(select(Authors))
@@ -67,7 +68,7 @@ async def get_stats():
     }
 
 @app.get("/top_authors")
-async def get_top_authors():
+async def get_top_authors(current_user: Users = Depends(verify_token)):
     # Run a query to get the top authors
     async with session() as s:
         result = await s.execute(
@@ -118,44 +119,42 @@ async def register_user(user: UserRequest):
         # Hash the password
         user.password = hash_password(user.password)
 
-        # Insert the user into the database
-        async with s.begin():
-            try:
-                uuid_str = str(uuid.uuid4())
-                await s.execute(
-                    Authors.__table__.insert().values(
-                        id=uuid_str,
-                        username=user.username,
-                        email=user.email,
-                        password=user.password,
-                        roles=user.roles
-                    )
-                )
-                return {"message": "User registered successfully"}
-            except Exception as e:
-                print(f"Error in transaction, rolling back: {e}")
-                await s.rollback()
-                raise HTTPException(status_code=500, detail="Failed to register user")
-            
-    @app.post("/login")
-    async def login(login_request: LoginRequest):
-        # Run a query to login a user
-        async with session() as s:
-            # Check if the user exists
-            result = await s.execute(
-                select(Users)
-                .where(Users.username == login_request.username)
+        try:
+            uuid_str = str(uuid.uuid4())
+            await insert_user(
+                id=uuid_str,
+                username=user.username,
+                email=user.email,
+                password_hash=user.password,
+                roles=user.roles,
+                session=s
             )
-            user = result.scalars().first()
+            await s.commit()
+            return {"message": "User registered successfully"}
+        except Exception as e:
+            print(f"Error in transaction, rolling back: {e}")
+            await s.rollback()
+            raise HTTPException(status_code=500, detail="Failed to register user")
+            
+@app.post("/login")
+async def login(login_request: LoginRequest):
+    # Run a query to login a user
+    async with session() as s:
+        # Check if the user exists
+        result = await s.execute(
+            select(Users)
+            .where(Users.username == login_request.username)
+        )
+        user = result.scalars().first()
 
-            # Verify the user
-            if not user:
-                raise HTTPException(status_code=400, detail="Invalid username or password")
-            
-            # Verify the password
-            if not verify_password(login_request.password, user.password):
-                raise HTTPException(status_code=400, detail="Invalid username or password")
-            
-            # Create JWT token
-            access_token = create_access_token(data={"username": user.username, "email": user.email, "roles": user.roles})
-            return {"access_token": access_token, "token_type": "bearer"}
+        # Verify the user
+        if not user:
+            raise HTTPException(status_code=401, detail="Invalid username or password")
+        
+        # Verify the password
+        if not verify_password(login_request.password, user.password_hash):
+            raise HTTPException(status_code=401, detail="Invalid username or password")
+        
+        # Create JWT token
+        access_token = create_access_token(data={"username": user.username, "email": user.email, "roles": user.roles})
+        return {"access_token": access_token, "token_type": "bearer"}

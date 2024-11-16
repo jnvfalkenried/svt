@@ -23,25 +23,40 @@ const Login = () => {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
-  const dispatch = useDispatch() // Initialize dispatch
   const navigate = useNavigate()
+  const dispatch = useDispatch()
+
+  const validateForm = () => {
+    return username.length > 0 && password.length > 0
+  }
 
   const handleLogin = (e) => {
     e.preventDefault()
 
-    try {
-      // Call the login method from AuthService
-      const response = AuthService.login(username, password)
-      // Dispatch the login action to update the redux store
-      dispatch({ type: 'set', isAuthenticated: true })
-      // Save the authentication state in localStorage
-      localStorage.setItem('auth', JSON.stringify(response.data))
-      console.log(response.data)
-      // Redirect to the dashboard page
-      navigate('/dashboard')
-    } catch (error) {
-      setError(error.response?.data?.message || 'Login failed. Please try again.')
+    if (!validateForm()) {
+      setError('Please fill in all fields')
+      return
     }
+
+    AuthService.login(username, password)
+      .then((response) => {
+        // Store the token in local storage
+        localStorage.setItem('access_token', response.data.access_token)
+        dispatch({ type: 'set', access_token: response.data.access_token })
+        // Redirect to home page
+        navigate('/')
+      })
+      .catch((error) => {
+        if (error.response) {
+          setError(error.response.data.detail)
+        } else if (error.request) {
+          console.log('Error in request', error.request)
+          setError('Network error. Please try again.')
+        } else {
+          console.log('Error in else', error.message)
+          setError('An error occurred. Please try again.')
+        }
+      })
   }
 
   const handleForgotPassword = () => {

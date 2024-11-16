@@ -9,11 +9,12 @@ const AuthService = {
     },
   }),
 
-  register: (username, email, password) => {
+  register: (username, email, password, roles) => {
     return AuthService.client.post('/register', {
       username,
       email,
       password,
+      roles,
     })
   },
 

@@ -253,6 +253,7 @@ services:
       POSTGRES_PORT: ${POSTGRES_PORT}
       SECRET_KEY: ${SECRET_KEY}
       JWT_ALGORITHM: ${JWT_ALGORITHM}
+      JWT_EXPIRATION: ${JWT_EXPIRATION}
     ports:
       - "80:80"
     labels:

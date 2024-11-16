@@ -10,23 +10,24 @@ from fastapi.security import OAuth2PasswordBearer
 load_dotenv()
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = os.getenv("JWT_ALGORITHM")
+JWT_EXPIRATION = os.getenv("JWT_EXPIRATION")
 
 # OAuth2PasswordBearer provides a way to extract the token from the Authorization header
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
 # Hash the password with bcrypt
-def hash_password(password: str):
-    return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
+def hash_password(password: str) -> str:
+    return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
 
 # Verify the password with bcrypt
 def verify_password(password: str, hashed_password: str):
-    return bcrypt.hashpw(password.encode("utf-8"), hashed_password) == hashed_password
+    return bcrypt.checkpw(password.encode("utf-8"), hashed_password.encode("utf-8"))
 
 # Function to create JWT token
 def create_access_token(data: dict):
     to_encode = data.copy()
-    expire = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=24)
+    expire = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(minutes=int(JWT_EXPIRATION))
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt

@@ -1,7 +1,7 @@
 import React, { Suspense, useEffect } from 'react'
 import { BrowserRouter, Route, Routes, Navigate } from 'react-router-dom'
-import { useSelector } from 'react-redux'
-import PropTypes from 'prop-types'
+import { useSelector, useDispatch } from 'react-redux'
+import { jwtDecode } from 'jwt-decode'
 
 import { CSpinner, useColorModes } from '@coreui/react'
 import './scss/style.scss'
@@ -19,7 +19,8 @@ const ForgotPassword = React.lazy(() => import('./views/pages/forgot_password/Fo
 const App = () => {
   const { isColorModeSet, setColorMode } = useColorModes('coreui-free-react-admin-template-theme')
   const storedTheme = useSelector((state) => state.theme)
-  const isAuthenticated = useSelector((state) => state.isAuthenticated)
+  const token = useSelector((state) => state.access_token)
+  const dispatch = useDispatch()
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.href.split('?')[1])
@@ -35,6 +36,49 @@ const App = () => {
     setColorMode(storedTheme)
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
+  useEffect(() => {
+    const isLoggedIn = localStorage.getItem('access_token')
+    if (!isLoggedIn) return
+    const tokenCheckInterval = setInterval(() => {
+      const token = localStorage.getItem('access_token') // Ensure you get the latest token
+      if (token) {
+        const decoded = jwtDecode(token)
+        const currentTime = Date.now() / 1000
+        if (decoded.exp < currentTime) {
+          console.log('Token expired. Logging out...')
+          dispatch({ type: 'set', access_token: null })
+          localStorage.removeItem('access_token')
+          window.location.href = '/login' // Redirect user to login
+        }
+      } else {
+        console.log('No token found. Logging out...')
+        dispatch({ type: 'set', access_token: null })
+        window.location.href = '/login'
+      }
+    }, 10000) // Check every 10 seconds
+
+    return () => clearInterval(tokenCheckInterval) // Clear the interval on unmount
+  }, [dispatch])
+
+  const isAuthenticated = () => {
+    console.log(token)
+    if (token) {
+      const decoded = jwtDecode(token)
+      const currentTime = Date.now() / 1000
+      console.log(decoded)
+      console.log(currentTime)
+      if (decoded.exp < currentTime) {
+        dispatch({ type: 'set', access_token: null })
+        localStorage.removeItem('access_token')
+        return false
+      }
+      return true
+    }
+    dispatch({ type: 'set', access_token: null })
+    localStorage.removeItem('access_token')
+    return false
+  }
+
   return (
     <BrowserRouter>
       <Suspense
@@ -46,7 +90,7 @@ const App = () => {
       >
         <Routes>
           {/* Authentication Check */}
-          {!isAuthenticated ? (
+          {!isAuthenticated() ? (
             <Route exact path="*" element={<Navigate to="/login" replace />} />
           ) : (
             <>
