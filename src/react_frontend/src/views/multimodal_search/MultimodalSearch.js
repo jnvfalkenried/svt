@@ -1,7 +1,15 @@
 import React, { useState } from 'react'
 import { CCard, CCardBody, CCardHeader, CRow, CCol, CButton, CSpinner, CBadge } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
-import { cilSearch, cilImage, cilX, cilCheckCircle, cilHeart, cilPeople } from '@coreui/icons'
+import {
+  cilSearch,
+  cilImage,
+  cilX,
+  cilCheckCircle,
+  cilHeart,
+  cilPeople,
+  cilUserFollow,
+} from '@coreui/icons'
 
 const MultimodalSearch = () => {
   const [searchQuery, setSearchQuery] = useState('')
@@ -77,6 +85,8 @@ const MultimodalSearch = () => {
         throw new Error('Unexpected response format from server')
       }
 
+      console.log('Results:', data)
+
       if (!response.ok) {
         throw new Error(data.detail || 'Search failed')
       }
@@ -103,18 +113,22 @@ const MultimodalSearch = () => {
     return (
       <div className="author-info">
         <div className="d-flex align-items-center gap-2">
-          <strong>{author.nickname || author.unique_id}</strong>{' '}
-          {author.verified && (
-            <CBadge color="info" className="px-2">
-              <CIcon icon={cilCheckCircle} size="sm" /> Verified
-            </CBadge>
-          )}
+          <strong>Username: {author.username || 'Unknown'}</strong>{' '}
+        </div>
+        <div className="d-flex align-items-center gap-2">
+          <small>Signature: {author.signature || 'Unknown'}</small>{' '}
         </div>
         <div className="d-flex gap-3 text-muted small mt-1">
           {author.follower_count !== undefined && (
             <span>
-              <CIcon icon={cilPeople} size="sm" /> {author.follower_count.toLocaleString()}
+              <CIcon icon={cilPeople} size="sm" /> {author.follower_count.toLocaleString()}{' '}
               followers
+            </span>
+          )}
+          {author.following_count !== undefined && (
+            <span>
+              <CIcon icon={cilUserFollow} size="sm" /> {author.following_count.toLocaleString()}{' '}
+              following
             </span>
           )}
           {author.heart_count !== undefined && (
@@ -123,7 +137,6 @@ const MultimodalSearch = () => {
             </span>
           )}
         </div>
-        {author.signature && <small className="text-muted d-block mt-1">{author.signature}</small>}
       </div>
     )
   }
@@ -226,7 +239,8 @@ const MultimodalSearch = () => {
                       </div>
                     </div>
                     <div className="post-content">
-                      <p className="mb-2">{result.description}</p>
+                      {/* <p className="mb-2">Description:</p> */}
+                      <p className="mb-2">Description: {result.description}</p>
                       <div className="d-flex gap-2 mt-2 flex-wrap">
                         {result.duet_enabled && (
                           <CBadge color="success" className="px-2">

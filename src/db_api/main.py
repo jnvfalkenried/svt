@@ -32,19 +32,29 @@ def serialize_author(author: Any) -> Dict[str, Any]:
         return None
     return {
         "id": str(author.id),
-        "username": str(getattr(author, 'username', 'Unknown')),
-        "follower_count": int(getattr(author, 'follower_count', 0)),
-        "following_count": int(getattr(author, 'following_count', 0))
+        "username": str(author.nickname) if author.nickname is not None else "Unknown",
+        "signature": str(author.signature) if author.signature is not None else "Unknown",
+        "follower_count": int(author.follower_count) if author.follower_count is not None else 0,
+        "following_count": int(author.following_count) if author.following_count is not None else 0
     }
 
-def serialize_match(match: Any, author: Optional[Any] = None) -> Dict[str, Any]:
+def serialize_posts(posts: Any) -> Dict[str, Any]:
+    """Safely serialize an author object to a dictionary."""
+    if not posts:
+        return None
+    return {
+        "id": str(posts.id),
+    }
+
+def serialize_match(match: Any, author: Optional[Any] = None, posts: Optional[Any] = None) -> Dict[str, Any]:
     """Safely serialize a database match to a dictionary."""
     return {
         "post_id": str(match.id),
         "description": str(match.description) if match.description else "",
         "distance": float(match.distance),
         "element_id": str(match.element_id),
-        "author": serialize_author(author)
+        "author": serialize_author(author), 
+        "posts": serialize_posts(posts)
     }
 
 @app.get("/authors")
