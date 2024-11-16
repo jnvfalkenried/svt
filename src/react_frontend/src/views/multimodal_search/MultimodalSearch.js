@@ -60,10 +60,8 @@ const MultimodalSearch = () => {
       const response = await fetch('http://localhost/search/multimodal', {
         method: 'POST',
         body: formData,
-        headers: {
-          Accept: 'application/json',
-        },
-        credentials: 'omit',
+        headers: { Accept: 'application/json' },
+        credentials: 'same-origin',
       })
 
       console.log('Response status:', response.status)

@@ -4,70 +4,73 @@ from fastapi import FastAPI, HTTPException, File, UploadFile, Form
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.future import select
-from sqlalchemy import func
+from sqlalchemy import func, text
 from postgresql.config.db import session
 from postgresql.database_models import Authors, Posts, ActiveHashtags, Challenges
 from postgresql.database_scripts.active_hashtags import insert_or_update_active_hashtag, get_active_hashtags
 from vertexai.vision_models import Image, MultiModalEmbeddingModel
 import numpy as np
-from scipy.spatial.distance import cosine
+from typing import Optional, List, Dict, Any
+import json
 
 app = FastAPI()
 
-# CORS configuration
-# app.add_middleware(
-#     CORSMiddleware,
-#     allow_origins=["*"],  # Allow all origins for development (change to specific URLs in production)
-#     allow_credentials=True,
-#     allow_methods=["*"],  # Allow all HTTP methods (GET, POST, etc.)
-#     allow_headers=["*"],  # Allow all headers
-# )
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,  # Change this to True to allow credentials
+    allow_origins=["http://localhost:3000"],
+    allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allow_headers=["*"],  # Allow all headers to be more permissive
+    allow_headers=["*"],  # Changed to allow all headers for compatibility
 )
 
 class HashtagRequest(BaseModel):
     hashtag: str
 
+def serialize_author(author: Any) -> Dict[str, Any]:
+    """Safely serialize an author object to a dictionary."""
+    if not author:
+        return None
+    return {
+        "id": str(author.id),
+        "username": str(getattr(author, 'username', 'Unknown')),
+        "follower_count": int(getattr(author, 'follower_count', 0)),
+        "following_count": int(getattr(author, 'following_count', 0))
+    }
+
+def serialize_match(match: Any, author: Optional[Any] = None) -> Dict[str, Any]:
+    """Safely serialize a database match to a dictionary."""
+    return {
+        "post_id": str(match.id),
+        "description": str(match.description) if match.description else "",
+        "distance": float(match.distance),
+        "element_id": str(match.element_id),
+        "author": serialize_author(author)
+    }
+
 @app.get("/authors")
 async def get_authors():
-    # Run a query to get all authors
     async with session() as s:
         result = await s.execute(select(Authors))
         authors = result.scalars().all()
-        return authors
+        return [serialize_author(author) for author in authors]
     
 @app.get("/stats")
 async def get_stats():
-    # Run a query to get the number of authors
     async with session() as s:
-        # Count authors
         author_count = await s.scalar(select(func.count()).select_from(Authors))
-        
-        # Count posts
         post_count = await s.scalar(select(func.count()).select_from(Posts))
-
-        # Count active hashtags
         active_hashtags_count = await s.scalar(select(func.count()).select_from(ActiveHashtags))
-
-        # Count challenges
         challenge_count = await s.scalar(select(func.count()).select_from(Challenges))
         
     return {
-        "author_count": author_count,
-        "post_count": post_count,
-        "active_hashtags_count": active_hashtags_count,
-        "challenge_count": challenge_count
+        "author_count": int(author_count),
+        "post_count": int(post_count),
+        "active_hashtags_count": int(active_hashtags_count),
+        "challenge_count": int(challenge_count)
     }
 
 @app.get("/top_authors")
 async def get_top_authors():
-    # Run a query to get the top authors
     async with session() as s:
         result = await s.execute(
             select(Authors)
@@ -75,30 +78,27 @@ async def get_top_authors():
             .limit(10)
         )
         authors = result.scalars().all()
-        return authors
+        return [serialize_author(author) for author in authors]
     
 @app.post("/hashtag")
 async def add_hashtag(hashtag_request: HashtagRequest):
     hashtag = hashtag_request.hashtag
-    print(f"Attempting to add hashtag: {hashtag}")  # Debug log
+    print(f"Attempting to add hashtag: {hashtag}")
     
     async with session() as s:
         try:
             uuid_str = str(uuid.uuid4())
             await insert_or_update_active_hashtag(id=uuid_str, title=hashtag, session=s)
             await s.commit()
-            print(f"Successfully added hashtag: {hashtag}")  # Debug log
             return {"message": "Hashtag added successfully"}
         except Exception as e:
             await s.rollback()
-            print(f"Error adding hashtag: {e}")
             raise HTTPException(status_code=500, detail=str(e))
         
 @app.get("/hashtags")
 async def get_hashtags():
     async with session() as s:
         hashtags = await get_active_hashtags(s)
-        print(f"Retrieved hashtags: {hashtags}")  # Debug log
         return hashtags
 
 @app.post("/search/multimodal")
@@ -109,7 +109,6 @@ async def multimodal_search(
 ):
     print(f"Received request - query: {query}, image present: {image is not None}")
     
-    # Validate inputs
     if not query and not image:
         raise HTTPException(
             status_code=400,
@@ -117,10 +116,7 @@ async def multimodal_search(
         )
     
     try:
-        # Initialize the embedding model
         model = MultiModalEmbeddingModel.from_pretrained("multimodalembedding@001")
-        
-        # Generate query embedding
         query_embedding = None
         
         if query:
@@ -157,19 +153,14 @@ async def multimodal_search(
 
         print("Starting database search")
         async with session() as s:
-            from sqlalchemy import text
-            
             try:
-                # Convert numpy array to list if necessary
                 if isinstance(query_embedding, np.ndarray):
                     query_embedding = query_embedding.tolist()
                 
-                # Convert embedding list to PostgreSQL array string format
                 vector_str = '[' + ','.join(str(x) for x in query_embedding) + ']'
                 print(f"Vector string length: {len(vector_str)}")
                 
-                # Query with the formatted vector string
-                query = text("""
+                search_query = text("""
                     SELECT 
                         p.id,
                         p.description,
@@ -183,9 +174,8 @@ async def multimodal_search(
                     LIMIT :search_limit
                 """)
                 
-                # Execute with properly formatted vector string
                 results = await s.execute(
-                    query,
+                    search_query,
                     {
                         "query_vector": vector_str,
                         "search_limit": limit
@@ -198,21 +188,20 @@ async def multimodal_search(
                 if not matches:
                     return []
                 
-                # Get author details
                 author_ids = [match.author_id for match in matches]
-                authors = await s.execute(
+                authors_query = await s.execute(
                     text("SELECT * FROM authors WHERE id = ANY(:ids)"),
                     {"ids": author_ids}
                 )
-                authors_dict = {author.id: author for author in authors}
+                authors_dict = {str(author.id): author for author in authors_query}
                 
-                return [{
-                    "post_id": match.id,
-                    "description": match.description,
-                    "distance": float(match.distance),
-                    "element_id": match.element_id,
-                    "author": authors_dict.get(match.author_id)
-                } for match in matches]
+                formatted_results = []
+                for match in matches:
+                    author = authors_dict.get(str(match.author_id))
+                    result = serialize_match(match, author)
+                    formatted_results.append(result)
+                
+                return formatted_results
                 
             except Exception as db_error:
                 print(f"Database error: {str(db_error)}")
@@ -221,3 +210,7 @@ async def multimodal_search(
     except Exception as e:
         print(f"Search error: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=80)
