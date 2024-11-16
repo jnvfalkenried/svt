@@ -189,11 +189,6 @@ const MultimodalSearch = () => {
                 className="mb-4"
               >
                 <CCard>
-                  <img
-                    src={`http://localhost/api/keyframes/${result.post_id}/${result.element_id}`}
-                    alt="Key frame"
-                    className="card-img-top"
-                  />
                   <CCardBody>
                     <p className="text-muted mb-1">Distance: {result.distance.toFixed(3)}</p>
                     <p className="mb-2">{result.description}</p>
