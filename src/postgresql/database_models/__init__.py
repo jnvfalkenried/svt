@@ -6,6 +6,7 @@ from postgresql.database_models.music import *
 from postgresql.database_models.posts import *
 from postgresql.database_models.posts_challenges import *
 from postgresql.database_models.posts_reporting import *
+from postgresql.database_models.users import *
 from postgresql.database_models.video_embeddings import *
 
 __all__ = ['Base', 'Posts', 'VideoEmbeddings']
