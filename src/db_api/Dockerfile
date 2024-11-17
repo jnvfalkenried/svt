@@ -1,16 +1,12 @@
-FROM python:3.10
+FROM python:3.10-slim
 
 WORKDIR /app
 
-COPY ./db_api/requirements.txt .
-# Add required packages including scipy
-RUN pip install --no-cache-dir -r requirements.txt \
-    google-cloud-aiplatform \
-    vertexai \
-    scipy \
-    numpy
+COPY ./db_api/requirements.txt /app/requirements.txt
 
-COPY ./db_api .
+RUN pip install --no-cache-dir -r requirements.txt 
+
+COPY ./db_api /app/
 COPY ./helpers ./helpers
 COPY ./postgresql ./postgresql
 
