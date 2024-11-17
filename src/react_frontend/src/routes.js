@@ -7,6 +7,8 @@ const HashtagSearch = React.lazy(() => import('./views/hashtag_search/HashtagSea
 const About = React.lazy(() => import('./views/about/About'))
 const Reports = React.lazy(() => import('./views/reports/Reports'))
 const MonitoredHashtags = React.lazy(() => import('./views/monitored_hashtags/MonitoredHashtags'))
+const MultimodalSearch = React.lazy(() => import('./views/multimodal_search/MultimodalSearch'))
+const FetchedData = React.lazy(() => import('./views/fetched_data/FetchedData'))
 
 // Old components
 const Dashboard = React.lazy(() => import('./views/dashboard/Dashboard'))
@@ -62,10 +64,11 @@ const Widgets = React.lazy(() => import('./views/widgets/Widgets'))
 const routes = [
   { path: '/', exact: true, name: 'Home' },
   { path: '/trends', name: 'Trends', element: Dashboard },
-  { path: '/hashtag_search', name: 'Search', element: HashtagSearch },
+  { path: '/search', name: 'Search', element: MultimodalSearch },
+  { path: '/hashtag_search', name: 'Hashtag Search', element: HashtagSearch },
   { path: '/monitored_hashtags', name: 'Monitored Hashtags', element: MonitoredHashtags },
   { path: '/reports', name: 'Reports', element: Reports },
-  { path: '/fetched_data', name: 'Fetched Data', element: Overview },
+  { path: '/fetched_data', name: 'Fetched Data', element: FetchedData },
   { path: '/about', name: 'About', element: About },
   { path: '/overview', name: 'Overview', element: Overview },
   { path: '/dashboard', name: 'Dashboard', element: Dashboard },

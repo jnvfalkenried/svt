@@ -1,15 +1,17 @@
-FROM python:3.10-slim
+FROM python:3.10
 
 WORKDIR /app
 
-COPY ./db_api/requirements.txt /app/requirements.txt
+COPY ./db_api/requirements.txt .
+# Add required packages including scipy
+RUN pip install --no-cache-dir -r requirements.txt \
+    google-cloud-aiplatform \
+    vertexai \
+    scipy \
+    numpy
 
-RUN pip install --no-cache-dir -r requirements.txt
+COPY ./db_api .
+COPY ./helpers ./helpers
+COPY ./postgresql ./postgresql
 
-COPY ./db_api /app
-COPY ./postgresql/config /app/postgresql/config
-COPY ./postgresql/database_models /app/postgresql/database_models
-COPY ./postgresql/database_scripts /app/postgresql/database_scripts
-
-# Command to run FastAPI with Uvicorn
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "80"]

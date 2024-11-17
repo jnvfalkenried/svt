@@ -1,21 +1,23 @@
-# Use an official Python runtime as a parent image
+# Use slim image
 FROM python:3.10-slim
 
 # Set noninteractive installation
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Install system dependencies in a single RUN command to reduce layers
-RUN apt-get clean && \
-    rm -rf /var/lib/apt/lists/* && \
-    apt-get update --fix-missing && \
-    apt-get install -y --no-install-recommends \
+RUN rm -rf /var/lib/apt/lists/* && \
+    apt-get clean && \
+    apt-get update -o Acquire::AllowInsecureRepositories=true \
+                   -o Acquire::AllowDowngradeToInsecureRepositories=true && \
+    apt-get install --allow-unauthenticated -y --no-install-recommends \
         libgl1-mesa-glx \
         libglib2.0-0 \
         libsm6 \
         libxext6 \
-        libxrender-dev \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+        libxrender-dev && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* && \
+    rm -rf /var/cache/apt/archives/*
 
 # Set the working directory
 WORKDIR /app
