@@ -1,12 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import CIcon from '@coreui/icons-react'
-import {
-  cilChartPie,
-  cilGraph,
-  cilLoopCircular,
-  cilPencil,
-  cilDataTransferDown,
-} from '@coreui/icons'
+import { cilChartPie, cilGraph, cilLoopCircular, cilDataTransferDown } from '@coreui/icons'
 import {
   CCard,
   CCardBody,
@@ -19,7 +13,7 @@ import {
 } from '@coreui/react'
 import PropTypes from 'prop-types'
 
-const API_BASE_URL = 'http://localhost:80'
+const API_BASE_URL = 'http://localhost'
 
 // PropTypes definitions
 const RelatedHashtagPropType = PropTypes.shape({
@@ -57,62 +51,92 @@ GrowthIndicator.propTypes = {
   period: PropTypes.string.isRequired,
 }
 
-const HashtagCard = ({ tag }) => (
-  <CCard className="mb-4 shadow-sm">
-    <CCardBody className="p-4">
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <div className="d-flex align-items-center">
-          <h4 className="mb-0">#{tag.title}</h4>
-        </div>
-        {/* <CButton color="danger" variant="ghost" size="sm" onClick={() => removeHashtag(tag.id)}> */}
-        <CButton color="danger" variant="ghost" size="sm">
-          Remove
-        </CButton>
-      </div>
+const HashtagCard = ({ tag, onRemove }) => {
+  const [isRemoving, setIsRemoving] = useState(false)
 
-      <div className="bg-light p-3 rounded mb-4">
-        <CRow xs={4} className="text-center">
-          <medium className="text-medium-bold d-block mb-4">Posts growth</medium>
-        </CRow>
-        <CRow>
-          <CCol xs={4} className="text-center border-end">
-            <small className="text-medium-emphasis d-block mb-2">Daily</small>
-            <GrowthIndicator value={tag.daily} period="Daily" />
-          </CCol>
-          <CCol xs={4} className="text-center border-end">
-            <small className="text-medium-emphasis d-block mb-2">Weekly</small>
-            <GrowthIndicator value={tag.weekly} period="Weekly" />
-          </CCol>
-          <CCol xs={4} className="text-center">
-            <small className="text-medium-emphasis d-block mb-2">Monthly</small>
-            <GrowthIndicator value={tag.monthly} period="Monthly" />
-          </CCol>
-        </CRow>
-      </div>
+  const handleRemove = async () => {
+    setIsRemoving(true)
+    try {
+      await onRemove(tag.id)
+    } catch (error) {
+      console.error('Error removing hashtag:', error)
+    } finally {
+      setIsRemoving(false)
+    }
+  }
 
-      <div className="d-flex justify-content-center my-2">
-        <CButton color="primary">View trending posts for hashtag</CButton>
-      </div>
+  return (
+    <CCard className="mb-4 shadow-sm">
+      <CCardBody className="p-4">
+        <div className="d-flex justify-content-between align-items-center mb-4">
+          <div className="d-flex align-items-center">
+            <h4 className="mb-0">#{tag.title}</h4>
+          </div>
+          <CButton
+            color="danger"
+            variant="ghost"
+            size="sm"
+            onClick={handleRemove}
+            disabled={isRemoving}
+          >
+            {isRemoving ? (
+              <>
+                <CSpinner size="sm" className="me-2" />
+                Removing...
+              </>
+            ) : (
+              'Remove'
+            )}
+          </CButton>
+        </div>
 
-      <div>
-        <div className="d-flex align-items-center mb-2">
-          <CIcon icon={cilLoopCircular} size="sm" className="text-primary me-2" />
-          <small className="text-medium-emphasis">Related Hashtags</small>
+        <div className="bg-light p-3 rounded mb-4">
+          <CRow>
+            <CCol className="text-center mb-3">
+              <p className="text-medium-bold mb-0">Posts growth</p>
+            </CCol>
+          </CRow>
+          <CRow>
+            <CCol xs={4} className="text-center border-end">
+              <small className="text-medium-emphasis d-block mb-2">Daily</small>
+              <GrowthIndicator value={tag.daily} period="Daily" />
+            </CCol>
+            <CCol xs={4} className="text-center border-end">
+              <small className="text-medium-emphasis d-block mb-2">Weekly</small>
+              <GrowthIndicator value={tag.weekly} period="Weekly" />
+            </CCol>
+            <CCol xs={4} className="text-center">
+              <small className="text-medium-emphasis d-block mb-2">Monthly</small>
+              <GrowthIndicator value={tag.monthly} period="Monthly" />
+            </CCol>
+          </CRow>
         </div>
-        <div className="d-flex flex-wrap gap-2">
-          {tag.related.map((related) => (
-            <span key={related.id} className="badge bg-light text-primary rounded-pill">
-              #{related.title}
-            </span>
-          ))}
+
+        <div className="d-flex justify-content-center my-2">
+          <CButton color="primary">View trending posts for hashtag</CButton>
         </div>
-      </div>
-    </CCardBody>
-  </CCard>
-)
+
+        <div>
+          <div className="d-flex align-items-center mb-2">
+            <CIcon icon={cilLoopCircular} size="sm" className="text-primary me-2" />
+            <small className="text-medium-emphasis">Related Hashtags</small>
+          </div>
+          <div className="d-flex flex-wrap gap-2">
+            {tag.related.map((related) => (
+              <span key={related.id} className="badge bg-light text-primary rounded-pill">
+                #{related.title}
+              </span>
+            ))}
+          </div>
+        </div>
+      </CCardBody>
+    </CCard>
+  )
+}
 
 HashtagCard.propTypes = {
   tag: HashtagPropType.isRequired,
+  onRemove: PropTypes.func.isRequired,
 }
 
 const MonitoredHashtags = () => {
@@ -154,16 +178,21 @@ const MonitoredHashtags = () => {
 
   const removeHashtag = async (id) => {
     try {
-      await fetch(`${API_BASE_URL}/hashtags/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/hashtags/${id}/deactivate`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ active: false }),
       })
+
+      if (!response.ok) {
+        throw new Error('Failed to remove hashtag')
+      }
+
       setHashtags(hashtags.filter((tag) => tag.id !== id))
     } catch (error) {
       console.error('Error removing hashtag:', error)
+      throw error
     }
   }
 
@@ -187,7 +216,7 @@ const MonitoredHashtags = () => {
           </CCardHeader>
           <CCardBody>
             {hashtags.length > 0 ? (
-              hashtags.map((tag) => <HashtagCard key={tag.id} tag={tag} />)
+              hashtags.map((tag) => <HashtagCard key={tag.id} tag={tag} onRemove={removeHashtag} />)
             ) : (
               <div className="text-center text-medium-emphasis py-4">
                 No hashtags currently being monitored.

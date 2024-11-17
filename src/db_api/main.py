@@ -19,8 +19,9 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000"],
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allow_headers=["*"],  # Changed to allow all headers for compatibility
+    allow_methods=["*"],
+    allow_headers=["*"],
+    expose_headers=["*"],
 )
 
 class HashtagRequest(BaseModel):
@@ -38,23 +39,31 @@ def serialize_author(author: Any) -> Dict[str, Any]:
         "following_count": int(author.following_count) if author.following_count is not None else 0
     }
 
-def serialize_posts(posts: Any) -> Dict[str, Any]:
-    """Safely serialize an author object to a dictionary."""
-    if not posts:
+def serialize_posts(post: Any) -> Dict[str, Any]:
+    """Safely serialize a post object to a dictionary."""
+    if not post:
         return None
     return {
-        "id": str(posts.id),
+        "id": str(post.id),
+        "created_at": int(post.created_at) if post.created_at is not None else None,
+        "description": str(post.description) if post.description is not None else "",
+        "duet_enabled": bool(post.duet_enabled) if post.duet_enabled is not None else False,
+        "duet_from_id": str(post.duet_from_id) if post.duet_from_id is not None else None,
+        "is_ad": bool(post.is_ad) if post.is_ad is not None else False,
+        "can_repost": bool(post.can_repost) if post.can_repost is not None else False,
+        "author_id": str(post.author_id) if post.author_id is not None else None,
+        "music_id": str(post.music_id) if post.music_id is not None else None,
     }
 
-def serialize_match(match: Any, author: Optional[Any] = None, posts: Optional[Any] = None) -> Dict[str, Any]:
+def serialize_match(match: Any, author: Optional[Any] = None, post: Optional[Any] = None) -> Dict[str, Any]:
     """Safely serialize a database match to a dictionary."""
     return {
         "post_id": str(match.id),
         "description": str(match.description) if match.description else "",
-        "distance": float(match.distance),
+        "similarity": float(match.cosine_similarity),
         "element_id": str(match.element_id),
-        "author": serialize_author(author), 
-        "posts": serialize_posts(posts)
+        "author": serialize_author(author),
+        "post": serialize_posts(match) 
     }
 
 @app.get("/authors")
@@ -110,12 +119,40 @@ async def get_hashtags():
     async with session() as s:
         hashtags = await get_active_hashtags(s)
         return hashtags
+    
+@app.patch("/hashtags/{hashtag_id}/deactivate")
+async def deactivate_hashtag(hashtag_id: str):
+    async with session() as s:
+        try:
+            # Update the active status to False
+            result = await s.execute(
+                text("""
+                    UPDATE active_hashtags 
+                    SET active = false 
+                    WHERE id = :hashtag_id AND active = true
+                """),
+                {"hashtag_id": hashtag_id}
+            )
+            
+            await s.commit()
+            
+            if result.rowcount == 0:
+                raise HTTPException(
+                    status_code=404,
+                    detail="Hashtag not found or already inactive"
+                )
+                
+            return {"message": "Hashtag deactivated successfully"}
+            
+        except Exception as e:
+            await s.rollback()
+            raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/search/multimodal")
 async def multimodal_search(
     query: str = Form(default=None),
     image: UploadFile = File(default=None),
-    limit: int = 10
+    limit: int = 3000
 ):
     print(f"Received request - query: {query}, image present: {image is not None}")
     
@@ -171,17 +208,16 @@ async def multimodal_search(
                 print(f"Vector string length: {len(vector_str)}")
                 
                 search_query = text("""
-                    SELECT 
-                        p.id,
-                        p.description,
-                        p.author_id,
-                        ve.element_id,
-                        ve.embedding <-> cast(:query_vector as vector) as distance
-                    FROM 
-                        video_embeddings ve
-                        JOIN posts p ON ve.post_id = p.id
-                    ORDER BY distance ASC
-                    LIMIT :search_limit
+                SELECT 
+                    p.*,
+                    ve.element_id,
+                    1 - (ve.embedding <=> cast(:query_vector as vector)) as cosine_similarity  -- Convert to similarity
+                FROM 
+                    video_embeddings ve
+                    JOIN posts p ON ve.post_id = p.id
+                WHERE (1 - (ve.embedding <=> cast(:query_vector as vector))) > 0.2  -- Similarity threshold
+                ORDER BY cosine_similarity DESC  -- Most similar first
+                LIMIT :search_limit
                 """)
                 
                 results = await s.execute(

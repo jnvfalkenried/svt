@@ -228,9 +228,7 @@ const MultimodalSearch = () => {
                     <div className="d-flex justify-content-between align-items-start mb-3">
                       <div className="flex-grow-1">{renderAuthorInfo(result.author)}</div>
                       <div className="text-end ms-3">
-                        <p className="text-muted mb-1">
-                          Similarity: {(1 - result.distance).toFixed(3)}
-                        </p>
+                        <p className="text-muted mb-1">Similarity score: {result.similarity}</p>
                         {result.created_at && (
                           <small className="text-muted d-block">
                             Posted: {formatDate(result.created_at)}
