@@ -61,12 +61,9 @@ const App = () => {
   }, [dispatch])
 
   const isAuthenticated = () => {
-    console.log(token)
     if (token) {
       const decoded = jwtDecode(token)
       const currentTime = Date.now() / 1000
-      console.log(decoded)
-      console.log(currentTime)
       if (decoded.exp < currentTime) {
         dispatch({ type: 'set', access_token: null })
         localStorage.removeItem('access_token')

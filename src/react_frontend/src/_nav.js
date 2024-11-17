@@ -22,7 +22,56 @@ import {
 } from '@coreui/icons'
 import { CNavGroup, CNavItem, CNavTitle } from '@coreui/react'
 
-const _nav = [
+const _navProd = [
+  {
+    component: CNavTitle,
+    name: 'Our app', // will divide our pages into sections at a later stage
+  },
+  {
+    component: CNavItem,
+    name: 'Trends',
+    to: '/trends',
+    icon: <CIcon icon={cilGraph} customClassName="nav-icon" />,
+  },
+  {
+    component: CNavItem,
+    name: 'Search',
+    to: '/search',
+    icon: <CIcon icon={cilSearch} customClassName="nav-icon" />,
+  },
+  {
+    component: CNavItem,
+    name: 'Hashtag Search',
+    to: '/hashtag_search',
+    icon: <CIcon icon={cilSearch} customClassName="nav-icon" />,
+  },
+  {
+    component: CNavItem,
+    name: 'Monitored Hashtags',
+    to: '/monitored_hashtags',
+    icon: <CIcon icon={cilLoopCircular} customClassName="nav-icon" />,
+  },
+  {
+    component: CNavItem,
+    name: 'Reports',
+    to: '/reports',
+    icon: <CIcon icon={cilBarChart} customClassName="nav-icon" />,
+  },
+  {
+    component: CNavItem,
+    name: 'Fetched data',
+    to: '/fetched_data',
+    icon: <CIcon icon={cilDataTransferDown} customClassName="nav-icon" />,
+  },
+  {
+    component: CNavItem,
+    name: 'About this application',
+    to: '/about',
+    icon: <CIcon icon={cilLightbulb} customClassName="nav-icon" />,
+  },
+]
+
+const _navDev = [
   {
     component: CNavTitle,
     name: 'Our app', // will divide our pages into sections at a later stage
@@ -358,5 +407,7 @@ const _nav = [
     icon: <CIcon icon={cilDescription} customClassName="nav-icon" />,
   },
 ]
+
+const _nav = { _navDev, _navProd }
 
 export default _nav

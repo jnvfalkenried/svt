@@ -1,7 +1,7 @@
 import React from 'react'
 import { useEffect, useState } from 'react'
 
-import { CWidgetStatsF, CCol, CRow, CCardHeader, CCardBody, CCard } from '@coreui/react'
+import { CWidgetStatsF, CCol, CRow, CCardBody, CCard } from '@coreui/react'
 
 import CIcon from '@coreui/icons-react'
 

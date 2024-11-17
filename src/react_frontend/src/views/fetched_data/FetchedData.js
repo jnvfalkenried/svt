@@ -5,13 +5,13 @@ import {
   CCardHeader,
   CCol,
   CRow,
-  CProgress,
+  CWidgetStatsF,
   CButton,
   CButtonGroup,
 } from '@coreui/react'
 import { CChartLine, CChartBar } from '@coreui/react-chartjs'
 import CIcon from '@coreui/icons-react'
-import { cilCloudDownload } from '@coreui/icons'
+import { cilCloudDownload, cilUser, cilVideo, cilTag, cilSearch } from '@coreui/icons'
 import { getStyle } from '@coreui/utils'
 
 const FetchedData = () => {
@@ -59,9 +59,15 @@ const FetchedData = () => {
   }
 
   const metrics = [
-    { title: 'Authors', value: stats?.author_count || 0, color: 'info' },
-    { title: 'Posts', value: stats?.post_count || 0, color: 'primary' },
-    { title: 'Challenges', value: stats?.challenge_count || 0, color: 'warning' },
+    { title: 'Authors', value: stats?.author_count || 0, color: 'info', icon: cilUser },
+    { title: 'Posts', value: stats?.post_count || 0, color: 'primary', icon: cilVideo },
+    { title: 'Challenges', value: stats?.challenge_count || 0, color: 'warning', icon: cilTag },
+    {
+      title: 'Active Hashtags',
+      value: stats?.active_hashtags_count || 0,
+      color: 'danger',
+      icon: cilSearch,
+    },
   ]
 
   const lineChartData = {
@@ -78,11 +84,12 @@ const FetchedData = () => {
       },
       {
         label: 'New Authors',
-        backgroundColor: 'transparent',
+        backgroundColor: `rgba(${getStyle('--cui-success-rgb')}, .1)`,
         borderColor: getStyle('--cui-success'),
         pointHoverBackgroundColor: getStyle('--cui-success'),
         borderWidth: 2,
         data: [20, 25, 30, 35, 40, 45, 50],
+        fill: true,
       },
     ],
   }
@@ -90,16 +97,16 @@ const FetchedData = () => {
   return (
     <CRow>
       <CCol xs={12}>
-        <CRow xs={{ cols: 1 }} md={{ cols: 2 }} xl={{ cols: 4 }} className="mb-4">
+        <CRow>
           {metrics.map((metric, index) => (
             <CCol key={index}>
-              <CCard className="mb-4">
-                <CCardBody>
-                  <div className="fs-4 fw-semibold">{metric.value.toLocaleString()}</div>
-                  <div className="text-body-secondary text-truncate">{metric.title}</div>
-                  <CProgress thin className="mt-3" color={metric.color} value={100} />
-                </CCardBody>
-              </CCard>
+              <CWidgetStatsF
+                className="mb-3"
+                color={metric.color || 'primary'}
+                icon={<CIcon icon={metric.icon} height={24} />}
+                title={metric.title}
+                value={loading ? 'Loading...' : error ? error : metric.value.toLocaleString()}
+              />
             </CCol>
           ))}
         </CRow>
