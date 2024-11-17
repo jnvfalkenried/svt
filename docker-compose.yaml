@@ -216,6 +216,8 @@ services:
       RABBITMQ_USER: ${RABBITMQ_USER}
       RABBITMQ_PASS: ${RABBITMQ_PASS}
       RABBITMQ_EXCHANGE: ${RABBITMQ_EXCHANGE}
+      GOOGLE_PROJECT_ID: ${GOOGLE_PROJECT_ID}
+      REGION: ${REGION}
       GOOGLE_APPLICATION_CREDENTIALS: /app/.ssh/google-credentials.json
     volumes:
       - ${HOME_DIR}/.ssh:/app/.ssh
@@ -251,6 +253,9 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_HOST: postgres
       POSTGRES_PORT: ${POSTGRES_PORT}
+      SECRET_KEY: ${SECRET_KEY}
+      JWT_ALGORITHM: ${JWT_ALGORITHM}
+      JWT_EXPIRATION: ${JWT_EXPIRATION}
       GOOGLE_PROJECT_ID: ${GOOGLE_PROJECT_ID}
       REGION: ${REGION}
       GOOGLE_APPLICATION_CREDENTIALS: /app/.ssh/google-credentials.json

@@ -1,5 +1,6 @@
-import React from 'react'
-import { Link } from 'react-router-dom'
+import React, { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { useDispatch } from 'react-redux'
 import {
   CButton,
   CCard,
@@ -16,7 +17,53 @@ import {
 import CIcon from '@coreui/icons-react'
 import { cilLockLocked, cilUser } from '@coreui/icons'
 
+import AuthService from '../../../services/AuthService'
+
 const Login = () => {
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
+  const navigate = useNavigate()
+  const dispatch = useDispatch()
+
+  const validateForm = () => {
+    return username.length > 0 && password.length > 0
+  }
+
+  const handleLogin = (e) => {
+    e.preventDefault()
+
+    if (!validateForm()) {
+      setError('Please fill in all fields')
+      return
+    }
+
+    AuthService.login(username, password)
+      .then((response) => {
+        // Store the token in local storage
+        localStorage.setItem('access_token', response.data.access_token)
+        dispatch({ type: 'set', access_token: response.data.access_token })
+        // Redirect to home page
+        navigate('/')
+      })
+      .catch((error) => {
+        if (error.response) {
+          setError(error.response.data.detail)
+        } else if (error.request) {
+          console.log('Error in request', error.request)
+          setError('Network error. Please try again.')
+        } else {
+          console.log('Error in else', error.message)
+          setError('An error occurred. Please try again.')
+        }
+      })
+  }
+
+  const handleForgotPassword = () => {
+    // Redirect to forgot password page
+    navigate('/forgot-password')
+  }
+
   return (
     <div className="bg-body-tertiary min-vh-100 d-flex flex-row align-items-center">
       <CContainer>
@@ -25,14 +72,19 @@ const Login = () => {
             <CCardGroup>
               <CCard className="p-4">
                 <CCardBody>
-                  <CForm>
+                  <CForm onSubmit={handleLogin}>
                     <h1>Login</h1>
                     <p className="text-body-secondary">Sign In to your account</p>
                     <CInputGroup className="mb-3">
                       <CInputGroupText>
                         <CIcon icon={cilUser} />
                       </CInputGroupText>
-                      <CFormInput placeholder="Username" autoComplete="username" />
+                      <CFormInput
+                        placeholder="Username"
+                        autoComplete="username"
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                      />
                     </CInputGroup>
                     <CInputGroup className="mb-4">
                       <CInputGroupText>
@@ -42,16 +94,23 @@ const Login = () => {
                         type="password"
                         placeholder="Password"
                         autoComplete="current-password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
                       />
                     </CInputGroup>
+                    {error && (
+                      <div className="text-danger mb-3" style={{ textAlign: 'center' }}>
+                        {error}
+                      </div>
+                    )}
                     <CRow>
                       <CCol xs={6}>
-                        <CButton color="primary" className="px-4">
+                        <CButton color="primary" className="px-4" type="submit">
                           Login
                         </CButton>
                       </CCol>
                       <CCol xs={6} className="text-right">
-                        <CButton color="link" className="px-0">
+                        <CButton color="link" className="px-0" onClick={handleForgotPassword}>
                           Forgot password?
                         </CButton>
                       </CCol>

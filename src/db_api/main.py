@@ -1,13 +1,16 @@
 # main.py
 import uuid
-from fastapi import FastAPI, HTTPException, File, UploadFile, Form
+from fastapi import FastAPI, HTTPException, File, UploadFile, Form, Depends
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.future import select
 from sqlalchemy import func, text
 from postgresql.config.db import session
-from postgresql.database_models import Authors, Posts, ActiveHashtags, Challenges
+from postgresql.database_models import Authors, Posts, ActiveHashtags, Challenges, Users
 from postgresql.database_scripts.active_hashtags import insert_or_update_active_hashtag, get_active_hashtags
+from postgresql.database_scripts.users import insert_user
+
+from auth import verify_token, create_access_token, hash_password, verify_password
 from vertexai.vision_models import Image, MultiModalEmbeddingModel
 import numpy as np
 from typing import Optional, List, Dict, Any
@@ -26,6 +29,16 @@ app.add_middleware(
 
 class HashtagRequest(BaseModel):
     hashtag: str
+
+class UserRequest(BaseModel):
+    username: str
+    email: str
+    password: str
+    roles: str
+
+class LoginRequest(BaseModel):
+    username: str
+    password: str
 
 def serialize_author(author: Any) -> Dict[str, Any]:
     """Safely serialize an author object to a dictionary."""
@@ -67,7 +80,7 @@ def serialize_match(match: Any, author: Optional[Any] = None, post: Optional[Any
     }
 
 @app.get("/authors")
-async def get_authors():
+async def get_authors(current_user: Users = Depends(verify_token)):
     async with session() as s:
         result = await s.execute(select(Authors))
         authors = result.scalars().all()
@@ -89,7 +102,8 @@ async def get_stats():
     }
 
 @app.get("/top_authors")
-async def get_top_authors():
+async def get_top_authors(current_user: Users = Depends(verify_token)):
+    # Run a query to get the top authors
     async with session() as s:
         result = await s.execute(
             select(Authors)
@@ -119,7 +133,63 @@ async def get_hashtags():
     async with session() as s:
         hashtags = await get_active_hashtags(s)
         return hashtags
-    
+
+@app.post("/register")
+async def register_user(user: UserRequest):
+    # Run a query to register a user
+    async with session() as s:
+        # Check if the user already exists
+        result = await s.execute(
+            select(Users)
+            .where(Users.username == user.username)
+        )
+        existing_user = result.scalars().first()
+        if existing_user:
+            raise HTTPException(status_code=400, detail="User already exists")
+
+        # Hash the password
+        user.password = hash_password(user.password)
+
+        try:
+            uuid_str = str(uuid.uuid4())
+            await insert_user(
+                id=uuid_str,
+                username=user.username,
+                email=user.email,
+                password_hash=user.password,
+                roles=user.roles,
+                session=s
+            )
+            await s.commit()
+            return {"message": "User registered successfully"}
+        except Exception as e:
+            print(f"Error in transaction, rolling back: {e}")
+            await s.rollback()
+            raise HTTPException(status_code=500, detail="Failed to register user")
+            
+@app.post("/login")
+async def login(login_request: LoginRequest):
+    # Run a query to login a user
+    async with session() as s:
+        # Check if the user exists
+        result = await s.execute(
+            select(Users)
+            .where(Users.username == login_request.username)
+        )
+        user = result.scalars().first()
+
+        # Verify the user
+        if not user:
+            raise HTTPException(status_code=401, detail="Invalid username or password")
+        
+        # Verify the password
+        if not verify_password(login_request.password, user.password_hash):
+            raise HTTPException(status_code=401, detail="Invalid username or password")
+        
+        # Create JWT token
+        access_token = create_access_token(data={"username": user.username, "email": user.email, "roles": user.roles})
+        return {"access_token": access_token, "token_type": "bearer"}
+
 @app.patch("/hashtags/{hashtag_id}/deactivate")
 async def deactivate_hashtag(hashtag_id: str):
     async with session() as s:

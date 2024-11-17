@@ -9,6 +9,8 @@ import { cilUser, cilVideo, cilSearch, cilTag } from '@coreui/icons'
 
 import MainChart from './MainChart'
 
+import ApiService from '../../services/ApiService'
+
 const Overview = () => {
   const [stats, setStats] = useState({
     author_count: 0,
@@ -39,26 +41,19 @@ const Overview = () => {
         setErrorStats(error.message)
         setLoadingStats(false)
       })
-  }, [])
+  }, [stats, loadingStats, errorStats])
 
   useEffect(() => {
-    // Call the FastAPI top_authors endpoint
-    fetch('http://localhost/top_authors')
+    ApiService.top_authors()
       .then((response) => {
-        if (!response.ok) {
-          throw new Error('Failed to fetch top authors')
-        }
-        return response.json()
-      })
-      .then((data) => {
-        setAuthors(data)
+        setAuthors(response.data)
         setLoadingAuthors(false)
       })
       .catch((error) => {
         setErrorAuthors(error.message)
         setLoadingAuthors(false)
       })
-  }, [])
+  }, [authors, loadingAuthors, errorAuthors])
 
   return (
     <>

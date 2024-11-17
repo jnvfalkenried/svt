@@ -4,4 +4,6 @@ asyncpg==0.29.0
 pgvector==0.2.5
 uvicorn==0.32.0
 fastapi==0.115.5
-python-multipart
+pyjwt==2.9.0
+bcrypt==4.2.0
+google-cloud-aiplatform==1.70.0
