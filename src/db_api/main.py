@@ -208,15 +208,24 @@ async def multimodal_search(
                 print(f"Vector string length: {len(vector_str)}")
                 
                 search_query = text("""
-                SELECT 
-                    p.*,
-                    ve.element_id,
-                    1 - (ve.embedding <=> cast(:query_vector as vector)) as cosine_similarity  -- Convert to similarity
-                FROM 
-                    video_embeddings ve
-                    JOIN posts p ON ve.post_id = p.id
-                WHERE (1 - (ve.embedding <=> cast(:query_vector as vector))) > 0.2  -- Similarity threshold
-                ORDER BY cosine_similarity DESC  -- Most similar first
+                WITH ranked_embeddings AS (
+                    SELECT 
+                        p.*,
+                        ve.element_id,
+                        1 - (ve.embedding <=> cast(:query_vector as vector)) as cosine_similarity,
+                        ROW_NUMBER() OVER (
+                            PARTITION BY p.id 
+                            ORDER BY 1 - (ve.embedding <=> cast(:query_vector as vector)) DESC
+                        ) as rank
+                    FROM 
+                        video_embeddings ve
+                        JOIN posts p ON ve.post_id = p.id
+                    WHERE (1 - (ve.embedding <=> cast(:query_vector as vector))) > 0.2
+                )
+                SELECT *
+                FROM ranked_embeddings
+                WHERE rank = 1
+                ORDER BY cosine_similarity DESC
                 LIMIT :search_limit
                 """)
                 
@@ -256,7 +265,3 @@ async def multimodal_search(
     except Exception as e:
         print(f"Search error: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=80)
