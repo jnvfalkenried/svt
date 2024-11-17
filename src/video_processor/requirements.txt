@@ -4,8 +4,5 @@ scenedetect[opencv]==0.6.4
 --prefer-binary opencv-python==4.10.0.84
 #numpy==2.1.2 # this version didnt work with importing cvc in the video processor
 numpy==1.21.2
-click==8.1.7
-tqdm==4.66.5
-appdirs==1.4.4
 google-cloud-aiplatform==1.70.0
 ratelimit==2.2.1
