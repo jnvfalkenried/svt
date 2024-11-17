@@ -251,6 +251,11 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_HOST: postgres
       POSTGRES_PORT: ${POSTGRES_PORT}
+      GOOGLE_PROJECT_ID: ${GOOGLE_PROJECT_ID}
+      REGION: ${REGION}
+      GOOGLE_APPLICATION_CREDENTIALS: /app/.ssh/google-credentials.json
+    volumes:
+      - ${HOME_DIR}/.ssh:/app/.ssh
     ports:
       - "80:80"
     labels:

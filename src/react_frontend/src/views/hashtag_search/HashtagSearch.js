@@ -79,36 +79,6 @@ const HashtagSearch = () => {
       <CCol md={6}>
         <CCard className="mb-4">
           <CCardHeader>
-            <h4>Multimodal Search</h4>
-          </CCardHeader>
-          <CCardBody>
-            <CInputGroup className="mb-3">
-              <CFormInput
-                placeholder="Type keywords (e.g. Trump)"
-                value={hashtag}
-                onChange={handleInputChange}
-              />
-              <CButton
-                color="primary"
-                onClick={handleSubmitHashtag}
-                disabled={loading}
-                className="ms-2"
-              >
-                {loading ? <CSpinner size="sm" /> : 'Search'}
-              </CButton>
-            </CInputGroup>
-            {responseMessage && (
-              <CAlert
-                color={responseMessage.startsWith('Error') ? 'danger' : 'success'}
-                className="mb-3"
-              >
-                {responseMessage}
-              </CAlert>
-            )}
-          </CCardBody>
-        </CCard>
-        <CCard className="mb-4">
-          <CCardHeader>
             <h4>Enter a new Hashtag</h4>
           </CCardHeader>
           <CCardBody>

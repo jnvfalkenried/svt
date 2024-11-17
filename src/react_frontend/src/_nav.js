@@ -36,6 +36,12 @@ const _nav = [
   {
     component: CNavItem,
     name: 'Search',
+    to: '/search',
+    icon: <CIcon icon={cilSearch} customClassName="nav-icon" />,
+  },
+  {
+    component: CNavItem,
+    name: 'Hashtag Search',
     to: '/hashtag_search',
     icon: <CIcon icon={cilSearch} customClassName="nav-icon" />,
   },

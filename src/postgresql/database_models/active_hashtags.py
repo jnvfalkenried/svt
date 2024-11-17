@@ -14,9 +14,9 @@ class ActiveHashtags(Base):
     title: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     active: Mapped[bool] = mapped_column(Boolean, default=False)
     
-    __table_args__ = (
-        PrimaryKeyConstraint("id", "active"),
-    )
+    # __table_args__ = (
+    #     PrimaryKeyConstraint("id", "active"),
+    # )
     
     def __repr__(self):
         return (

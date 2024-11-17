@@ -39,23 +39,33 @@ class TasksManager(RabbitMQClient):
                 delivery_mode=aio_pika.DeliveryMode.PERSISTENT,
             )
             await self.exchange.publish(message, routing_key=str(key))
-            logger.info(f"Produced message with key: {key}")
-            logger.debug(f"Message details: {key}: {value}")
+            logger.info(f"Successfully produced message with key: {key}")
+            #logger.debug(f"Message details - Key: {key}, Value: {value}")
         except Exception as e:
-            logger.error(f"Error producing message: {e}")
+            logger.error(f"Error producing message: {e}", exc_info=True)
+            raise  # Re-raise to let caller handle the error
 
     async def update_hashtags_to_monitor(self):
-        async with session() as s:
-            self.hashtags_to_monitor = await get_active_hashtags(s)
-            logger.info(f"Updated hashtags to monitor: {self.hashtags_to_monitor}")
+        try:
+            async with session() as s:
+                self.hashtags_to_monitor = await get_active_hashtags(s)
+                logger.info(f"Updated hashtags to monitor: {[h.title for h in self.hashtags_to_monitor]}")  # Log just the titles
+        except Exception as e:
+            logger.error(f"Error updating hashtags to monitor: {e}", exc_info=True)
+            self.hashtags_to_monitor = []  # Reset to empty list on error
 
     async def send_tasks_to_queue(self):
-        for hashtag in self.hashtags_to_monitor:
-            task_data = {
-                "hashtag": hashtag,
-                "num_videos": 500,
-                "timestamp": datetime.datetime.now().isoformat(),
-            }
-            await self.produce_message(
-                key="producer.hashtag_search", value=json.dumps(task_data)
-            )
+        try:
+            for hashtag in self.hashtags_to_monitor:
+                task_data = {
+                    "hashtag": hashtag.title,  # Use the title attribute instead of the whole object
+                    "num_videos": 500,
+                    "timestamp": datetime.datetime.now().isoformat(),
+                }
+                await self.produce_message(
+                    key="producer.hashtag_search", 
+                    value=json.dumps(task_data)
+                )
+                logger.info(f"Sent task for hashtag: {hashtag.title}")
+        except Exception as e:
+            logger.error(f"Error sending tasks to queue: {e}", exc_info=True)
