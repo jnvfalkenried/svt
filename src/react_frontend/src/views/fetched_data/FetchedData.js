@@ -61,7 +61,6 @@ const FetchedData = () => {
   const metrics = [
     { title: 'Authors', value: stats?.author_count || 0, color: 'info' },
     { title: 'Posts', value: stats?.post_count || 0, color: 'primary' },
-    { title: 'Active Hashtags', value: stats?.active_hashtags_count || 0, color: 'success' },
     { title: 'Challenges', value: stats?.challenge_count || 0, color: 'warning' },
   ]
 
@@ -176,22 +175,16 @@ const FetchedData = () => {
           <CCardBody>
             <CChartBar
               data={{
-                labels: ['Authors', 'Posts', 'Active Hashtags', 'Challenges'],
+                labels: ['Authors', 'Posts', 'Challenges'],
                 datasets: [
                   {
                     label: 'Total Count',
                     backgroundColor: [
                       getStyle('--cui-info'),
                       getStyle('--cui-primary'),
-                      getStyle('--cui-success'),
                       getStyle('--cui-warning'),
                     ],
-                    data: [
-                      stats?.author_count,
-                      stats?.post_count,
-                      stats?.active_hashtags_count,
-                      stats?.challenge_count,
-                    ],
+                    data: [stats?.author_count, stats?.post_count, stats?.challenge_count],
                   },
                 ],
               }}
