@@ -8,6 +8,7 @@ import {
   CSidebarFooter,
   CSidebarHeader,
   CSidebarToggler,
+  CFormSwitch,
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 
@@ -17,12 +18,14 @@ import { logo } from 'src/assets/brand/logo'
 import { sygnet } from 'src/assets/brand/sygnet'
 
 // sidebar nav config
-import navigation from '../_nav'
+import nav from '../_nav'
 
 const AppSidebar = () => {
   const dispatch = useDispatch()
   const unfoldable = useSelector((state) => state.sidebarUnfoldable)
   const sidebarShow = useSelector((state) => state.sidebarShow)
+  const devMode = useSelector((state) => state.dev)
+  const navigation = devMode ? nav._navDev : nav._navProd
 
   return (
     <CSidebar
@@ -48,6 +51,12 @@ const AppSidebar = () => {
       </CSidebarHeader>
       <AppSidebarNav items={navigation} />
       <CSidebarFooter className="border-top d-none d-lg-flex">
+        <CFormSwitch
+          label="Dev"
+          id="devMode"
+          onClick={() => dispatch({ type: 'set', dev: !devMode })}
+          defaultChecked={devMode}
+        />
         <CSidebarToggler
           onClick={() => dispatch({ type: 'set', sidebarUnfoldable: !unfoldable })}
         />
