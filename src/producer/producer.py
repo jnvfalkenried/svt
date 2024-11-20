@@ -81,11 +81,7 @@ class TikTokProducer(RabbitMQClient):
         async with TikTokApi() as api:
             await api.create_sessions(num_sessions=1, sleep_after=3)
 
-            # Wait for the session to be created, not sure we really need this
-            for attempt in range(3):
-                if hasattr(api, "num_sessions"):
-                    break
-                await asyncio.sleep(1)
+            await asyncio.sleep(1)
 
             tag = api.hashtag(name=hashtag)
             async for video in tag.videos(count=num_videos):
