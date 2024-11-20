@@ -25,9 +25,6 @@ async def main():
     scheduler.add_job(tasks_manager.send_tasks_to_queue, "cron", hour=8, minute=1)
     scheduler.add_job(tasks_manager.send_tasks_to_queue, "cron", hour=16, minute=1)
 
-    scheduler.add_job(tasks_manager.update_hashtags_to_monitor)
-    scheduler.add_job(tasks_manager.send_tasks_to_queue, "interval", minutes=5)
-
     scheduler.start()
 
     while True:
