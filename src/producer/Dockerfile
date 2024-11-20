@@ -1,24 +1,17 @@
-# producer/Dockerfile
-
-# Use an official Python runtime as a parent image, need python 3.10 otherwise build will fail
-FROM python:3.10-slim
+# Use Playwright base image
+FROM mcr.microsoft.com/playwright/python:v1.37.0-jammy
 
 # Set the working directory
 WORKDIR /app
 
-# Workaround for quicker development.
-# Installing required packages before copying the rest of the code avoids re-installing them on every code change.
-# https://docs.docker.com/build/cache/
+# Install Playwright browsers
+RUN pip install --no-cache-dir playwright==1.37.0 && playwright install chromium
 
-# Copy the requirements file into the container at /app
+# Copy the requirements file into the container
 COPY ./producer/requirements.txt /app/requirements.txt
 
-# Install any needed packages specified in requirements.txt
+# Install Python dependencies including Playwright
 RUN pip install --no-cache-dir -r requirements.txt
-
-# Install playwright, this takes soooo long :/ (around 2 min)
-RUN playwright install
-RUN playwright install-deps
 
 # Copy the producer directory contents into the container
 COPY ./producer /app

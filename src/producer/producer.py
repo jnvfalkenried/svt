@@ -2,6 +2,7 @@ import asyncio
 import json
 import os
 import pickle
+import socket
 
 import aio_pika
 import requests
@@ -10,13 +11,19 @@ from TikTokApi import TikTokApi
 from helpers.logging import setup_logger
 from helpers.rabbitmq import RabbitMQClient
 
-logger = setup_logger("producer")
+# Get the hostname (e.g., producer.1, producer.2)
+hostname = socket.gethostname()
+
+# Extract replica number from hostname
+replica_number = hostname.split(".")[-1]
+
+logger = setup_logger(f"producer_{replica_number}")
 
 
 class TikTokProducer(RabbitMQClient):
     def __init__(self, rabbitmq_server, rabbitmq_port, user, password):
         super().__init__(rabbitmq_server, rabbitmq_port, user, password)
-        self.connection_name = "tiktok_data_producer"
+        self.connection_name = f"tiktok_data_producer_{replica_number}"
         self.exchange_name = os.environ.get("RABBITMQ_EXCHANGE")
         self.tasks_queue = os.environ.get("RMQ_PRODUCER_TASKS_QUEUE")
 
@@ -73,7 +80,9 @@ class TikTokProducer(RabbitMQClient):
                         num_videos=task_params["num_videos"],
                     )
         except Exception as e:
-            logger.error(f"Error processing task, rescheduling: {e}")
+            logger.error(
+                f"Error {e} occured while processing task {task_params}. Rescheduling!"
+            )
 
     async def get_hashtag_videos(self, hashtag, num_videos=5):
         logger.info(f"Getting {num_videos} videos for hashtag: {hashtag}")

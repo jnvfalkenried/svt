@@ -137,6 +137,10 @@ services:
       - ./docker_runtime/logs:/app/logs
     labels:
       description: "TikTok Data Producer"
+    deploy:
+      replicas: 5
+      restart_policy:
+        condition: on-failure
 
   consumer:
     build:
