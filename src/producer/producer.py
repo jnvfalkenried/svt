@@ -2,6 +2,8 @@ import asyncio
 import json
 import os
 import pickle
+import socket
+from datetime import datetime
 
 import aio_pika
 import requests
@@ -10,13 +12,19 @@ from TikTokApi import TikTokApi
 from helpers.logging import setup_logger
 from helpers.rabbitmq import RabbitMQClient
 
-logger = setup_logger("producer")
+# Get the hostname (e.g., producer.1, producer.2)
+hostname = socket.gethostname()
+
+# Extract replica number from hostname
+replica_number = hostname.split(".")[-1]
+
+logger = setup_logger(f"producer_{replica_number}")
 
 
 class TikTokProducer(RabbitMQClient):
     def __init__(self, rabbitmq_server, rabbitmq_port, user, password):
         super().__init__(rabbitmq_server, rabbitmq_port, user, password)
-        self.connection_name = "tiktok_data_producer"
+        self.connection_name = f"tiktok_data_producer_{replica_number}"
         self.exchange_name = os.environ.get("RABBITMQ_EXCHANGE")
         self.tasks_queue = os.environ.get("RMQ_PRODUCER_TASKS_QUEUE")
 
@@ -71,26 +79,37 @@ class TikTokProducer(RabbitMQClient):
                     await self.get_hashtag_videos(
                         hashtag=task_params["hashtag"],
                         num_videos=task_params["num_videos"],
+                        scheduled_at=task_params["timestamp"],
                     )
         except Exception as e:
-            logger.error(f"Error processing task, rescheduling: {e}")
+            logger.error(
+                f"Error {e} occured while processing task {task_params}. Rescheduling!"
+            )
 
-    async def get_hashtag_videos(self, hashtag, num_videos=5):
+    async def get_hashtag_videos(self, hashtag, scheduled_at, num_videos=5):
         logger.info(f"Getting {num_videos} videos for hashtag: {hashtag}")
+
+        # Round scheduled_at to minutes
+        collected_at = datetime.fromisoformat(scheduled_at).replace(
+            second=0, microsecond=0
+        )
 
         async with TikTokApi() as api:
             await api.create_sessions(num_sessions=1, sleep_after=3)
 
-            # Wait for the session to be created, not sure we really need this
-            for attempt in range(3):
-                if hasattr(api, "num_sessions"):
-                    break
-                await asyncio.sleep(1)
+            await asyncio.sleep(1)
 
             tag = api.hashtag(name=hashtag)
             async for video in tag.videos(count=num_videos):
+                video_dict = video.as_dict
                 await self.produce_message(
-                    key=f"tiktok.hashtag.{hashtag}", value=json.dumps(video.as_dict)
+                    key=f"tiktok.hashtag.{hashtag}",
+                    value=json.dumps(
+                        {
+                            **video_dict,
+                            "collected_at": collected_at.isoformat(),
+                        }
+                    ),
                 )
 
                 await self.get_video_bytes(video)

@@ -1,4 +1,5 @@
 import asyncio
+from datetime import datetime
 import json
 import os
 
@@ -12,6 +13,7 @@ from postgresql.database_scripts.challenges import insert_or_update_challenge
 from postgresql.database_scripts.music import insert_music
 from postgresql.database_scripts.posts import insert_post
 from postgresql.database_scripts.posts_challenges import insert_post_challenge
+from postgresql.database_scripts.posts_reporting import insert_post_stats
 
 logger = setup_logger("consumer")
 
@@ -110,14 +112,21 @@ class TikTokConsumer(RabbitMQClient):
                         duet_from_id=item.get("duetInfo", {}).get("duetFromId"),
                         is_ad=item.get("isAd"),
                         can_repost=item.get("item_control", {}).get("can_repost"),
-                        # collect_count=item.get("statsV2", {}).get("collectCount"),
-                        # comment_count=item.get("statsV2", {}).get("commentCount"),
-                        # digg_count=item.get("statsV2", {}).get("diggCount"),
-                        # play_count=item.get("statsV2", {}).get("playCount"),
-                        # repost_count=item.get("statsV2", {}).get("repostCount"),
-                        # share_count=item.get("statsV2", {}).get("shareCount"),
                         author_id=author_data.get("id"),
                         music_id=music_data.get("id"),
+                        session=s,
+                    )
+
+                    # Process Video Stats
+                    await insert_post_stats(
+                        id=item.get("id"),
+                        collected_at=datetime.fromisoformat(item.get("collected_at")),
+                        collect_count=item.get("statsV2", {}).get("collectCount"),
+                        comment_count=item.get("statsV2", {}).get("commentCount"),
+                        digg_count=item.get("statsV2", {}).get("diggCount"),
+                        play_count=item.get("statsV2", {}).get("playCount"),
+                        repost_count=item.get("statsV2", {}).get("repostCount"),
+                        share_count=item.get("statsV2", {}).get("shareCount"),
                         session=s,
                     )
 
