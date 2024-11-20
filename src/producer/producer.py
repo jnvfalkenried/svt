@@ -3,6 +3,7 @@ import json
 import os
 import pickle
 import socket
+from datetime import datetime
 
 import aio_pika
 import requests
@@ -78,14 +79,20 @@ class TikTokProducer(RabbitMQClient):
                     await self.get_hashtag_videos(
                         hashtag=task_params["hashtag"],
                         num_videos=task_params["num_videos"],
+                        scheduled_at=task_params["timestamp"],
                     )
         except Exception as e:
             logger.error(
                 f"Error {e} occured while processing task {task_params}. Rescheduling!"
             )
 
-    async def get_hashtag_videos(self, hashtag, num_videos=5):
+    async def get_hashtag_videos(self, hashtag, scheduled_at, num_videos=5):
         logger.info(f"Getting {num_videos} videos for hashtag: {hashtag}")
+
+        # Round scheduled_at to minutes
+        collected_at = datetime.fromisoformat(scheduled_at).replace(
+            second=0, microsecond=0
+        )
 
         async with TikTokApi() as api:
             await api.create_sessions(num_sessions=1, sleep_after=3)
@@ -94,8 +101,15 @@ class TikTokProducer(RabbitMQClient):
 
             tag = api.hashtag(name=hashtag)
             async for video in tag.videos(count=num_videos):
+                video_dict = video.as_dict
                 await self.produce_message(
-                    key=f"tiktok.hashtag.{hashtag}", value=json.dumps(video.as_dict)
+                    key=f"tiktok.hashtag.{hashtag}",
+                    value=json.dumps(
+                        {
+                            **video_dict,
+                            "collected_at": collected_at.isoformat(),
+                        }
+                    ),
                 )
 
                 await self.get_video_bytes(video)
