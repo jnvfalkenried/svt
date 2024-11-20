@@ -16,6 +16,10 @@ const ApiService = {
   top_authors: () => {
     return ApiService.client.get('/top_authors')
   },
+
+  addHashtag: (hashtag) => {
+    return ApiService.client.post('/hashtag', { hashtag })
+  },
 }
 
 // Add a request interceptor
