@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 
 import {
   CCard,
@@ -9,16 +9,15 @@ import {
   CFormInput,
   CRow,
   CCol,
-  CListGroup,
-  CListGroupItem,
   CAlert,
   CSpinner,
 } from '@coreui/react'
 
+import ApiService from '../../services/ApiService'
+
 const HashtagSearch = () => {
   const [hashtag, setHashtag] = useState('') // State to store the input hashtag
   const [responseMessage, setResponseMessage] = useState('')
-  const [activeHashtags, setActiveHashtags] = useState([])
   const [loading, setLoading] = useState(false)
 
   const handleInputChange = (e) => {
@@ -32,47 +31,21 @@ const HashtagSearch = () => {
     }
 
     setLoading(true)
-    try {
-      const response = await fetch('http://localhost:80/hashtag', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ hashtag }), // Send the hashtag as JSON
-      })
 
-      if (response.ok) {
-        const data = await response.json()
-        setResponseMessage(`Success: ${data.message}`)
-
-        // If hashtag is successfully added, update the list of hashtags
-        setActiveHashtags((prevHashtags) => [...prevHashtags, { title: hashtag, active: true }])
-      } else {
-        const errorData = await response.json()
-        setResponseMessage(`Error: ${errorData.detail}`)
-      }
-    } catch (error) {
-      console.error('Request failed:', error)
-      setResponseMessage('Request failed. Please try again.')
-    }
-  }
-
-  useEffect(() => {
-    // Call the FastAPI hashtag endpoint
-    fetch('http://localhost:80/hashtags')
+    // Call the ApiService to add a new hashtag
+    ApiService.addHashtag(hashtag.toLowerCase())
       .then((response) => {
-        if (!response.ok) {
-          throw new Error('Failed to fetch hashtag')
-        }
-        return response.json()
-      })
-      .then((data) => {
-        setActiveHashtags(data)
+        setResponseMessage(response.data.message)
+        setLoading(false)
+        setHashtag('')
       })
       .catch((error) => {
         console.error('Request failed:', error)
+        setResponseMessage('Request failed. Please try again.')
+        setLoading(false)
+        setHashtag('')
       })
-  }, [])
+  }
 
   return (
     <CRow className="justify-content-center">
