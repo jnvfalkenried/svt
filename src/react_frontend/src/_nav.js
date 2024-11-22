@@ -40,12 +40,6 @@ const _navProd = [
   },
   {
     component: CNavItem,
-    name: 'Hashtag Search',
-    to: '/hashtag_search',
-    icon: <CIcon icon={cilSearch} customClassName="nav-icon" />,
-  },
-  {
-    component: CNavItem,
     name: 'Monitored Hashtags',
     to: '/monitored_hashtags',
     icon: <CIcon icon={cilLoopCircular} customClassName="nav-icon" />,
@@ -85,12 +79,6 @@ const _navDev = [
     component: CNavItem,
     name: 'Search',
     to: '/search',
-    icon: <CIcon icon={cilSearch} customClassName="nav-icon" />,
-  },
-  {
-    component: CNavItem,
-    name: 'Hashtag Search',
-    to: '/hashtag_search',
     icon: <CIcon icon={cilSearch} customClassName="nav-icon" />,
   },
   {
