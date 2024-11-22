@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import CIcon from '@coreui/icons-react'
 import { cilChartPie, cilGraph, cilLoopCircular, cilDataTransferDown } from '@coreui/icons'
+import { Link } from 'react-router-dom'
 import {
   CCard,
   CCardBody,
@@ -113,7 +114,9 @@ const HashtagCard = ({ tag, onRemove }) => {
         </div>
 
         <div className="d-flex justify-content-center my-2">
-          <CButton color="primary">View trending posts for hashtag</CButton>
+          <Link to={`/monitored_hashtags/${tag.id}/trending`}>
+            <CButton color="primary">View trending posts for hashtag</CButton>
+          </Link>
         </div>
 
         <div>
