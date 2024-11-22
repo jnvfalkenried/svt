@@ -12,9 +12,7 @@ import {
   CCardBody,
   CCardHeader,
 } from '@coreui/react'
-import { CChartBar, CChartLine } from '@coreui/react-chartjs'
-import { CIcon } from '@coreui/icons-react'
-import { cilUser, cilVideo } from '@coreui/icons'
+import { CChartBar} from '@coreui/react-chartjs'
 
 // Sample data
 const sampleDailyData = {

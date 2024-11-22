@@ -16,7 +16,6 @@ import {
   cilGraph,
   cilSearch,
   cilDataTransferDown,
-  cilHeart,
   cilLoopCircular,
   cilLightbulb,
 } from '@coreui/icons'

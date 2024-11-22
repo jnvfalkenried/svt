@@ -5,7 +5,6 @@ import {
   cilSearch,
   cilImage,
   cilX,
-  cilCheckCircle,
   cilHeart,
   cilPeople,
   cilUserFollow,
