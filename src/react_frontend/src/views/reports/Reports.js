@@ -12,7 +12,7 @@ import {
   CCardBody,
   CCardHeader,
 } from '@coreui/react'
-import { CChartBar} from '@coreui/react-chartjs'
+import { CChartBar } from '@coreui/react-chartjs'
 
 // Sample data
 const sampleDailyData = {

@@ -10,6 +10,13 @@ import {
   CBreadcrumb,
   CBreadcrumbItem,
   CButton,
+  CTable,
+  CTableHead,
+  CTableRow,
+  CTableHeaderCell,
+  CTableBody,
+  CTableDataCell,
+  CAlert,
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 import { cilArrowLeft } from '@coreui/icons'
@@ -23,6 +30,40 @@ const TrendingPosts = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
+  // Define dummy data for when no posts are found
+  const dummyData = [
+    {
+      id: 1,
+      description: 'Fun dance challenge #viral',
+      author: 'DanceKing123',
+      followers: '1.2M',
+      video_growth_daily: '14.5%',
+      video_growth_weekly: '23.3%',
+      video_growth_monthly: '34.7%',
+      videoLink: 'https://example.com/video1',
+    },
+    {
+      id: 2,
+      description: 'Cooking tutorial - Easy pasta recipe',
+      author: 'ChefMaster',
+      followers: '850K',
+      video_growth_daily: '14.5%',
+      video_growth_weekly: '23.3%',
+      video_growth_monthly: '34.7%',
+      videoLink: 'https://example.com/video2',
+    },
+    {
+      id: 3,
+      description: 'Daily vlog - Adventure time!',
+      author: 'TravelBlogger',
+      followers: '2.1M',
+      video_growth_daily: '14.5%',
+      video_growth_weekly: '23.3%',
+      video_growth_monthly: '34.7%',
+      videoLink: 'https://example.com/video3',
+    },
+  ]
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -32,7 +73,7 @@ const TrendingPosts = () => {
         // Fetch hashtag details
         const hashtagResponse = await fetch(`${API_BASE_URL}/hashtags/${id}`)
         if (!hashtagResponse.ok) {
-          throw new Error('Failed to fetch hashtag details')
+          throw new Error('Loading dummy data for demo')
         }
         const hashtagData = await hashtagResponse.json()
         setHashtag(hashtagData)
@@ -63,18 +104,6 @@ const TrendingPosts = () => {
     )
   }
 
-  if (error) {
-    return (
-      <div className="text-center text-danger p-4">
-        <h4>Error loading data</h4>
-        <p>{error}</p>
-        <Link to="/monitored_hashtags">
-          <CButton color="primary">Return to Monitored Hashtags</CButton>
-        </Link>
-      </div>
-    )
-  }
-
   return (
     <>
       <CBreadcrumb>
@@ -84,33 +113,56 @@ const TrendingPosts = () => {
             Back to Monitored Hashtags
           </Link>
         </CBreadcrumbItem>
-        <CBreadcrumbItem active>#{hashtag?.title}</CBreadcrumbItem>
+        <CBreadcrumbItem active>#{hashtag?.title || 'Loading...'}</CBreadcrumbItem>
       </CBreadcrumb>
 
       <CRow>
         <CCol>
+          {error && (
+            <CAlert color="danger" className="mb-4">
+              {error}
+            </CAlert>
+          )}
           <CCard className="mb-4">
             <CCardHeader>
-              <h4 className="mb-0">Trending Posts for #{hashtag?.title}</h4>
+              <h4 className="mb-0">
+                Trending Posts {hashtag?.title ? `for #${hashtag.title}` : ''}
+              </h4>
+              <small className="text-muted">
+                {error || posts.length === 0 ? 'Loading dummy data for demonstration' : ''}
+              </small>
             </CCardHeader>
             <CCardBody>
-              {posts.length > 0 ? (
-                posts.map((post) => (
-                  <div key={post.id} className="border-bottom p-3">
-                    <h5>{post.title}</h5>
-                    <p>{post.content}</p>
-                    <div className="d-flex gap-3">
-                      <small>Likes: {post.likes}</small>
-                      <small>Comments: {post.comments}</small>
-                      <small>Shares: {post.shares}</small>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="text-center p-4">
-                  <p>No trending posts found for this hashtag.</p>
-                </div>
-              )}
+              <CTable hover>
+                <CTableHead>
+                  <CTableRow>
+                    <CTableHeaderCell scope="col">Post Description</CTableHeaderCell>
+                    <CTableHeaderCell scope="col">Author</CTableHeaderCell>
+                    <CTableHeaderCell scope="col"># of Followers</CTableHeaderCell>
+                    <CTableHeaderCell scope="col">Video Growth Daily</CTableHeaderCell>
+                    <CTableHeaderCell scope="col">Video Growth Weekly</CTableHeaderCell>
+                    <CTableHeaderCell scope="col">Video Growth Monthly</CTableHeaderCell>
+                    <CTableHeaderCell scope="col">Video Link</CTableHeaderCell>
+                  </CTableRow>
+                </CTableHead>
+                <CTableBody>
+                  {(posts.length > 0 ? posts : dummyData).map((item) => (
+                    <CTableRow key={item.id}>
+                      <CTableDataCell>{item.description || item.title}</CTableDataCell>
+                      <CTableDataCell>{item.author}</CTableDataCell>
+                      <CTableDataCell>{item.followers}</CTableDataCell>
+                      <CTableDataCell>{item.video_growth_daily}</CTableDataCell>
+                      <CTableDataCell>{item.video_growth_weekly}</CTableDataCell>
+                      <CTableDataCell>{item.video_growth_monthly}</CTableDataCell>
+                      <CTableDataCell>
+                        <a href={item.videoLink} className="text-decoration-none">
+                          View Video
+                        </a>
+                      </CTableDataCell>
+                    </CTableRow>
+                  ))}
+                </CTableBody>
+              </CTable>
             </CCardBody>
           </CCard>
         </CCol>
