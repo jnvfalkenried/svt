@@ -36,3 +36,23 @@ class StatsResponse(BaseModel):
     post_count: int
     active_hashtags_count: int
     challenge_count: int
+
+class PostResponse(BaseModel):
+    id: str
+    created_at: int
+    description: str
+    duet_enabled: bool
+    duet_from_id: str
+    is_ad: bool
+    can_repost: bool
+    author_id: str
+    music_id: str
+    max_collect_count: int
+    max_comment_count: int
+    max_digg_count: int
+    max_play_count: int
+    max_repost_count: int
+    max_share_count: int
+
+class FeedResponse(PostResponse):
+    appearances_in_feed: int
