@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import PropTypes from 'prop-types'
 import ApiService from '../../services/ApiService'
 import { CRow, CCol, CCard, CCardBody, CCardHeader } from '@coreui/react'
@@ -6,21 +6,16 @@ import { CChartBar } from '@coreui/react-chartjs'
 import { CIcon } from '@coreui/icons-react'
 import { cilVideo } from '@coreui/icons'
 import { getStyle } from '@coreui/utils'
+import PostDetailsOffcanvas from './PostDetailsOffcanvas'
 
-const Feed = ({ filteredHashtag, selectedDateRange }) => {
+const Feed = ({ params }) => {
   const [feedPosts, setFeedPosts] = useState([])
   const [loading, setLoading] = useState(true)
+  const [offcanvasVisible, setOffcanvasVisible] = useState(false)
+  const [selectedPost, setSelectedPost] = useState(null)
 
-  const params = {
-    feed: true,
-    hashtag: filteredHashtag,
-    start_date: selectedDateRange[0]
-      ? selectedDateRange[0].toISOString()
-      : new Date('1990-01-01').toISOString(),
-    end_date: selectedDateRange[0]
-      ? selectedDateRange[0].toISOString()
-      : new Date('2200-01-01').toISOString(),
-  }
+  // Create a ref to store the latest feedPosts
+  const feedPostsRef = useRef([])
 
   useEffect(() => {
     ApiService.getTopPosts(params)
@@ -32,7 +27,29 @@ const Feed = ({ filteredHashtag, selectedDateRange }) => {
         console.log(error)
         setLoading(false)
       })
-  }, [filteredHashtag, selectedDateRange])
+  }, [params])
+
+  useEffect(() => {
+    feedPostsRef.current = feedPosts
+  }, [feedPosts])
+
+  const handleBarClick = (event) => {
+    const activePoints = event.chart.getElementsAtEventForMode(
+      event.native,
+      'nearest',
+      { intersect: true },
+      true,
+    )
+    if (activePoints.length > 0) {
+      const dataIndex = activePoints[0].index
+      const post = feedPostsRef.current[dataIndex]
+
+      if (post) {
+        setSelectedPost(post)
+        setOffcanvasVisible(true)
+      }
+    }
+  }
 
   // Prepare chart data
   const chartData = {
@@ -52,6 +69,7 @@ const Feed = ({ filteredHashtag, selectedDateRange }) => {
   // Chart options (you can customize these)
   const chartOptions = {
     responsive: true,
+    onClick: handleBarClick,
     scales: {
       x: {
         title: {
@@ -119,13 +137,17 @@ const Feed = ({ filteredHashtag, selectedDateRange }) => {
           </CCardBody>
         </CCard>
       </CCol>
+      <PostDetailsOffcanvas
+        visible={offcanvasVisible}
+        onClose={() => setOffcanvasVisible(false)}
+        post={selectedPost}
+      />
     </CRow>
   )
 }
 
 Feed.propTypes = {
-  filteredHashtag: PropTypes.string,
-  selectedDateRange: PropTypes.array,
+  params: PropTypes.object.isRequired,
 }
 
 export default Feed

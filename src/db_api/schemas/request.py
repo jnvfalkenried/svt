@@ -19,3 +19,4 @@ class PostsRequest(BaseModel):
     start_date: datetime
     end_date: datetime
     hashtag: str
+    limit: int

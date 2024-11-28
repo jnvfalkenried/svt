@@ -1,14 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import {
-  CFormSelect,
-  CNav,
-  CNavItem,
-  CNavLink,
-  CTabContent,
-  CTabPane,
-  CCol,
-  CRow,
-} from '@coreui/react'
+import { CNav, CNavItem, CNavLink, CTabContent, CTabPane } from '@coreui/react'
 import ApiService from '../../services/ApiService'
 import Feed from './Feed'
 import Top from './Top'
@@ -19,6 +10,17 @@ const Reports = () => {
   const [hashtags, setHashtags] = useState([])
   const [selectedHashtag, setSelectedHashtag] = useState('all')
   const [selectedDateRange, setSelectedDateRange] = useState([null, null])
+
+  const params = {
+    hashtag: selectedHashtag,
+    start_date: selectedDateRange[0]
+      ? selectedDateRange[0].toISOString()
+      : new Date('1990-01-01').toISOString(),
+    end_date: selectedDateRange[0]
+      ? selectedDateRange[1].toISOString()
+      : new Date('2200-01-01').toISOString(),
+    limit: 10,
+  }
 
   useEffect(() => {
     ApiService.getActiveHashtags()
@@ -65,11 +67,11 @@ const Reports = () => {
       <CTabContent>
         {/* Top Posts */}
         <CTabPane visible={activeTab === 'top'}>
-          <Top filteredHashtag={selectedHashtag} selectedDateRange={selectedDateRange} />
+          <Top params={{ ...params, feed: false }} />
         </CTabPane>
         {/* Feed */}
         <CTabPane visible={activeTab === 'feed'}>
-          <Feed filteredHashtag={selectedHashtag} selectedDateRange={selectedDateRange} />
+          <Feed params={{ ...params, feed: true }} />
         </CTabPane>
       </CTabContent>
     </div>

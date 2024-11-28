@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import PropTypes from 'prop-types'
 import ApiService from '../../services/ApiService'
 import { getStyle } from '@coreui/utils'
@@ -6,34 +6,52 @@ import { CRow, CCol, CCard, CCardBody, CCardHeader } from '@coreui/react'
 import { CChartBar } from '@coreui/react-chartjs'
 import { CIcon } from '@coreui/icons-react'
 import { cilVideo } from '@coreui/icons'
+import PostDetailsOffcanvas from './PostDetailsOffcanvas'
 
-const Top = ({ filteredHashtag, selectedDateRange }) => {
+const Top = ({ params }) => {
   const [topPosts, setTopPosts] = useState([])
   const [loading, setLoading] = useState(true)
-
-  const params = {
-    feed: false,
-    hashtag: filteredHashtag,
-    start_date: selectedDateRange[0]
-      ? selectedDateRange[0].toISOString()
-      : new Date('1990-01-01').toISOString(),
-    end_date: selectedDateRange[0]
-      ? selectedDateRange[0].toISOString()
-      : new Date('2200-01-01').toISOString(),
-  }
+  const [offcanvasVisible, setOffcanvasVisible] = useState(false)
+  const [selectedPost, setSelectedPost] = useState(null)
+  // Create a ref to store the latest topPosts
+  const topPostsRef = useRef([])
 
   useEffect(() => {
     ApiService.getTopPosts(params)
       .then((response) => {
         setTopPosts(response.data)
         setLoading(false)
-        console.log(response.data)
       })
       .catch((error) => {
         console.log(error)
         setLoading(false)
       })
-  }, [filteredHashtag, selectedDateRange])
+  }, [params])
+
+  // Update the ref with the latest topPosts whenever the state changes
+  useEffect(() => {
+    topPostsRef.current = topPosts
+  }, [topPosts])
+
+  const handleBarClick = (event) => {
+    const activePoints = event.chart.getElementsAtEventForMode(
+      event.native,
+      'nearest',
+      { intersect: true },
+      true,
+    )
+    console.log(activePoints)
+    console.log(topPosts)
+    if (activePoints.length > 0) {
+      const dataIndex = activePoints[0].index
+      const post = topPostsRef.current[dataIndex]
+
+      if (post) {
+        setSelectedPost(post)
+        setOffcanvasVisible(true)
+      }
+    }
+  }
 
   // Prepare chart data
   const chartData = {
@@ -53,6 +71,7 @@ const Top = ({ filteredHashtag, selectedDateRange }) => {
   // Chart options (you can customize these)
   const chartOptions = {
     responsive: true,
+    onClick: handleBarClick,
     scales: {
       x: {
         title: {
@@ -70,7 +89,7 @@ const Top = ({ filteredHashtag, selectedDateRange }) => {
       y: {
         title: {
           display: true,
-          text: 'Appearances',
+          text: 'Views',
         },
         border: {
           color: getStyle('--cui-border-color-translucent'),
@@ -121,13 +140,17 @@ const Top = ({ filteredHashtag, selectedDateRange }) => {
           </CCardBody>
         </CCard>
       </CCol>
+      <PostDetailsOffcanvas
+        visible={offcanvasVisible}
+        onClose={() => setOffcanvasVisible(false)}
+        post={selectedPost}
+      />
     </CRow>
   )
 }
 
 Top.propTypes = {
-  filteredHashtag: PropTypes.string,
-  selectedDateRange: PropTypes.array,
+  params: PropTypes.object.isRequired,
 }
 
 export default Top
