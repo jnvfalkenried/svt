@@ -93,9 +93,12 @@ class TikTokVideoProcessor(RabbitMQClient):
                 )
                 print(f"Extracted {len(key_frames)} key frames")
 
+                # pre-process text 
+                text_description = body["description"].strip().lower()
+
                 # TODO: Calculate similarity between key frames and filter out similar frames
                 embeddings = await asyncio.to_thread(
-                    self.generate_embeddings, key_frames, body["description"]
+                    self.generate_embeddings, key_frames, text_description
                 )
                 print(f"Generated {len(embeddings)} embeddings")
 

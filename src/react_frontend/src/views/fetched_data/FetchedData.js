@@ -58,6 +58,73 @@ const FetchedData = () => {
     )
   }
 
+  const generateLastMonths = (n) => {
+    const months = []
+    const currentDate = new Date()
+
+    for (let i = n - 1; i >= 0; i--) {
+      const date = new Date(currentDate)
+      date.setMonth(date.getMonth() - i)
+      months.push(date.toLocaleDateString('en-US', { year: 'numeric', month: 'short' }))
+    }
+    return months
+  }
+
+  const generateTrendingData = (numPoints, minValue, maxValue) => {
+    const data = []
+    let currentValue = minValue
+
+    for (let i = 0; i < numPoints; i++) {
+      const increase = (maxValue - minValue) * (0.05 + Math.random() * 0.1)
+      currentValue = Math.min(maxValue, currentValue + increase)
+      const noise = currentValue * (Math.random() * 0.1 - 0.05)
+      data.push(Math.round(currentValue + noise))
+    }
+    return data
+  }
+
+  const timeRangeData = {
+    Day: {
+      labels: Array.from({ length: 24 }, (_, i) => `${i}:00`),
+      postsData: generateTrendingData(24, 50, 200),
+      authorsData: generateTrendingData(24, 20, 80),
+    },
+    Month: {
+      labels: generateLastMonths(12),
+      postsData: generateTrendingData(12, 1000, 5000),
+      authorsData: generateTrendingData(12, 500, 2000),
+    },
+    Year: {
+      labels: Array.from({ length: 5 }, (_, i) => `${2020 + i}`),
+      postsData: generateTrendingData(5, 10000, 50000),
+      authorsData: generateTrendingData(5, 5000, 20000),
+    },
+  }
+
+  const lineChartData = {
+    labels: timeRangeData[timeRange].labels,
+    datasets: [
+      {
+        label: 'New Posts',
+        backgroundColor: `rgba(${getStyle('--cui-info-rgb')}, .1)`,
+        borderColor: getStyle('--cui-info'),
+        pointHoverBackgroundColor: getStyle('--cui-info'),
+        borderWidth: 2,
+        data: timeRangeData[timeRange].postsData,
+        fill: true,
+      },
+      {
+        label: 'New Authors',
+        backgroundColor: `rgba(${getStyle('--cui-success-rgb')}, .1)`,
+        borderColor: getStyle('--cui-success'),
+        pointHoverBackgroundColor: getStyle('--cui-success'),
+        borderWidth: 2,
+        data: timeRangeData[timeRange].authorsData,
+        fill: true,
+      },
+    ],
+  }
+
   const metrics = [
     { title: 'Authors', value: stats?.author_count || 0, color: 'info', icon: cilUser },
     { title: 'Posts', value: stats?.post_count || 0, color: 'primary', icon: cilVideo },
@@ -69,30 +136,6 @@ const FetchedData = () => {
       icon: cilSearch,
     },
   ]
-
-  const lineChartData = {
-    labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
-    datasets: [
-      {
-        label: 'New Posts',
-        backgroundColor: `rgba(${getStyle('--cui-info-rgb')}, .1)`,
-        borderColor: getStyle('--cui-info'),
-        pointHoverBackgroundColor: getStyle('--cui-info'),
-        borderWidth: 2,
-        data: [50, 60, 70, 85, 90, 100, 110],
-        fill: true,
-      },
-      {
-        label: 'New Authors',
-        backgroundColor: `rgba(${getStyle('--cui-success-rgb')}, .1)`,
-        borderColor: getStyle('--cui-success'),
-        pointHoverBackgroundColor: getStyle('--cui-success'),
-        borderWidth: 2,
-        data: [20, 25, 30, 35, 40, 45, 50],
-        fill: true,
-      },
-    ],
-  }
 
   return (
     <CRow>
@@ -118,7 +161,13 @@ const FetchedData = () => {
                 <h4 id="traffic" className="card-title mb-0">
                   Platform Growth
                 </h4>
-                <div className="small text-body-secondary">January - July 2023</div>
+                <div className="small text-body-secondary">
+                  {timeRange === 'Day'
+                    ? 'Last 24 Hours'
+                    : timeRange === 'Month'
+                      ? 'Last 12 Months'
+                      : 'Last 5 Years'}
+                </div>
               </CCol>
               <CCol sm={7} className="d-none d-md-block">
                 <CButton color="primary" className="float-end">
@@ -148,17 +197,34 @@ const FetchedData = () => {
                   legend: {
                     display: true,
                   },
+                  tooltip: {
+                    callbacks: {
+                      label: (context) => {
+                        let label = context.dataset.label || ''
+                        if (label) {
+                          label += ': '
+                        }
+                        label += context.parsed.y.toLocaleString()
+                        return label
+                      },
+                    },
+                  },
                 },
                 scales: {
                   x: {
                     grid: {
                       drawOnChartArea: false,
                     },
+                    ticks: {
+                      maxRotation: 45,
+                      minRotation: 45,
+                    },
                   },
                   y: {
                     beginAtZero: true,
                     ticks: {
                       maxTicksLimit: 5,
+                      callback: (value) => value.toLocaleString(),
                     },
                   },
                 },
@@ -167,7 +233,7 @@ const FetchedData = () => {
                     tension: 0.4,
                   },
                   point: {
-                    radius: 0,
+                    radius: 2,
                     hitRadius: 10,
                     hoverRadius: 4,
                   },

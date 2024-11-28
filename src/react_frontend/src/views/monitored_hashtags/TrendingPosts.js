@@ -9,7 +9,6 @@ import {
   CSpinner,
   CBreadcrumb,
   CBreadcrumbItem,
-  CButton,
   CTable,
   CTableHead,
   CTableRow,

@@ -69,3 +69,14 @@ class TasksManager(RabbitMQClient):
                 logger.info(f"Sent task for hashtag: {hashtag.title}")
         except Exception as e:
             logger.error(f"Error sending tasks to queue: {e}", exc_info=True)
+
+    async def refresh_post_trends_view(self):
+        # Refreshes posts_trends materialized DB view 
+        try:
+            async with session() as s:
+                # Import at the top of file
+                from postgresql.database_models.post_trends import PostTrends
+                await PostTrends.refresh_view(s)
+                logger.info("Successfully refreshed post_trends materialized view")
+        except Exception as e:
+            logger.error(f"Error refreshing post_trends view: {e}", exc_info=True)
