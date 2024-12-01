@@ -18,7 +18,7 @@ const Feed = ({ params }) => {
   const feedPostsRef = useRef([])
 
   useEffect(() => {
-    ApiService.getTopPosts(params)
+    ApiService.getTopPosts({ ...params, category: 'Views' })
       .then((response) => {
         setFeedPosts(response.data)
         setLoading(false)

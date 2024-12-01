@@ -19,4 +19,5 @@ class PostsRequest(BaseModel):
     start_date: datetime
     end_date: datetime
     hashtag: str
+    category: str
     limit: int

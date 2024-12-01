@@ -43,6 +43,7 @@ async def get_top_posts(
     end_date: datetime,
     session,
     hashtag: str = "all",
+    category: str = "max_play_count",
     # additional_filters: Optional[dict] = None,
     limit: int = 10
 ) -> list[dict]:
@@ -52,6 +53,7 @@ async def get_top_posts(
     :param start_date: The start date for the query range.
     :param end_date: The end date for the query range.
     :param hashtag: The hashtag to filter by, or "all" for no hashtag filtering.
+    :param category: The category to sort by, e.g. "max_play_count".
     :param session: The SQLAlchemy async session for database connection.
     :param additional_filters: A dictionary of additional filters to apply.
     :param limit: The maximum number of posts to return.
@@ -113,7 +115,7 @@ async def get_top_posts(
         FROM posts
         INNER JOIN posts_reporting ON posts.id = posts_reporting.id
         LEFT JOIN authors ON posts.author_id = authors.id
-        ORDER BY CAST(posts_reporting.max_play_count AS INTEGER) DESC
+        ORDER BY CAST(posts_reporting.{category} AS INTEGER) DESC
         LIMIT :limit
     """)
 

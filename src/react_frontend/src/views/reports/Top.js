@@ -1,31 +1,42 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useMemo } from 'react'
 import PropTypes from 'prop-types'
 import ApiService from '../../services/ApiService'
 import { getStyle } from '@coreui/utils'
-import { CRow, CCol, CCard, CCardBody, CCardHeader } from '@coreui/react'
+import { CRow, CCol, CCard, CCardBody, CButton, CButtonGroup } from '@coreui/react'
 import { CChartBar } from '@coreui/react-chartjs'
 import { CIcon } from '@coreui/icons-react'
 import { cilVideo } from '@coreui/icons'
 import PostDetailsOffcanvas from './PostDetailsOffcanvas'
 
 const Top = ({ params }) => {
-  const [topPosts, setTopPosts] = useState([])
+  const categories = ['Views', 'Likes', 'Comments', 'Shares', 'Saves'] // 'Reposts' is always 0
+  const [topPosts, setTopPosts] = useState({})
   const [loading, setLoading] = useState(true)
   const [offcanvasVisible, setOffcanvasVisible] = useState(false)
   const [selectedPost, setSelectedPost] = useState(null)
+  const [activeCategory, setActiveCategory] = useState('Views')
+  const activePosts = topPosts[activeCategory] || []
+
   // Create a ref to store the latest topPosts
-  const topPostsRef = useRef([])
+  const topPostsRef = useRef({})
 
   useEffect(() => {
-    ApiService.getTopPosts(params)
-      .then((response) => {
-        setTopPosts(response.data)
+    const fetchTopPosts = async () => {
+      try {
+        const newTopPosts = {}
+        for (const el of categories) {
+          const response = await ApiService.getTopPosts({ ...params, category: el })
+          newTopPosts[el] = response.data
+        }
+        setTopPosts(newTopPosts)
+      } catch (error) {
+        console.error(error)
+      } finally {
         setLoading(false)
-      })
-      .catch((error) => {
-        console.log(error)
-        setLoading(false)
-      })
+      }
+    }
+
+    fetchTopPosts()
   }, [params])
 
   // Update the ref with the latest topPosts whenever the state changes
@@ -40,11 +51,9 @@ const Top = ({ params }) => {
       { intersect: true },
       true,
     )
-    console.log(activePoints)
-    console.log(topPosts)
     if (activePoints.length > 0) {
       const dataIndex = activePoints[0].index
-      const post = topPostsRef.current[dataIndex]
+      const post = topPostsRef.current[activeCategory][dataIndex]
 
       if (post) {
         setSelectedPost(post)
@@ -53,20 +62,40 @@ const Top = ({ params }) => {
     }
   }
 
-  // Prepare chart data
-  const chartData = {
-    labels: topPosts.map((post) => post.description.slice(0, 20)),
-    datasets: [
-      {
-        label: 'Most Views',
-        backgroundColor: `rgba(${getStyle('--cui-info-rgb')}, .7)`,
-        borderColor: getStyle('--cui-info'),
-        data: topPosts.map((post) => post.max_play_count),
-        hoverBackgroundColor: getStyle('--cui-info'),
-        hoverBorderColor: getStyle('--cui-info'),
-      },
-    ],
-  }
+  // Prepare chart data based on the active category
+  const chartData = useMemo(
+    () => ({
+      labels: activePosts.map((post) => post.description.slice(0, 20)),
+      datasets: [
+        {
+          label: activeCategory,
+          backgroundColor: `rgba(${getStyle('--cui-info-rgb')}, .7)`,
+          borderColor: getStyle('--cui-info'),
+          data: activePosts.map((post) => {
+            switch (activeCategory) {
+              case 'Views':
+                return post.max_play_count
+              case 'Likes':
+                return post.max_digg_count
+              case 'Comments':
+                return post.max_comment_count
+              case 'Shares':
+                return post.max_share_count
+              case 'Reposts':
+                return post.max_repost_count
+              case 'Saves':
+                return post.max_collect_count
+              default:
+                return post.max_play_count
+            }
+          }),
+          hoverBackgroundColor: getStyle('--cui-info'),
+          hoverBorderColor: getStyle('--cui-info'),
+        },
+      ],
+    }),
+    [activePosts, activeCategory],
+  )
 
   // Chart options (you can customize these)
   const chartOptions = {
@@ -89,7 +118,7 @@ const Top = ({ params }) => {
       y: {
         title: {
           display: true,
-          text: 'Views',
+          text: activeCategory,
         },
         border: {
           color: getStyle('--cui-border-color-translucent'),
@@ -103,7 +132,7 @@ const Top = ({ params }) => {
       tooltip: {
         callbacks: {
           label: function (tooltipItem) {
-            const post = topPosts[tooltipItem.dataIndex]
+            const post = activePosts[tooltipItem.dataIndex]
             return [
               //`Description: ${post.description}`,
               //` Plays: ${post.max_play_count}`,
@@ -124,12 +153,29 @@ const Top = ({ params }) => {
     <CRow>
       <CCol>
         <CCard>
-          <CCardHeader>
-            <h4>
-              <CIcon icon={cilVideo} size="lg" /> Top Posts by Views
-            </h4>
-          </CCardHeader>
           <CCardBody>
+            <CRow>
+              <CCol sm={5}>
+                <h4 id="topPosts" className="card-title mb-0">
+                  <CIcon icon={cilVideo} size="lg" /> Top Posts by {activeCategory}
+                </h4>
+              </CCol>
+              <CCol sm={7} className="d-none d-md-block">
+                <CButtonGroup className="float-end me-3">
+                  {categories.map((value) => (
+                    <CButton
+                      color="outline-secondary"
+                      key={value}
+                      //className="mx-0"
+                      active={activeCategory === value}
+                      onClick={() => setActiveCategory(value)}
+                    >
+                      {value}
+                    </CButton>
+                  ))}
+                </CButtonGroup>
+              </CCol>
+            </CRow>
             {loading ? (
               <p>Loading posts...</p>
             ) : (

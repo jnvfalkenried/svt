@@ -13,7 +13,7 @@ import {
   cilHeart,
   cilCommentBubble,
   cilShare,
-  cilLoop,
+  cilBookmark,
   cilLink,
   cilCalendar,
 } from '@coreui/icons'
@@ -60,8 +60,8 @@ const PostDetailsOffcanvas = ({ visible, onClose, post }) => {
               {post.max_share_count}
             </p>
             <p>
-              <CIcon icon={cilLoop} className="me-2 text-warning" /> <strong>Reposts:</strong>{' '}
-              {post.max_repost_count}
+              <CIcon icon={cilBookmark} className="me-2 text-warning" /> <strong>Saves:</strong>{' '}
+              {post.max_collect_count}
             </p>
             <p>
               <CIcon icon={cilLink} className="me-2" />{' '}
@@ -90,7 +90,7 @@ PostDetailsOffcanvas.propTypes = {
     max_digg_count: PropTypes.number,
     max_comment_count: PropTypes.number,
     max_share_count: PropTypes.number,
-    max_repost_count: PropTypes.number,
+    max_collect_count: PropTypes.number,
     author_unique_id: PropTypes.string,
     id: PropTypes.string,
     created_at: PropTypes.string,

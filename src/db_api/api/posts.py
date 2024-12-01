@@ -9,6 +9,14 @@ router = APIRouter()
 
 @router.get("/posts")
 async def get_posts(request: Annotated[PostsRequest, Query()]) -> Union[list[ReportFeedResponse], list[ReportPostResponse]]:
+    category_mapping = {
+        "Views": "max_play_count",
+        "Likes": "max_digg_count",
+        "Comments": "max_comment_count",
+        "Shares": "max_share_count",
+        "Reposts": "max_repost_count",
+        "Saves": "max_collect_count",
+    }
     if request.feed:
         async with session() as s:
             posts = await get_top_feed_posts(
@@ -26,10 +34,9 @@ async def get_posts(request: Annotated[PostsRequest, Query()]) -> Union[list[Rep
                 start_date=request.start_date.replace(tzinfo=None),
                 end_date=request.end_date.replace(tzinfo=None),
                 hashtag=request.hashtag,
+                category=category_mapping[request.category],
                 session=s,
                 limit=request.limit
             )
-
-        print(posts[0])
 
         return posts

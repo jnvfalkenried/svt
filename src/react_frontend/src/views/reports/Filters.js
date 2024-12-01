@@ -23,7 +23,7 @@ const Filters = ({ onDateRangeChange, hashtags, selectedHashtag, setSelectedHash
             <div className="d-flex flex-column">
               <label className="form-label fw-bold mb-1">
                 <CIcon icon={cilCalendar} className="me-2" />
-                Select Date Range
+                Posts Collection Date Range
               </label>
               <DatePicker
                 selected={startDate}

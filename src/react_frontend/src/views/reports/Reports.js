@@ -1,5 +1,15 @@
 import React, { useState, useEffect } from 'react'
-import { CNav, CNavItem, CNavLink, CTabContent, CTabPane } from '@coreui/react'
+import {
+  CNav,
+  CNavItem,
+  CNavLink,
+  CTabContent,
+  CTabPane,
+  CCard,
+  CCardHeader,
+  CCardBody,
+  CAlert,
+} from '@coreui/react'
 import ApiService from '../../services/ApiService'
 import Feed from './Feed'
 import Top from './Top'
@@ -56,21 +66,35 @@ const Reports = () => {
         </CNavItem>
       </CNav>
 
-      {/* Filters */}
-      <Filters
-        hashtags={hashtags}
-        selectedHashtag={selectedHashtag}
-        setSelectedHashtag={setSelectedHashtag}
-        onDateRangeChange={setSelectedDateRange}
-      />
-
       <CTabContent>
         {/* Top Posts */}
         <CTabPane visible={activeTab === 'top'}>
+          <CAlert color="info" className="mb-3">
+            Discover the most viewed TikTok posts based on your selected filters. Use this section
+            to analyze which posts are gaining popularity!
+          </CAlert>
+          {/* Filters */}
+          <Filters
+            hashtags={hashtags}
+            selectedHashtag={selectedHashtag}
+            setSelectedHashtag={setSelectedHashtag}
+            onDateRangeChange={setSelectedDateRange}
+          />
           <Top params={{ ...params, feed: false }} />
         </CTabPane>
         {/* Feed */}
         <CTabPane visible={activeTab === 'feed'}>
+          <CAlert color="info" className="mb-3">
+            Explore the TikTok posts that appeared most frequently in users feeds. This can provide
+            insights into TikToks algorithm and content prioritization strategies.
+          </CAlert>
+          {/* Filters */}
+          <Filters
+            hashtags={hashtags}
+            selectedHashtag={selectedHashtag}
+            setSelectedHashtag={setSelectedHashtag}
+            onDateRangeChange={setSelectedDateRange}
+          />
           <Feed params={{ ...params, feed: true }} />
         </CTabPane>
       </CTabContent>
