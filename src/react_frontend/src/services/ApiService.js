@@ -20,6 +20,14 @@ const ApiService = {
   addHashtag: (hashtag) => {
     return ApiService.client.post('/hashtag', { hashtag })
   },
+
+  getActiveHashtags: () => {
+    return ApiService.client.get('/hashtags')
+  },
+
+  getTopPosts: (params) => {
+    return ApiService.client.get('/posts', { params })
+  },
 }
 
 // Add a request interceptor

@@ -1,9 +1,10 @@
 from fastapi import APIRouter
 from sqlalchemy.future import select
-from sqlalchemy import func
+from sqlalchemy import func, text
 from postgresql.config.db import session
-from postgresql.database_models import Authors, Posts, ActiveHashtags, Challenges
+from postgresql.database_models import Authors, Posts, ActiveHashtags, Challenges, PostsReporting
 from schemas.response import StatsResponse
+from datetime import datetime
 
 router = APIRouter()
 

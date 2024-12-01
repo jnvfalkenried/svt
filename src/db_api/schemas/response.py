@@ -1,4 +1,5 @@
 from pydantic import BaseModel, Field
+from datetime import datetime
 
 class AuthorResponse(BaseModel):
     id: str
@@ -36,3 +37,24 @@ class StatsResponse(BaseModel):
     post_count: int
     active_hashtags_count: int
     challenge_count: int
+
+class ReportPostResponse(BaseModel):
+    id: str
+    created_at: datetime
+    last_collected_at: datetime
+    description: str
+    duet_enabled: bool
+    duet_from_id: str
+    is_ad: bool
+    can_repost: bool
+    author_id: str
+    author_unique_id: str
+    max_collect_count: int
+    max_comment_count: int
+    max_digg_count: int
+    max_play_count: int
+    max_repost_count: int
+    max_share_count: int
+
+class ReportFeedResponse(ReportPostResponse):
+    appearances_in_feed: int

@@ -4,7 +4,7 @@ const initialState = {
   sidebarShow: true,
   theme: 'light',
   access_token: localStorage.getItem('access_token'),
-  dev: true,
+  dev: false,
 }
 
 const changeState = (state = initialState, { type, ...rest }) => {
