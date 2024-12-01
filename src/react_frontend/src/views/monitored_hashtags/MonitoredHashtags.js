@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import CIcon from '@coreui/icons-react'
 import { cilChartPie, cilGraph, cilLoopCircular, cilDataTransferDown } from '@coreui/icons'
+import { Link } from 'react-router-dom'
 import {
   CCard,
   CCardBody,
@@ -10,8 +11,13 @@ import {
   CButton,
   CSpinner,
   CTooltip,
+  CInputGroup,
+  CFormInput,
+  CAlert,
 } from '@coreui/react'
 import PropTypes from 'prop-types'
+
+import ApiService from '../../services/ApiService'
 
 const API_BASE_URL = 'http://localhost'
 
@@ -49,6 +55,75 @@ const GrowthIndicator = ({ value, period }) => {
 GrowthIndicator.propTypes = {
   value: PropTypes.number.isRequired,
   period: PropTypes.string.isRequired,
+}
+
+const HashtagSearch = ({ onHashtagAdded }) => {
+  const [hashtag, setHashtag] = useState('')
+  const [responseMessage, setResponseMessage] = useState('')
+  const [loading, setLoading] = useState(false)
+
+  const handleInputChange = (e) => {
+    setHashtag(e.target.value)
+  }
+
+  const handleSubmitHashtag = async () => {
+    if (!hashtag) {
+      setResponseMessage('Please enter a hashtag')
+      return
+    }
+
+    setLoading(true)
+    try {
+      const response = await ApiService.addHashtag(hashtag.toLowerCase())
+      setResponseMessage(response.data.message)
+      setHashtag('')
+      if (onHashtagAdded) {
+        onHashtagAdded()
+      }
+    } catch (error) {
+      console.error('Request failed:', error)
+      setResponseMessage('Request failed. Please try again.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <CCard className="mb-4">
+      <CCardHeader>
+        <h4>Enter a new Hashtag</h4>
+      </CCardHeader>
+      <CCardBody>
+        <CInputGroup className="mb-3">
+          <CFormInput
+            placeholder="Type a hashtag (e.g., React)"
+            value={hashtag}
+            onChange={handleInputChange}
+          />
+          <CButton
+            color="primary"
+            onClick={handleSubmitHashtag}
+            disabled={loading}
+            className="ms-2"
+          >
+            {loading ? <CSpinner size="sm" /> : 'Submit Hashtag'}
+          </CButton>
+        </CInputGroup>
+        {responseMessage && (
+          <CAlert
+            color={responseMessage.startsWith('Error') ? 'danger' : 'success'}
+            className="mb-3"
+          >
+            {responseMessage}
+          </CAlert>
+        )}
+      </CCardBody>
+    </CCard>
+  )
+}
+
+HashtagSearch.propTypes = {
+  onHashtagAdded: PropTypes.func,
 }
 
 const HashtagCard = ({ tag, onRemove }) => {
@@ -113,7 +188,9 @@ const HashtagCard = ({ tag, onRemove }) => {
         </div>
 
         <div className="d-flex justify-content-center my-2">
-          <CButton color="primary">View trending posts for hashtag</CButton>
+          <Link to={`/monitored_hashtags/${tag.id}/trending`}>
+            <CButton color="primary">View trending posts for hashtag</CButton>
+          </Link>
         </div>
 
         <div>
@@ -207,6 +284,7 @@ const MonitoredHashtags = () => {
   return (
     <CRow className="justify-content-center">
       <CCol md={8}>
+        <HashtagSearch onHashtagAdded={fetchHashtags} />
         <CCard className="mb-4">
           <CCardHeader>
             <h4 className="mb-0">

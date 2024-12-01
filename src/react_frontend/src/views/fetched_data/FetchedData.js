@@ -57,17 +57,48 @@ const FetchedData = () => {
     )
   }
 
-  const metrics = [
-    { title: 'Authors', value: stats?.author_count || 0, color: 'info', icon: cilUser },
-    { title: 'Posts', value: stats?.post_count || 0, color: 'primary', icon: cilVideo },
-    { title: 'Challenges', value: stats?.challenge_count || 0, color: 'warning', icon: cilTag },
-    {
-      title: 'Active Hashtags',
-      value: stats?.active_hashtags_count || 0,
-      color: 'danger',
-      icon: cilSearch,
+  const generateLastMonths = (n) => {
+    const months = []
+    const currentDate = new Date()
+
+    for (let i = n - 1; i >= 0; i--) {
+      const date = new Date(currentDate)
+      date.setMonth(date.getMonth() - i)
+      months.push(date.toLocaleDateString('en-US', { year: 'numeric', month: 'short' }))
+    }
+    return months
+  }
+
+  const generateTrendingData = (numPoints, minValue, maxValue) => {
+    const data = []
+    let currentValue = minValue
+
+    for (let i = 0; i < numPoints; i++) {
+      const increase = (maxValue - minValue) * (0.05 + Math.random() * 0.1)
+      currentValue = Math.min(maxValue, currentValue + increase)
+      const noise = currentValue * (Math.random() * 0.1 - 0.05)
+      data.push(Math.round(currentValue + noise))
+    }
+    return data
+  }
+
+  const timeRangeData = {
+    Day: {
+      labels: Array.from({ length: 24 }, (_, i) => `${i}:00`),
+      postsData: generateTrendingData(24, 50, 200),
+      authorsData: generateTrendingData(24, 20, 80),
     },
-  ]
+    Month: {
+      labels: generateLastMonths(12),
+      postsData: generateTrendingData(12, 1000, 5000),
+      authorsData: generateTrendingData(12, 500, 2000),
+    },
+    Year: {
+      labels: Array.from({ length: 5 }, (_, i) => `${2020 + i}`),
+      postsData: generateTrendingData(5, 10000, 50000),
+      authorsData: generateTrendingData(5, 5000, 20000),
+    },
+  }
 
   const unionLabels = platformGrowth
     ? [

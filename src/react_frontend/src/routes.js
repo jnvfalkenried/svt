@@ -3,12 +3,13 @@ import React from 'react'
 const Overview = React.lazy(() => import('./views/overview/Overview'))
 
 // Our components
-const HashtagSearch = React.lazy(() => import('./views/hashtag_search/HashtagSearch'))
 const About = React.lazy(() => import('./views/about/About'))
 const Reports = React.lazy(() => import('./views/reports/Reports'))
 const MonitoredHashtags = React.lazy(() => import('./views/monitored_hashtags/MonitoredHashtags'))
 const MultimodalSearch = React.lazy(() => import('./views/multimodal_search/MultimodalSearch'))
 const FetchedData = React.lazy(() => import('./views/fetched_data/FetchedData'))
+const TrendingPosts = React.lazy(() => import('./views/monitored_hashtags/TrendingPosts'))
+const Trends = React.lazy(() => import('./views/trends/Trends'))
 
 // Old components
 const Dashboard = React.lazy(() => import('./views/dashboard/Dashboard'))
@@ -63,13 +64,13 @@ const Widgets = React.lazy(() => import('./views/widgets/Widgets'))
 
 const routes = [
   { path: '/', exact: true, name: 'Home' },
-  { path: '/trends', name: 'Trends', element: Dashboard },
+  { path: '/trends', name: 'Trends', element: Trends },
   { path: '/search', name: 'Search', element: MultimodalSearch },
-  { path: '/hashtag_search', name: 'Hashtag Search', element: HashtagSearch },
   { path: '/monitored_hashtags', name: 'Monitored Hashtags', element: MonitoredHashtags },
   { path: '/reports', name: 'Reports', element: Reports },
   { path: '/fetched_data', name: 'Fetched Data', element: FetchedData },
   { path: '/about', name: 'About', element: About },
+  { path: '/monitored_hashtags/:id/trending', name: 'Trending Posts', element: TrendingPosts },
   { path: '/overview', name: 'Overview', element: Overview },
   { path: '/dashboard', name: 'Dashboard', element: Dashboard },
   { path: '/theme', name: 'Theme', element: Colors, exact: true },

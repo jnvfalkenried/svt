@@ -30,6 +30,7 @@ async def multimodal_search(
         
         if query:
             print(f"Processing text query: {query}")
+            query = query.strip().lower()
             embeddings = model.get_embeddings(
                 contextual_text=query,
                 dimension=1408

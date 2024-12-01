@@ -28,6 +28,12 @@ async def main():
     scheduler.add_job(tasks_manager.send_tasks_to_queue, "cron", hour=8, minute=1)
     scheduler.add_job(tasks_manager.send_tasks_to_queue, "cron", hour=16, minute=1)
 
+    # Run refresh right after tasks are sent
+    # This refreshes the db materialized view table posts_trends with growth data
+    scheduler.add_job(tasks_manager.refresh_post_trends_view, "cron", hour=1, minute=0)
+    scheduler.add_job(tasks_manager.refresh_post_trends_view, "cron", hour=9, minute=0)
+    scheduler.add_job(tasks_manager.refresh_post_trends_view, "cron", hour=17, minute=0)
+
     scheduler.start()
 
     while True:

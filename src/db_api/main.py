@@ -6,6 +6,7 @@ from api.users import router as users_router
 from api.search import router as search_router
 from api.stats import router as stats_router
 from api.posts import router as posts_router
+from api.post_trends import router as post_trends_router
 
 app = FastAPI()
 
@@ -26,3 +27,4 @@ app.include_router(users_router)
 app.include_router(search_router)
 app.include_router(stats_router)
 app.include_router(posts_router)
+app.include_router(post_trends_router)

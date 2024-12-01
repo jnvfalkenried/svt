@@ -16,7 +16,6 @@ import {
   cilGraph,
   cilSearch,
   cilDataTransferDown,
-  cilHeart,
   cilLoopCircular,
   cilLightbulb,
 } from '@coreui/icons'
@@ -37,12 +36,6 @@ const _navProd = [
     component: CNavItem,
     name: 'Search',
     to: '/search',
-    icon: <CIcon icon={cilSearch} customClassName="nav-icon" />,
-  },
-  {
-    component: CNavItem,
-    name: 'Hashtag Search',
-    to: '/hashtag_search',
     icon: <CIcon icon={cilSearch} customClassName="nav-icon" />,
   },
   {
@@ -86,12 +79,6 @@ const _navDev = [
     component: CNavItem,
     name: 'Search',
     to: '/search',
-    icon: <CIcon icon={cilSearch} customClassName="nav-icon" />,
-  },
-  {
-    component: CNavItem,
-    name: 'Hashtag Search',
-    to: '/hashtag_search',
     icon: <CIcon icon={cilSearch} customClassName="nav-icon" />,
   },
   {
