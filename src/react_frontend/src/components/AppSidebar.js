@@ -38,6 +38,10 @@ const AppSidebar = () => {
           <CIcon customClassName="sidebar-brand-full" icon={logo} height={32} />
           <CIcon customClassName="sidebar-brand-narrow" icon={sygnet} height={32} />
         </CSidebarBrand>*/}
+        <CSidebarBrand to="/" className="d-flex align-items-center">
+          {/* Text-based branding */}
+          <span className="fs-6 text-white">TikTok Fake News Detector</span>
+        </CSidebarBrand>
         <CCloseButton
           className="d-lg-none"
           dark
