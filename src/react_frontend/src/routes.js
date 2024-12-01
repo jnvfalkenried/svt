@@ -9,6 +9,7 @@ const MonitoredHashtags = React.lazy(() => import('./views/monitored_hashtags/Mo
 const MultimodalSearch = React.lazy(() => import('./views/multimodal_search/MultimodalSearch'))
 const FetchedData = React.lazy(() => import('./views/fetched_data/FetchedData'))
 const TrendingPosts = React.lazy(() => import('./views/monitored_hashtags/TrendingPosts'))
+const Trends = React.lazy(() => import('./views/trends/Trends'))
 
 // Old components
 const Dashboard = React.lazy(() => import('./views/dashboard/Dashboard'))
@@ -63,7 +64,7 @@ const Widgets = React.lazy(() => import('./views/widgets/Widgets'))
 
 const routes = [
   { path: '/', exact: true, name: 'Home' },
-  { path: '/trends', name: 'Trends', element: Dashboard },
+  { path: '/trends', name: 'Trends', element: Trends },
   { path: '/search', name: 'Search', element: MultimodalSearch },
   { path: '/monitored_hashtags', name: 'Monitored Hashtags', element: MonitoredHashtags },
   { path: '/reports', name: 'Reports', element: Reports },
