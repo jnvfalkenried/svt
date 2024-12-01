@@ -35,6 +35,8 @@ const AppHeader = () => {
   const dispatch = useDispatch()
   const sidebarShow = useSelector((state) => state.sidebarShow)
 
+  const devMode = useSelector((state) => state.dev)
+
   useEffect(() => {
     document.addEventListener('scroll', () => {
       headerRef.current &&
@@ -53,33 +55,41 @@ const AppHeader = () => {
         </CHeaderToggler>
         <CHeaderNav className="d-none d-md-flex">
           <CNavItem>
-            <CNavLink to="/dashboard" as={NavLink}>
+            <CNavLink to="/trends" as={NavLink}>
               Dashboard
             </CNavLink>
           </CNavItem>
-          <CNavItem>
-            <CNavLink href="#">Users</CNavLink>
-          </CNavItem>
-          <CNavItem>
-            <CNavLink href="#">Settings</CNavLink>
-          </CNavItem>
+          {devMode && (
+            <div className="d-flex">
+              <CNavItem>
+                <CNavLink href="#">Users</CNavLink>
+              </CNavItem>
+              <CNavItem>
+                <CNavLink href="#">Settings</CNavLink>
+              </CNavItem>
+            </div>
+          )}
         </CHeaderNav>
         <CHeaderNav className="ms-auto">
-          <CNavItem>
-            <CNavLink href="#">
-              <CIcon icon={cilBell} size="lg" />
-            </CNavLink>
-          </CNavItem>
-          <CNavItem>
-            <CNavLink href="#">
-              <CIcon icon={cilList} size="lg" />
-            </CNavLink>
-          </CNavItem>
-          <CNavItem>
-            <CNavLink href="#">
-              <CIcon icon={cilEnvelopeOpen} size="lg" />
-            </CNavLink>
-          </CNavItem>
+          {devMode && (
+            <div className="d-flex">
+              <CNavItem>
+                <CNavLink href="#">
+                  <CIcon icon={cilBell} size="lg" />
+                </CNavLink>
+              </CNavItem>
+              <CNavItem>
+                <CNavLink href="#">
+                  <CIcon icon={cilList} size="lg" />
+                </CNavLink>
+              </CNavItem>
+              <CNavItem>
+                <CNavLink href="#">
+                  <CIcon icon={cilEnvelopeOpen} size="lg" />
+                </CNavLink>
+              </CNavItem>
+            </div>
+          )}
         </CHeaderNav>
         <CHeaderNav>
           <li className="nav-item py-1">
