@@ -58,3 +58,10 @@ class ReportPostResponse(BaseModel):
 
 class ReportFeedResponse(ReportPostResponse):
     appearances_in_feed: int
+
+class PlatformGrowthResponse(BaseModel):
+    author_growth: list[dict]
+    post_growth: list[dict]
+    # active_hashtags_growth: list[dict]
+    challenge_growth: list[dict]
+    # video_embeddings_growth: list[dict]
