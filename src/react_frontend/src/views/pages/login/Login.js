@@ -44,7 +44,7 @@ const Login = () => {
         localStorage.setItem('access_token', response.data.access_token)
         dispatch({ type: 'set', access_token: response.data.access_token })
         // Redirect to home page
-        navigate('/')
+        navigate('/trends')
       })
       .catch((error) => {
         if (error.response) {
