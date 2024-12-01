@@ -21,3 +21,6 @@ class PostsRequest(BaseModel):
     hashtag: str
     category: str
     limit: int
+
+class PlatformGrowthRequest(BaseModel):
+    interval: str

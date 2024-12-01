@@ -28,6 +28,14 @@ const ApiService = {
   getTopPosts: (params) => {
     return ApiService.client.get('/posts', { params })
   },
+
+  getPlatformGrowth: (params) => {
+    return ApiService.client.get('/stats/growth', { params })
+  },
+
+  getStats: () => {
+    return ApiService.client.get('/stats')
+  },
 }
 
 // Add a request interceptor
