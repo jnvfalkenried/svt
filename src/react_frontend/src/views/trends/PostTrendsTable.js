@@ -8,11 +8,12 @@ import {
   CTableRow,
   CProgress,
 } from '@coreui/react'
-import CIcon from '@coreui/icons-react'
-import { cilLink } from '@coreui/icons'
+import PostDetailsOffcanvas from './PostTrendsDetailsOffcanvas'
 
 const PostTrendsTable = () => {
   const [trends, setTrends] = useState([])
+  const [selectedPost, setSelectedPost] = useState(null)
+  const [visible, setVisible] = useState(false)
 
   useEffect(() => {
     const fetchTrends = async () => {
@@ -35,37 +36,49 @@ const PostTrendsTable = () => {
   }
 
   return (
-    <CTable align="middle" className="mb-0 border" hover responsive>
-      <CTableHead className="text-nowrap">
-        <CTableRow>
-          <CTableHeaderCell className="bg-body-tertiary">Author</CTableHeaderCell>
-          <CTableHeaderCell className="bg-body-tertiary">Description</CTableHeaderCell>
-          <CTableHeaderCell className="bg-body-tertiary">Video</CTableHeaderCell>
-          <CTableHeaderCell className="bg-body-tertiary">Current Views</CTableHeaderCell>
-          <CTableHeaderCell className="bg-body-tertiary">Daily Growth</CTableHeaderCell>
-          <CTableHeaderCell className="bg-body-tertiary">Weekly Growth</CTableHeaderCell>
-          <CTableHeaderCell className="bg-body-tertiary">Monthly Growth</CTableHeaderCell>
-          <CTableHeaderCell className="bg-body-tertiary">Last Updated</CTableHeaderCell>
-        </CTableRow>
-      </CTableHead>
-      <CTableBody>
-        {trends.map((trend, index) => {
-          const tiktokUrl = `https://www.tiktok.com/@${trend.author_name}/video/${trend.post_id}`
-          return (
+    <>
+      <CTable align="middle" className="mb-0 border" hover responsive>
+        <CTableHead className="text-nowrap">
+          <CTableRow>
+            <CTableHeaderCell className="bg-body-tertiary">Hashtags</CTableHeaderCell>
+            <CTableHeaderCell className="bg-body-tertiary">Post Info</CTableHeaderCell>
+            <CTableHeaderCell className="bg-body-tertiary">Current Views</CTableHeaderCell>
+            <CTableHeaderCell className="bg-body-tertiary">Daily Growth</CTableHeaderCell>
+            <CTableHeaderCell className="bg-body-tertiary">Weekly Growth</CTableHeaderCell>
+            <CTableHeaderCell className="bg-body-tertiary">Monthly Growth</CTableHeaderCell>
+            <CTableHeaderCell className="bg-body-tertiary">Last Updated</CTableHeaderCell>
+          </CTableRow>
+        </CTableHead>
+        <CTableBody>
+          {trends.map((trend, index) => (
             <CTableRow key={index}>
               <CTableDataCell>
-                <div className="fw-semibold">{trend.author_name}</div>
-              </CTableDataCell>
-              <CTableDataCell>
-                <div className="text-truncate" style={{ maxWidth: '200px' }}>
-                  {trend.post_description}
+                <div className="d-flex flex-wrap gap-2" style={{ maxWidth: '200px' }}>
+                  {trend.challenges.slice(0, 3).map((tag, i) => (
+                    <span key={i} className="badge bg-light text-dark">
+                      {tag}
+                    </span>
+                  ))}
+                  {trend.challenges.length > 3 && (
+                    <span
+                      className="badge bg-secondary"
+                      title={trend.challenges.slice(3).join(' ')}
+                    >
+                      +{trend.challenges.length - 3}
+                    </span>
+                  )}
                 </div>
               </CTableDataCell>
               <CTableDataCell>
-                <a href={tiktokUrl} target="_blank" rel="noopener noreferrer">
-                  <CIcon icon={cilLink} className="me-2" />
-                  Watch
-                </a>
+                <button
+                  className="btn btn-ghost-primary"
+                  onClick={() => {
+                    setSelectedPost(trend)
+                    setVisible(true)
+                  }}
+                >
+                  View Details
+                </button>
               </CTableDataCell>
               <CTableDataCell>
                 <div className="fw-semibold">{trend.current_views.toLocaleString()}</div>
@@ -120,10 +133,15 @@ const PostTrendsTable = () => {
                 <div className="fw-semibold">{new Date(trend.collected_at).toLocaleString()}</div>
               </CTableDataCell>
             </CTableRow>
-          )
-        })}
-      </CTableBody>
-    </CTable>
+          ))}
+        </CTableBody>
+      </CTable>
+      <PostDetailsOffcanvas
+        visible={visible}
+        onClose={() => setVisible(false)}
+        post={selectedPost}
+      />
+    </>
   )
 }
 
