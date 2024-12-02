@@ -49,9 +49,9 @@ class TikTokProducer(RabbitMQClient):
                 delivery_mode=aio_pika.DeliveryMode.PERSISTENT,
             )
             await self.exchange.publish(message, routing_key=str(key))
-            logger.debug(
-                f"Produced message with key: {key} \n Message details: {key}: {value}"
-            )
+            # logger.debug(
+            #     f"Produced message with key: {key} \n Message details: {key}: {value}"
+            # )
         except Exception as e:
             logger.error(f"Error producing message: {e}")
 
