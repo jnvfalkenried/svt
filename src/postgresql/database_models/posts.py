@@ -29,6 +29,7 @@ class Posts(Base):
     authors = relationship("Authors", back_populates="posts")
     music = relationship("Music", back_populates="posts")
     video_embeddings = relationship("VideoEmbeddings", back_populates="posts", cascade="all, delete-orphan")
+    url: Mapped[Optional[str]] = mapped_column(String, nullable=True)
    
     __table_args__ = (
         Index("posts_id", "id"),
@@ -39,11 +40,7 @@ class Posts(Base):
         return (
             f"Post("
             f"id={self.id}, "
-            f"collect_count={self.collect_count!r}, "
-            f"comment_count={self.comment_count!r}, "
-            f"digg_count={self.digg_count!r}, "
-            f"play_count={self.play_count!r}"
-            f"repost_count={self.repost_count!r}"
-            f"share_count={self.share_count!r}"
+            f"description={self.description!r}, "
+            f"url={self.url!r}"
             f")"
         )

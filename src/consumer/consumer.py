@@ -122,6 +122,7 @@ class TikTokConsumer(RabbitMQClient):
                         can_repost=item.get("item_control", {}).get("can_repost"),
                         author_id=author_data.get("id"),
                         music_id=music_data.get("id"),
+                        url=f"https://www.tiktok.com/@{author_data.get('uniqueId')}/video/{item.get('id')}",
                         session=s,
                     )
 
@@ -135,6 +136,7 @@ class TikTokConsumer(RabbitMQClient):
                         play_count=item.get("statsV2", {}).get("playCount"),
                         repost_count=item.get("statsV2", {}).get("repostCount"),
                         share_count=item.get("statsV2", {}).get("shareCount"),
+                        url=f"https://www.tiktok.com/@{author_data.get('uniqueId')}/video/{item.get('id')}",
                         session=s,
                     )
 

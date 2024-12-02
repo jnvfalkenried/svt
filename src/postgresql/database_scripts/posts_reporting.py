@@ -11,6 +11,7 @@ async def insert_post_stats(
     play_count: str,
     repost_count: str,
     share_count: str,
+    url: str,
     session,
 ) -> None:
     await session.execute(
@@ -18,11 +19,11 @@ async def insert_post_stats(
             """
             INSERT INTO posts_reporting (
                 id, collected_at, collect_count, comment_count, digg_count, 
-                play_count, repost_count, share_count
+                play_count, repost_count, share_count, url
             ) 
             VALUES (
                 :id, :collected_at, :collect_count, :comment_count, :digg_count, 
-                :play_count, :repost_count, :share_count
+                :play_count, :repost_count, :share_count, :url
             )
             ON CONFLICT (id, collected_at) DO NOTHING
             """
@@ -35,6 +36,7 @@ async def insert_post_stats(
             play_count=play_count,
             repost_count=repost_count,
             share_count=share_count,
+            url=url,
         )
     )
 

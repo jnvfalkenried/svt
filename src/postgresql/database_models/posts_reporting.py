@@ -18,6 +18,7 @@ class PostsReporting(Base):
     play_count: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     repost_count: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     share_count: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    url: Mapped[Optional[str]] = mapped_column(String, nullable=True)
 
     __table_args__ = (
         PrimaryKeyConstraint("id", "collected_at"),
