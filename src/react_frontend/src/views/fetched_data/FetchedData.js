@@ -222,6 +222,33 @@ const FetchedData = () => {
     },
   }
 
+  const metrics = [
+    {
+      color: 'primary',
+      icon: cilUser,
+      title: 'Authors',
+      value: stats?.author_count || 0,
+    },
+    {
+      color: 'info',
+      icon: cilVideo,
+      title: 'Posts',
+      value: stats?.post_count || 0,
+    },
+    {
+      color: 'warning',
+      icon: cilTag,
+      title: 'Active Hashtags',
+      value: stats?.active_hashtags_count || 0,
+    },
+    {
+      color: 'success',
+      icon: cilSearch,
+      title: 'Challenges',
+      value: stats?.challenge_count || 0,
+    },
+  ]
+
   return (
     <CRow>
       <CCol xs={12}>
