@@ -9,6 +9,7 @@ from helpers.logging import setup_logger
 from helpers.rabbitmq import RabbitMQClient
 from postgresql.config.db import session
 from postgresql.database_scripts.authors import insert_author
+from postgresql.database_scripts.authors_reporting import insert_author_stats
 from postgresql.database_scripts.challenges import insert_or_update_challenge
 from postgresql.database_scripts.music import insert_music
 from postgresql.database_scripts.posts import insert_post
@@ -84,6 +85,13 @@ class TikTokConsumer(RabbitMQClient):
                         signature=author_data.get("signature"),
                         unique_id=author_data.get("uniqueId"),
                         verified=author_data.get("verified"),
+                        session=s,
+                    )
+                    
+                    # Process Author Stats
+                    await insert_author_stats(
+                        id=author_data.get("id"),
+                        collected_at=datetime.fromisoformat(item.get("collected_at")),
                         digg_count=authorStats_data.get("diggCount"),
                         follower_count=authorStats_data.get("followerCount"),
                         following_count=authorStats_data.get("followingCount"),
