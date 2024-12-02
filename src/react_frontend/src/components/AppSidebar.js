@@ -8,7 +8,6 @@ import {
   CSidebarHeader,
   CSidebarToggler,
   CFormSwitch,
-  CSidebarBrand,
 } from '@coreui/react'
 
 import { AppSidebarNav } from './AppSidebarNav'
