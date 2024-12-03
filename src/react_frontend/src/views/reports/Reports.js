@@ -1,22 +1,13 @@
 import React, { useState, useEffect } from 'react'
-import {
-  CNav,
-  CNavItem,
-  CNavLink,
-  CTabContent,
-  CTabPane,
-  CCard,
-  CCardHeader,
-  CCardBody,
-  CAlert,
-} from '@coreui/react'
+import { CNav, CNavItem, CNavLink, CTabContent, CTabPane, CAlert } from '@coreui/react'
 import ApiService from '../../services/ApiService'
 import Feed from './Feed'
-import Top from './Top'
+import TopPosts from './TopPosts'
+import TopAuthors from './TopAuthors'
 import Filters from './Filters'
 
 const Reports = () => {
-  const [activeTab, setActiveTab] = useState('top')
+  const [activeTab, setActiveTab] = useState('topPosts')
   const [hashtags, setHashtags] = useState([])
   const [selectedHashtag, setSelectedHashtag] = useState('all')
   const [selectedDateRange, setSelectedDateRange] = useState([null, null])
@@ -48,11 +39,20 @@ const Reports = () => {
       <CNav variant="tabs" role="tablist" className="mb-4">
         <CNavItem>
           <CNavLink
-            active={activeTab === 'top'}
-            onClick={() => setActiveTab('top')}
+            active={activeTab === 'topPosts'}
+            onClick={() => setActiveTab('topPosts')}
             style={{ cursor: 'pointer' }}
           >
             Top Posts
+          </CNavLink>
+        </CNavItem>
+        <CNavItem>
+          <CNavLink
+            active={activeTab === 'topAuthors'}
+            onClick={() => setActiveTab('topAuthors')}
+            style={{ cursor: 'pointer' }}
+          >
+            Top Authors
           </CNavLink>
         </CNavItem>
         <CNavItem>
@@ -61,14 +61,14 @@ const Reports = () => {
             onClick={() => setActiveTab('feed')}
             style={{ cursor: 'pointer' }}
           >
-            Feed
+            Top Posts in Feed
           </CNavLink>
         </CNavItem>
       </CNav>
 
       <CTabContent>
         {/* Top Posts */}
-        <CTabPane visible={activeTab === 'top'}>
+        <CTabPane visible={activeTab === 'topPosts'}>
           <CAlert color="info" className="mb-3">
             Discover the most viewed TikTok posts based on your selected filters. Use this section
             to analyze which posts are gaining popularity!
@@ -80,7 +80,22 @@ const Reports = () => {
             setSelectedHashtag={setSelectedHashtag}
             onDateRangeChange={setSelectedDateRange}
           />
-          <Top params={{ ...params, feed: false }} />
+          <TopPosts params={{ ...params, feed: false }} />
+        </CTabPane>
+        {/* Top Authors */}
+        <CTabPane visible={activeTab === 'topAuthors'}>
+          <CAlert color="info" className="mb-3">
+            Discover the most viewed TikTok authors based on your selected filters. Use this section
+            to analyze which authors are gaining popularity!
+          </CAlert>
+          {/* Filters */}
+          <Filters
+            hashtags={hashtags}
+            selectedHashtag={selectedHashtag}
+            setSelectedHashtag={setSelectedHashtag}
+            onDateRangeChange={setSelectedDateRange}
+          />
+          <TopAuthors params={{ ...params, feed: false }} />
         </CTabPane>
         {/* Feed */}
         <CTabPane visible={activeTab === 'feed'}>

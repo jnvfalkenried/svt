@@ -9,10 +9,6 @@ const ApiService = {
     },
   }),
 
-  authors: () => {
-    return ApiService.client.get('/authors')
-  },
-
   top_authors: () => {
     return ApiService.client.get('/top_authors')
   },
@@ -35,6 +31,10 @@ const ApiService = {
 
   getStats: () => {
     return ApiService.client.get('/stats')
+  },
+
+  getTopAuthors: (params) => {
+    return ApiService.client.get('/authors', { params })
   },
 }
 

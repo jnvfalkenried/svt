@@ -108,7 +108,41 @@ async def multimodal_search(
                 
                 author_ids = [match.author_id for match in matches]
                 authors_query = await s.execute(
-                    text("SELECT * FROM authors WHERE id = ANY(:ids)"),
+                    text("""
+                        WITH post_stats AS (
+                            SELECT
+                                id,
+                                MAX(digg_count) AS max_digg_count,
+                                MAX(play_count) AS max_play_count,
+                                MAX(share_count) AS max_share_count,
+                                MAX(collect_count) AS max_collect_count
+                            FROM posts_reporting
+                            GROUP BY id
+                        ),
+                        author_stats AS (
+                            SELECT
+                                id,
+                                MAX(follower_count) AS follower_count,
+                                MAX(following_count) AS following_count
+                            FROM authors_reporting
+                            GROUP BY id
+                        )
+                        SELECT
+                            a.id,
+                            a.nickname,
+                            a.signature,
+                            astats.follower_count,
+                            astats.following_count,
+                            p.description,
+                            s.max_digg_count,
+                            s.max_play_count,
+                            s.max_share_count,
+                            s.max_collect_count
+                        FROM posts p
+                        LEFT JOIN post_stats s ON p.id = s.id
+                        LEFT JOIN authors a ON p.author_id = a.id
+                        LEFT JOIN author_stats astats ON a.id = astats.id
+                        WHERE a.id = ANY(:ids)"""),
                     {"ids": author_ids}
                 )
                 authors_dict = {str(author.id): author for author in authors_query}
@@ -123,7 +157,7 @@ async def multimodal_search(
                         element_id=str(match.element_id),
                         author=AuthorResponse(
                             id=str(author.id),
-                            username=author.nickname or "Unknown",
+                            nickname=author.nickname or "Unknown",
                             signature=author.signature or "Unknown",
                             follower_count=author.follower_count or 0,
                             following_count=author.following_count or 0,
@@ -138,6 +172,10 @@ async def multimodal_search(
                             can_repost=match.can_repost or False,
                             author_id=str(match.author_id) if match.author_id else None,
                             music_id=str(match.music_id) if match.music_id else None,
+                            max_digg_count=author.max_digg_count or 0,
+                            max_play_count=author.max_play_count or 0,
+                            max_share_count=author.max_share_count or 0,
+                            max_collect_count=author.max_collect_count or 0,
                         ),
                     )
                     formatted_results.append(result)
