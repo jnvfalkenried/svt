@@ -1,17 +1,18 @@
 from fastapi import APIRouter, Query
 from sqlalchemy.future import select
-from sqlalchemy import func
+from sqlalchemy import func, join
 from typing import List, Optional
 from datetime import datetime
 from postgresql.config.db import session
-from postgresql.database_models import PostTrends
+from postgresql.database_models import PostTrends, Posts, Authors, PostsChallenges, Challenges
 from pydantic import BaseModel
 
 router = APIRouter()
 
-# Pydantic model for response
 class PostTrendResponse(BaseModel):
     post_id: str
+    author_name: str
+    post_description: str
     collected_at: datetime
     current_views: int
     daily_change: int
@@ -20,6 +21,7 @@ class PostTrendResponse(BaseModel):
     daily_growth_rate: float
     weekly_growth_rate: float
     monthly_growth_rate: float
+    challenges: List[str]
 
     class Config:
         from_attributes = True
@@ -30,13 +32,12 @@ class PostTrendsListResponse(BaseModel):
 
 @router.get("/post-trends", response_model=PostTrendsListResponse)
 async def get_post_trends(
-    start_date: Optional[datetime] = Query(None, description="Filter trends from this date"),
-    end_date: Optional[datetime] = Query(None, description="Filter trends until this date"),
-    limit: int = Query(50, description="Number of records to return"),
-    offset: int = Query(0, description="Number of records to skip")
+    start_date: Optional[datetime] = Query(None),
+    end_date: Optional[datetime] = Query(None),
+    limit: int = Query(50),
+    offset: int = Query(0)
 ) -> PostTrendsListResponse:
     async with session() as s:
-        # Build base query with explicit column selection
         query = select(
             PostTrends.post_id,
             PostTrends.collected_at,
@@ -46,35 +47,62 @@ async def get_post_trends(
             PostTrends.monthly_change,
             PostTrends.daily_growth_rate,
             PostTrends.weekly_growth_rate,
-            PostTrends.monthly_growth_rate
+            PostTrends.monthly_growth_rate,
+            func.array_agg(Challenges.title).label('challenges'),
+            Authors.nickname.label('author_name'),
+            Posts.description.label('post_description')
+        ).select_from(PostTrends).join(
+            Posts, PostTrends.post_id == Posts.id
+        ).join(
+            Authors, Posts.author_id == Authors.id
+        ).join(
+            PostsChallenges, Posts.id == PostsChallenges.post_id
+        ).join(
+            Challenges, PostsChallenges.challenge_id == Challenges.id
         )
-        count_query = select(func.count()).select_from(PostTrends)
 
-        # Apply filters
+        # Apply filters and execute query
         if start_date:
             query = query.where(PostTrends.collected_at >= start_date)
-            count_query = count_query.where(PostTrends.collected_at >= start_date)
         if end_date:
             query = query.where(PostTrends.collected_at <= end_date)
-            count_query = count_query.where(PostTrends.collected_at <= end_date)
 
-        # Order by both weekly growth rate and current views
-        query = query.order_by(
-            PostTrends.weekly_growth_rate.desc(),  # First by growth rate
-            PostTrends.current_views.desc()        # Then by views
-        )
         
-        query = query.offset(offset).limit(limit)
+        query = query.group_by(
+            PostTrends.post_id,
+            PostTrends.collected_at,
+            PostTrends.current_views,
+            PostTrends.daily_change,
+            PostTrends.weekly_change,
+            PostTrends.monthly_change,
+            PostTrends.daily_growth_rate,
+            PostTrends.weekly_growth_rate,
+            PostTrends.monthly_growth_rate,
+            Authors.nickname,
+            Posts.description
+        ).order_by(
+            PostTrends.weekly_growth_rate.desc(),
+            PostTrends.current_views.desc()
+        ).offset(offset).limit(limit)
 
-        # Execute queries
-        total = await s.scalar(count_query)
         result = await s.execute(query)
         rows = result.all()
 
-        # Convert tuples to Pydantic models
+        # Get total count
+        count_query = select(func.count(PostTrends.post_id)).select_from(
+            PostTrends
+        ).join(
+            Posts, PostTrends.post_id == Posts.id
+        ).join(
+            Authors, Posts.author_id == Authors.id
+        )
+        total = await s.scalar(count_query)
+
         trends = [
             PostTrendResponse(
                 post_id=row.post_id,
+                author_name=row.author_name,
+                post_description=row.post_description,
                 collected_at=row.collected_at,
                 current_views=row.current_views,
                 daily_change=row.daily_change,
@@ -82,18 +110,9 @@ async def get_post_trends(
                 monthly_change=row.monthly_change,
                 daily_growth_rate=row.daily_growth_rate,
                 weekly_growth_rate=row.weekly_growth_rate,
-                monthly_growth_rate=row.monthly_growth_rate
+                monthly_growth_rate=row.monthly_growth_rate, 
+                challenges=['#' + challenge for challenge in row.challenges] if row.challenges else []
             ) for row in rows
         ]
 
-        return PostTrendsListResponse(
-            items=trends,
-            total=total
-        )
-    
-@router.post("/post-trends/refresh")
-async def refresh_post_trends():
-    """Endpoint to refresh the materialized view"""
-    async with session() as s:
-        await PostTrends.refresh_view(s)
-    return {"status": "success", "message": "Post trends materialized view refreshed"}
+        return PostTrendsListResponse(items=trends, total=total)
