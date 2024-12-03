@@ -1,172 +1,111 @@
 import React, { useState, useEffect } from 'react'
-import { useParams, Link } from 'react-router-dom'
 import {
-  CCard,
-  CCardBody,
-  CCardHeader,
-  CRow,
-  CCol,
-  CSpinner,
-  CBreadcrumb,
-  CBreadcrumbItem,
   CTable,
-  CTableHead,
-  CTableRow,
-  CTableHeaderCell,
   CTableBody,
   CTableDataCell,
+  CTableHead,
+  CTableHeaderCell,
+  CTableRow,
+  CProgress,
+  CSpinner,
   CAlert,
 } from '@coreui/react'
-import CIcon from '@coreui/icons-react'
-import { cilArrowLeft } from '@coreui/icons'
-
-const API_BASE_URL = 'http://localhost'
 
 const TrendingPosts = () => {
-  const { id } = useParams()
-  const [posts, setPosts] = useState([])
-  const [hashtag, setHashtag] = useState(null)
+  const [trends, setTrends] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
-  // Define dummy data for when no posts are found
-  const dummyData = [
-    {
-      id: 1,
-      description: 'Fun dance challenge #viral',
-      author: 'DanceKing123',
-      followers: '1.2M',
-      video_growth_daily: '14.5%',
-      video_growth_weekly: '23.3%',
-      video_growth_monthly: '34.7%',
-      videoLink: 'https://example.com/video1',
-    },
-    {
-      id: 2,
-      description: 'Cooking tutorial - Easy pasta recipe',
-      author: 'ChefMaster',
-      followers: '850K',
-      video_growth_daily: '14.5%',
-      video_growth_weekly: '23.3%',
-      video_growth_monthly: '34.7%',
-      videoLink: 'https://example.com/video2',
-    },
-    {
-      id: 3,
-      description: 'Daily vlog - Adventure time!',
-      author: 'TravelBlogger',
-      followers: '2.1M',
-      video_growth_daily: '14.5%',
-      video_growth_weekly: '23.3%',
-      video_growth_monthly: '34.7%',
-      videoLink: 'https://example.com/video3',
-    },
-  ]
-
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchTrends = async () => {
       try {
         setLoading(true)
         setError(null)
-
-        // Fetch hashtag details
-        const hashtagResponse = await fetch(`${API_BASE_URL}/hashtags/${id}`)
-        if (!hashtagResponse.ok) {
-          throw new Error('Loading dummy data for demo')
+        const response = await fetch('http://localhost:80/hashtag-trends')
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`)
         }
-        const hashtagData = await hashtagResponse.json()
-        setHashtag(hashtagData)
-
-        // Fetch trending posts
-        const postsResponse = await fetch(`${API_BASE_URL}/hashtags/${id}/trending`)
-        if (!postsResponse.ok) {
-          throw new Error('Failed to fetch trending posts')
-        }
-        const postsData = await postsResponse.json()
-        setPosts(Array.isArray(postsData) ? postsData : [])
+        const data = await response.json()
+        setTrends(data.items || [])
       } catch (error) {
-        console.error('Error fetching data:', error)
-        setError(error.message)
+        console.error('Error fetching trends:', error)
+        setError('Failed to load hashtag trends. Please try again later.')
       } finally {
         setLoading(false)
       }
     }
+    fetchTrends()
+  }, [])
 
-    fetchData()
-  }, [id])
+  const getProgressColor = (growth) => {
+    if (growth >= 75) return 'success'
+    if (growth >= 50) return 'info'
+    if (growth >= 25) return 'warning'
+    return 'danger'
+  }
 
   if (loading) {
     return (
-      <div className="d-flex justify-content-center align-items-center min-vh-50">
+      <div className="d-flex justify-content-center p-4">
         <CSpinner />
       </div>
     )
   }
 
-  return (
-    <>
-      <CBreadcrumb>
-        <CBreadcrumbItem>
-          <Link to="/monitored_hashtags">
-            <CIcon icon={cilArrowLeft} className="me-2" />
-            Back to Monitored Hashtags
-          </Link>
-        </CBreadcrumbItem>
-        <CBreadcrumbItem active>#{hashtag?.title || 'Loading...'}</CBreadcrumbItem>
-      </CBreadcrumb>
+  if (error) return <CAlert color="danger">{error}</CAlert>
 
-      <CRow>
-        <CCol>
-          {error && (
-            <CAlert color="danger" className="mb-4">
-              {error}
-            </CAlert>
-          )}
-          <CCard className="mb-4">
-            <CCardHeader>
-              <h4 className="mb-0">
-                Trending Posts {hashtag?.title ? `for #${hashtag.title}` : ''}
-              </h4>
-              <small className="text-muted">
-                {error || posts.length === 0 ? 'Loading dummy data for demonstration' : ''}
-              </small>
-            </CCardHeader>
-            <CCardBody>
-              <CTable hover>
-                <CTableHead>
-                  <CTableRow>
-                    <CTableHeaderCell scope="col">Post Description</CTableHeaderCell>
-                    <CTableHeaderCell scope="col">Author</CTableHeaderCell>
-                    <CTableHeaderCell scope="col"># of Followers</CTableHeaderCell>
-                    <CTableHeaderCell scope="col">Video Growth Daily</CTableHeaderCell>
-                    <CTableHeaderCell scope="col">Video Growth Weekly</CTableHeaderCell>
-                    <CTableHeaderCell scope="col">Video Growth Monthly</CTableHeaderCell>
-                    <CTableHeaderCell scope="col">Video Link</CTableHeaderCell>
-                  </CTableRow>
-                </CTableHead>
-                <CTableBody>
-                  {(posts.length > 0 ? posts : dummyData).map((item) => (
-                    <CTableRow key={item.id}>
-                      <CTableDataCell>{item.description || item.title}</CTableDataCell>
-                      <CTableDataCell>{item.author}</CTableDataCell>
-                      <CTableDataCell>{item.followers}</CTableDataCell>
-                      <CTableDataCell>{item.video_growth_daily}</CTableDataCell>
-                      <CTableDataCell>{item.video_growth_weekly}</CTableDataCell>
-                      <CTableDataCell>{item.video_growth_monthly}</CTableDataCell>
-                      <CTableDataCell>
-                        <a href={item.videoLink} className="text-decoration-none">
-                          View Video
-                        </a>
-                      </CTableDataCell>
-                    </CTableRow>
-                  ))}
-                </CTableBody>
-              </CTable>
-            </CCardBody>
-          </CCard>
-        </CCol>
-      </CRow>
-    </>
+  if (!trends.length) return <CAlert color="info">No hashtag trends available at this time.</CAlert>
+
+  return (
+    <CTable align="middle" className="mb-0 border" hover responsive>
+      <CTableHead className="text-nowrap">
+        <CTableRow>
+          <CTableHeaderCell className="bg-body-tertiary">Hashtag</CTableHeaderCell>
+          <CTableHeaderCell className="bg-body-tertiary">Daily Growth</CTableHeaderCell>
+          <CTableHeaderCell className="bg-body-tertiary">Weekly Growth</CTableHeaderCell>
+          <CTableHeaderCell className="bg-body-tertiary">Monthly Growth</CTableHeaderCell>
+        </CTableRow>
+      </CTableHead>
+      <CTableBody>
+        {trends.map((trend, index) => (
+          <CTableRow key={index}>
+            <CTableDataCell>
+              <div className="fw-semibold">{trend.hashtag_title}</div>
+            </CTableDataCell>
+            <CTableDataCell>
+              <div className="d-flex justify-content-between">
+                <div className="fw-semibold">{trend.daily_growth.toFixed(2)}%</div>
+              </div>
+              <CProgress
+                thin
+                color={getProgressColor(trend.daily_growth)}
+                value={Math.min(100, Math.abs(trend.daily_growth))}
+              />
+            </CTableDataCell>
+            <CTableDataCell>
+              <div className="d-flex justify-content-between">
+                <div className="fw-semibold">{trend.weekly_growth.toFixed(2)}%</div>
+              </div>
+              <CProgress
+                thin
+                color={getProgressColor(trend.weekly_growth)}
+                value={Math.min(100, Math.abs(trend.weekly_growth))}
+              />
+            </CTableDataCell>
+            <CTableDataCell>
+              <div className="d-flex justify-content-between">
+                <div className="fw-semibold">{trend.monthly_growth.toFixed(2)}%</div>
+              </div>
+              <CProgress
+                thin
+                color={getProgressColor(trend.monthly_growth)}
+                value={Math.min(100, Math.abs(trend.monthly_growth))}
+              />
+            </CTableDataCell>
+          </CTableRow>
+        ))}
+      </CTableBody>
+    </CTable>
   )
 }
 
