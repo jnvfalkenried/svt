@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { CCard, CCardBody, CCardHeader, CRow, CCol, CButton, CSpinner, CBadge } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 import { cilSearch, cilImage, cilX, cilHeart, cilPeople, cilUserFollow } from '@coreui/icons'
+import ApiService from '../../services/ApiService'
 
 const MultimodalSearch = () => {
   const [searchQuery, setSearchQuery] = useState('')
@@ -51,12 +52,10 @@ const MultimodalSearch = () => {
 
       if (searchQuery && searchQuery.trim()) {
         formData.append('query', searchQuery.trim())
-        console.log('Adding query to form:', searchQuery.trim())
       }
 
       if (selectedImage) {
         formData.append('image', selectedImage)
-        console.log('Adding image to form:', selectedImage.name)
       }
 
       const response = await fetch('http://localhost/search/multimodal', {
@@ -76,8 +75,6 @@ const MultimodalSearch = () => {
         console.error('Unexpected response format:', text)
         throw new Error('Unexpected response format from server')
       }
-
-      console.log('Results:', data)
 
       if (!response.ok) {
         throw new Error(data.detail || 'Search failed')
@@ -100,12 +97,16 @@ const MultimodalSearch = () => {
     }
   }
 
-  const renderAuthorInfo = (author) => {
-    if (!author) return 'Unknown Author'
+  const renderPostInfo = (post, author) => {
+    if (!author || !post) return 'Post information is not available'
+
+    const authorUniqueId = author.author_unique_id || 'unknown-author' // Provide a fallback value
+    const tiktokUrl = `https://www.tiktok.com/@${authorUniqueId}/video/${post.id || 'unknown-id'}`
+
     return (
-      <div className="author-info">
+      <div className="post-info">
         <div className="d-flex align-items-center gap-2">
-          <strong>Username: {author.username || 'Unknown'}</strong>{' '}
+          <strong>Username: {author.nickname || 'Unknown'}</strong>{' '}
         </div>
         <div className="d-flex align-items-center gap-2">
           <small>Signature: {author.signature || 'Unknown'}</small>{' '}
@@ -113,21 +114,50 @@ const MultimodalSearch = () => {
         <div className="d-flex gap-3 text-muted small mt-1">
           {author.follower_count !== undefined && (
             <span>
-              <CIcon icon={cilPeople} size="sm" /> {author.follower_count.toLocaleString()}{' '}
-              followers
+              <CIcon icon="cilUser" size="sm" /> {author.follower_count.toLocaleString()} followers
             </span>
           )}
           {author.following_count !== undefined && (
             <span>
-              <CIcon icon={cilUserFollow} size="sm" /> {author.following_count.toLocaleString()}{' '}
+              <CIcon icon="cilArrowRight" size="sm" /> {author.following_count.toLocaleString()}{' '}
               following
             </span>
           )}
           {author.heart_count !== undefined && (
             <span>
-              <CIcon icon={cilHeart} size="sm" /> {author.heart_count.toLocaleString()} likes
+              <CIcon icon="cilLike" size="sm" /> {author.heart_count.toLocaleString()} likes
             </span>
           )}
+        </div>
+
+        {/* Additional post statistics */}
+        <div className="d-flex gap-3 text-muted small mt-1">
+          {post.max_digg_count !== 0 && (
+            <span>
+              <CIcon icon="cilThumbUp" size="sm" /> {post.max_digg_count.toLocaleString()} likes
+            </span>
+          )}
+          {post.max_play_count !== 0 && (
+            <span>
+              <CIcon icon="cilPlayCircle" size="sm" /> {post.max_play_count.toLocaleString()} views
+            </span>
+          )}
+          {post.max_share_count !== 0 && (
+            <span>
+              <CIcon icon="cilShareAlt" size="sm" /> {post.max_share_count.toLocaleString()} shares
+            </span>
+          )}
+          {post.max_collect_count !== 0 && (
+            <span>
+              <CIcon icon="cilBookmark" size="sm" /> {post.max_collect_count.toLocaleString()} saves
+            </span>
+          )}
+        </div>
+
+        <div className="mt-2">
+          <a href={tiktokUrl} target="_blank" rel="noopener noreferrer" className="btn btn-primary">
+            Watch Post on TikTok
+          </a>
         </div>
       </div>
     )
@@ -218,7 +248,9 @@ const MultimodalSearch = () => {
                 <CCard>
                   <CCardBody>
                     <div className="d-flex justify-content-between align-items-start mb-3">
-                      <div className="flex-grow-1">{renderAuthorInfo(result.author)}</div>
+                      <div className="flex-grow-1">
+                        {renderPostInfo(result.post, result.author)}
+                      </div>
                       <div className="text-end ms-3">
                         <p className="text-muted mb-1">Similarity score: {result.similarity}</p>
                         {result.created_at && (

@@ -8,7 +8,7 @@ import { CIcon } from '@coreui/icons-react'
 import { cilVideo } from '@coreui/icons'
 import PostDetailsOffcanvas from './PostDetailsOffcanvas'
 
-const Top = ({ params }) => {
+const TopPosts = ({ params }) => {
   const categories = ['Views', 'Likes', 'Comments', 'Shares', 'Saves'] // 'Reposts' is always 0
   const [topPosts, setTopPosts] = useState({})
   const [loading, setLoading] = useState(true)
@@ -195,8 +195,8 @@ const Top = ({ params }) => {
   )
 }
 
-Top.propTypes = {
+TopPosts.propTypes = {
   params: PropTypes.object.isRequired,
 }
 
-export default Top
+export default TopPosts

@@ -3,10 +3,17 @@ from datetime import datetime
 
 class AuthorResponse(BaseModel):
     id: str
-    username: str = Field(default="Unknown")
+    nickname: str = Field(default="Unknown")
     signature: str = Field(default="Unknown")
-    follower_count: int = Field(default=0)
-    following_count: int = Field(default=0)
+    unique_id: str = Field(default="Unknown")
+    verified: bool = Field(default=False)
+    last_collected_at: datetime = Field(default=None)
+    max_follower_count: int = Field(default=0)
+    max_following_count: int = Field(default=0)
+    max_digg_count: int = Field(default=0)
+    max_heart_count: int = Field(default=0)
+    max_video_count: int = Field(default=0)
+    
 
 class PostResponse(BaseModel):
     id: str
@@ -18,6 +25,10 @@ class PostResponse(BaseModel):
     can_repost: bool = Field(default=False)
     author_id: str = Field(default=None)
     music_id: str = Field(default=None)
+    max_digg_count: int = Field(default=0)
+    max_play_count: int = Field(default=0)
+    max_share_count: int = Field(default=0)
+    max_collect_count: int = Field(default=0)
 
 class MatchResponse(BaseModel):
     post_id: str

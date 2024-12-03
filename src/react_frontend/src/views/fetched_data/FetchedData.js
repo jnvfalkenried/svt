@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { CCard, CCardBody, CCol, CRow, CWidgetStatsF, CButton, CButtonGroup } from '@coreui/react'
 import { CChartLine, CChartBar } from '@coreui/react-chartjs'
 import CIcon from '@coreui/icons-react'
-import { cilCloudDownload, cilUser, cilVideo, cilTag, cilSearch } from '@coreui/icons'
+import { cilUser, cilVideo, cilTag, cilSearch } from '@coreui/icons'
 import { getStyle } from '@coreui/utils'
 import ApiService from '../../services/ApiService'
 
@@ -55,49 +55,6 @@ const FetchedData = () => {
         </CCardBody>
       </CCard>
     )
-  }
-
-  const generateLastMonths = (n) => {
-    const months = []
-    const currentDate = new Date()
-
-    for (let i = n - 1; i >= 0; i--) {
-      const date = new Date(currentDate)
-      date.setMonth(date.getMonth() - i)
-      months.push(date.toLocaleDateString('en-US', { year: 'numeric', month: 'short' }))
-    }
-    return months
-  }
-
-  const generateTrendingData = (numPoints, minValue, maxValue) => {
-    const data = []
-    let currentValue = minValue
-
-    for (let i = 0; i < numPoints; i++) {
-      const increase = (maxValue - minValue) * (0.05 + Math.random() * 0.1)
-      currentValue = Math.min(maxValue, currentValue + increase)
-      const noise = currentValue * (Math.random() * 0.1 - 0.05)
-      data.push(Math.round(currentValue + noise))
-    }
-    return data
-  }
-
-  const timeRangeData = {
-    Day: {
-      labels: Array.from({ length: 24 }, (_, i) => `${i}:00`),
-      postsData: generateTrendingData(24, 50, 200),
-      authorsData: generateTrendingData(24, 20, 80),
-    },
-    Month: {
-      labels: generateLastMonths(12),
-      postsData: generateTrendingData(12, 1000, 5000),
-      authorsData: generateTrendingData(12, 500, 2000),
-    },
-    Year: {
-      labels: Array.from({ length: 5 }, (_, i) => `${2020 + i}`),
-      postsData: generateTrendingData(5, 10000, 50000),
-      authorsData: generateTrendingData(5, 5000, 20000),
-    },
   }
 
   const unionLabels = platformGrowth
@@ -236,16 +193,16 @@ const FetchedData = () => {
       value: stats?.post_count || 0,
     },
     {
+      color: 'success',
+      icon: cilSearch,
+      title: 'Collected Hashtags',
+      value: stats?.challenge_count || 0,
+    },
+    {
       color: 'warning',
       icon: cilTag,
       title: 'Active Hashtags',
       value: stats?.active_hashtags_count || 0,
-    },
-    {
-      color: 'success',
-      icon: cilSearch,
-      title: 'Challenges',
-      value: stats?.challenge_count || 0,
     },
   ]
 
