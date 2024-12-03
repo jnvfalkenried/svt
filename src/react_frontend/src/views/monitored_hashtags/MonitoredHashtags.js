@@ -16,7 +16,6 @@ import {
   CAlert,
 } from '@coreui/react'
 import PropTypes from 'prop-types'
-
 import ApiService from '../../services/ApiService'
 
 const API_BASE_URL = 'http://localhost'
@@ -220,32 +219,39 @@ const MonitoredHashtags = () => {
   const [hashtags, setHashtags] = useState([])
   const [loading, setLoading] = useState(true)
 
-  const getGrowthData = (hashtagId) => ({
-    daily: Math.random() * 20 - 10,
-    weekly: Math.random() * 30 - 15,
-    monthly: Math.random() * 40 - 20,
-    related: [
-      { id: `${hashtagId}-1`, title: 'related1' },
-      { id: `${hashtagId}-2`, title: 'related2' },
-      { id: `${hashtagId}-3`, title: 'related3' },
-    ],
-  })
-
   useEffect(() => {
     fetchHashtags()
   }, [])
 
   const fetchHashtags = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/hashtags`)
-      const data = await response.json()
-      const activeHashtags = data
-        .filter((tag) => tag.active)
-        .map((tag) => ({
+      // First fetch the active hashtags
+      const hashtagsResponse = await fetch(`${API_BASE_URL}/hashtags`)
+      const hashtagsData = await hashtagsResponse.json()
+      const activeHashtags = hashtagsData.filter((tag) => tag.active)
+
+      // Then fetch the growth data from your new endpoint
+      const trendsResponse = await fetch(`${API_BASE_URL}/hashtag-trends`)
+      const trendsData = await trendsResponse.json()
+      console.log('Trends Data:', trendsData)
+
+      // Merge hashtag data with growth data
+      const hashtagsWithGrowth = activeHashtags.map((tag) => {
+        const trendData = trendsData.items.find((trend) => trend.hashtag_id === tag.id) || {
+          daily_growth: 0,
+          weekly_growth: 0,
+          monthly_growth: 0,
+        }
+        return {
           ...tag,
-          ...getGrowthData(tag.id),
-        }))
-      setHashtags(activeHashtags)
+          daily: trendData.daily_growth,
+          weekly: trendData.weekly_growth,
+          monthly: trendData.monthly_growth,
+          related: [], // Will be populated when related hashtags endpoint is available
+        }
+      })
+
+      setHashtags(hashtagsWithGrowth)
       setLoading(false)
     } catch (error) {
       console.error('Error fetching hashtags:', error)
