@@ -240,12 +240,12 @@ services:
   frontend:
     profiles: ["webapp"]
     build:
-      context: ./src
-      dockerfile: ./react_frontend/Dockerfile
+      context: ./
+      dockerfile: ./webapp/frontend/Dockerfile
     ports:
       - "3000:3000"
     volumes:
-      - ./src/react_frontend:/app
+      - ./webapp/frontend:/app
       - /app/node_modules
     environment:
       CHOKIDAR_USEPOLLING: true

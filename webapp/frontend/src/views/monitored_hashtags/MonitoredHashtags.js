@@ -18,7 +18,7 @@ import {
 import PropTypes from 'prop-types'
 import ApiService from '../../services/ApiService'
 
-const API_BASE_URL = 'http://localhost'
+const API_BASE_URL = 'http://localhost:8000'
 
 // PropTypes definitions
 const RelatedHashtagPropType = PropTypes.shape({
@@ -226,12 +226,12 @@ const MonitoredHashtags = () => {
   const fetchHashtags = async () => {
     try {
       // First fetch the active hashtags
-      const hashtagsResponse = await fetch(`${API_BASE_URL}/hashtags`)
+      const hashtagsResponse = await fetch(`${API_BASE_URL}/api/hashtags`)
       const hashtagsData = await hashtagsResponse.json()
       const activeHashtags = hashtagsData.filter((tag) => tag.active)
 
       // Then fetch the growth data from your new endpoint
-      const trendsResponse = await fetch(`${API_BASE_URL}/hashtag-trends`)
+      const trendsResponse = await fetch(`${API_BASE_URL}/api/hashtag-trends`)
       const trendsData = await trendsResponse.json()
       console.log('Trends Data:', trendsData)
 
@@ -261,7 +261,7 @@ const MonitoredHashtags = () => {
 
   const removeHashtag = async (id) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/hashtags/${id}/deactivate`, {
+      const response = await fetch(`${API_BASE_URL}/api/hashtags/${id}/deactivate`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

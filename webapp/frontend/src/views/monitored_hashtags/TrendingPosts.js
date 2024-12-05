@@ -21,7 +21,7 @@ const TrendingPosts = () => {
       try {
         setLoading(true)
         setError(null)
-        const response = await fetch('http://localhost:80/hashtag-trends')
+        const response = await fetch('http://localhost:8000/api/hashtag-trends')
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`)
         }

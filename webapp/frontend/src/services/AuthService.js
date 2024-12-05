@@ -2,7 +2,7 @@ import axios from 'axios'
 
 const AuthService = {
   client: axios.create({
-    baseURL: 'http://localhost:80',
+    baseURL: 'http://localhost:8000',
     timeout: 1000,
     headers: {
       'Content-Type': 'application/json',
@@ -10,7 +10,7 @@ const AuthService = {
   }),
 
   register: (username, email, password, roles) => {
-    return AuthService.client.post('/register', {
+    return AuthService.client.post('/api/register', {
       username,
       email,
       password,
@@ -19,7 +19,7 @@ const AuthService = {
   },
 
   login: (username, password) => {
-    return AuthService.client.post('/login', {
+    return AuthService.client.post('/api/login', {
       username,
       password,
     })

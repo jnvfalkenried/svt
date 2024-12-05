@@ -2,7 +2,7 @@ import axios from 'axios'
 
 const ApiService = {
   client: axios.create({
-    baseURL: 'http://localhost:80',
+    baseURL: 'http://localhost:8000',
     timeout: 1000,
     headers: {
       'Content-Type': 'application/json',
@@ -10,31 +10,31 @@ const ApiService = {
   }),
 
   top_authors: () => {
-    return ApiService.client.get('/top_authors')
+    return ApiService.client.get('/api/top_authors')
   },
 
   addHashtag: (hashtag) => {
-    return ApiService.client.post('/hashtag', { hashtag })
+    return ApiService.client.post('/api/hashtag', { hashtag })
   },
 
   getActiveHashtags: () => {
-    return ApiService.client.get('/hashtags')
+    return ApiService.client.get('/api/hashtags')
   },
 
   getTopPosts: (params) => {
-    return ApiService.client.get('/posts', { params })
+    return ApiService.client.get('/api/posts', { params })
   },
 
   getPlatformGrowth: (params) => {
-    return ApiService.client.get('/stats/growth', { params })
+    return ApiService.client.get('/api/stats/growth', { params })
   },
 
   getStats: () => {
-    return ApiService.client.get('/stats')
+    return ApiService.client.get('/api/stats')
   },
 
   getTopAuthors: (params) => {
-    return ApiService.client.get('/authors', { params })
+    return ApiService.client.get('/api/authors', { params })
   },
 }
 

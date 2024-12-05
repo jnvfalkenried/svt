@@ -5,7 +5,7 @@ FROM node:18-alpine AS build
 WORKDIR /app
 
 # Install dependencies
-COPY ./react_frontend/package*.json ./
+COPY ./webapp/frontend/package*.json ./
 RUN npm install
 
 # Copy the rest of the app source code

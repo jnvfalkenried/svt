@@ -18,7 +18,7 @@ const PostTrendsTable = () => {
   useEffect(() => {
     const fetchTrends = async () => {
       try {
-        const response = await fetch('http://localhost:80/post-trends')
+        const response = await fetch('http://localhost:8000/api/post-trends')
         const data = await response.json()
         setTrends(data.items)
       } catch (error) {

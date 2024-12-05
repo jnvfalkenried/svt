@@ -32,7 +32,7 @@ const AppHeaderDropdown = () => {
     // Remove the authentication state from localStorage
     localStorage.removeItem('access_token')
     // Redirect to login page
-    navigate('/login')
+    navigate('/api/login')
   }
   const devMode = useSelector((state) => state.dev)
   const [userInitials, setUserInitials] = useState('')
