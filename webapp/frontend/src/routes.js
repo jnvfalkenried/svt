@@ -63,7 +63,7 @@ const Toasts = React.lazy(() => import('./views/notifications/toasts/Toasts'))
 const Widgets = React.lazy(() => import('./views/widgets/Widgets'))
 
 const routes = [
-  { path: '/', exact: true, name: 'Home' },
+  { path: '/', exact: true, name: 'Home', element: Trends },
   { path: '/trends', name: 'Trends', element: Trends },
   { path: '/search', name: 'Search', element: MultimodalSearch },
   { path: '/monitored_hashtags', name: 'Monitored Hashtags', element: MonitoredHashtags },

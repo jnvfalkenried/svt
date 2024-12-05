@@ -289,3 +289,17 @@ services:
     depends_on:
       - frontend
       - backend
+    restart: always
+
+  ngrok:
+    profiles: ["webapp"]
+    image: ngrok/ngrok:latest
+    command:
+      - "http"
+      - "nginx:80"
+    environment:
+      NGROK_AUTHTOKEN: ${NGROK_AUTH_TOKEN}
+    depends_on:
+      - nginx
+    ports:
+      - 4040:4040

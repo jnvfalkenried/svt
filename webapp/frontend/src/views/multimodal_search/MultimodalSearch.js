@@ -58,7 +58,7 @@ const MultimodalSearch = () => {
         formData.append('image', selectedImage)
       }
 
-      const response = await fetch('http://localhost:8000/api/search/multimodal', {
+      const response = await fetch('/api/search/multimodal', {
         method: 'POST',
         body: formData,
         headers: {

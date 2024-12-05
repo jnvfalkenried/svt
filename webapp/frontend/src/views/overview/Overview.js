@@ -26,7 +26,7 @@ const Overview = () => {
 
   useEffect(() => {
     // Call the FastAPI stats endpoint
-    fetch('http://localhost:8000/api/stats')
+    fetch('/api/stats')
       .then((response) => {
         if (!response.ok) {
           throw new Error('Failed to fetch stats')

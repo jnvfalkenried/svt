@@ -1,8 +1,9 @@
-import axios from 'axios'
+import axios from 'axios';
 
 const AuthService = {
   client: axios.create({
-    baseURL: 'http://localhost:8000',
+    // Automatically determine base URL dynamically
+    baseURL: `${window.location.origin}/api`,
     timeout: 1000,
     headers: {
       'Content-Type': 'application/json',
@@ -10,20 +11,20 @@ const AuthService = {
   }),
 
   register: (username, email, password, roles) => {
-    return AuthService.client.post('/api/register', {
+    return AuthService.client.post('/register', {
       username,
       email,
       password,
       roles,
-    })
+    });
   },
 
   login: (username, password) => {
-    return AuthService.client.post('/api/login', {
+    return AuthService.client.post('/login', {
       username,
       password,
-    })
+    });
   },
-}
+};
 
-export default AuthService
+export default AuthService;
