@@ -41,8 +41,12 @@ const AppHeaderDropdown = () => {
     const token = localStorage.getItem('access_token')
     if (!token) return
     const decoded = jwtDecode(token)
-    // Set the user's initials
-    setUserInitials(`${decoded.username[0].toUpperCase()}${decoded.username[1].toUpperCase()}`)
+    // Set the user's initials if username is defined and has at least two characters
+    if (decoded.username && decoded.username.length >= 2) {
+      setUserInitials(`${decoded.username[0].toUpperCase()}${decoded.username[1].toUpperCase()}`)
+    } else {
+      setUserInitials(decoded.username ? decoded.username[0].toUpperCase() : '')
+    }
   }, [])
 
   return (
