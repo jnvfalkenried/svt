@@ -293,10 +293,9 @@ services:
 
   ngrok:
     profiles: ["webapp"]
-    image: ngrok/ngrok:latest
-    command:
-      - "http"
-      - "nginx:80"
+    build:
+      context: ./webapp/ngrok
+      dockerfile: Dockerfile
     environment:
       NGROK_AUTHTOKEN: ${NGROK_AUTH_TOKEN}
     depends_on:
