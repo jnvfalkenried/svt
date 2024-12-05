@@ -9,15 +9,13 @@ from core.auth import hash_password, verify_password, create_access_token
 
 router = APIRouter()
 
-@router.post("/register")
+
+@router.post("/api/register")
 async def register(user: UserRequest) -> dict[str, str]:
     # Run a query to register a user
     async with session() as s:
         # Check if the user already exists
-        result = await s.execute(
-            select(Users)
-            .where(Users.username == user.username)
-        )
+        result = await s.execute(select(Users).where(Users.username == user.username))
         existing_user = result.scalars().first()
         if existing_user:
             raise HTTPException(status_code=400, detail="User already exists")
@@ -33,7 +31,7 @@ async def register(user: UserRequest) -> dict[str, str]:
                 email=user.email,
                 password_hash=user.password,
                 roles=user.roles,
-                session=s
+                session=s,
             )
             await s.commit()
             return {"message": "User registered successfully"}
@@ -42,25 +40,27 @@ async def register(user: UserRequest) -> dict[str, str]:
             await s.rollback()
             raise HTTPException(status_code=500, detail="Failed to register user")
 
-@router.post("/login")
+
+@router.post("/api/login")
 async def login(login_request: LoginRequest) -> dict[str, str]:
     # Run a query to login a user
     async with session() as s:
         # Check if the user exists
         result = await s.execute(
-            select(Users)
-            .where(Users.username == login_request.username)
+            select(Users).where(Users.username == login_request.username)
         )
         user = result.scalars().first()
 
         # Verify the user
         if not user:
             raise HTTPException(status_code=401, detail="Invalid username or password")
-        
+
         # Verify the password
         if not verify_password(login_request.password, user.password_hash):
             raise HTTPException(status_code=401, detail="Invalid username or password")
-        
+
         # Create JWT token
-        access_token = create_access_token(data={"username": user.username, "email": user.email, "roles": user.roles})
+        access_token = create_access_token(
+            data={"username": user.username, "email": user.email, "roles": user.roles}
+        )
         return {"access_token": access_token, "token_type": "bearer"}

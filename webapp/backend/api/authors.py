@@ -12,8 +12,11 @@ from schemas.response import AuthorResponse
 router = APIRouter()
 
 
-@router.get("/authors")
-async def get_authors(request: Annotated[PostsRequest, Query()], current_user: Users = Depends(verify_token)) -> list[AuthorResponse]:
+@router.get("/api/authors")
+async def get_authors(
+    request: Annotated[PostsRequest, Query()],
+    current_user: Users = Depends(verify_token),
+) -> list[AuthorResponse]:
     hashtag_mapping = {
         "Likes Collected": "max_heart_count",
         "Likes Given": "max_digg_count",
@@ -21,7 +24,7 @@ async def get_authors(request: Annotated[PostsRequest, Query()], current_user: U
         "Following": "max_following_count",
         "Videos": "max_video_count",
     }
-    
+
     async with session() as s:
         result = await get_top_authors(
             start_date=request.start_date.replace(tzinfo=None),
@@ -29,6 +32,6 @@ async def get_authors(request: Annotated[PostsRequest, Query()], current_user: U
             session=s,
             hashtag=request.hashtag,
             category=hashtag_mapping[request.category],
-            limit=request.limit
+            limit=request.limit,
         )
         return result

@@ -1,14 +1,20 @@
 from fastapi import APIRouter, Query
 from postgresql.config.db import session
-from postgresql.database_scripts.posts_reporting import get_top_feed_posts, get_top_posts
+from postgresql.database_scripts.posts_reporting import (
+    get_top_feed_posts,
+    get_top_posts,
+)
 from schemas.request import PostsRequest
 from schemas.response import ReportFeedResponse, ReportPostResponse
 from typing import Annotated, Union
 
 router = APIRouter()
 
-@router.get("/posts")
-async def get_posts(request: Annotated[PostsRequest, Query()]) -> Union[list[ReportFeedResponse], list[ReportPostResponse]]:
+
+@router.get("/api/posts")
+async def get_posts(
+    request: Annotated[PostsRequest, Query()]
+) -> Union[list[ReportFeedResponse], list[ReportPostResponse]]:
     category_mapping = {
         "Views": "max_play_count",
         "Likes": "max_digg_count",
@@ -24,7 +30,7 @@ async def get_posts(request: Annotated[PostsRequest, Query()]) -> Union[list[Rep
                 end_date=request.end_date.replace(tzinfo=None),
                 hashtag=request.hashtag,
                 session=s,
-                limit=request.limit
+                limit=request.limit,
             )
 
         return posts
@@ -36,7 +42,7 @@ async def get_posts(request: Annotated[PostsRequest, Query()]) -> Union[list[Rep
                 hashtag=request.hashtag,
                 category=category_mapping[request.category],
                 session=s,
-                limit=request.limit
+                limit=request.limit,
             )
 
         return posts

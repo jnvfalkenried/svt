@@ -4,10 +4,17 @@ from sqlalchemy import func, join
 from typing import List, Optional
 from datetime import datetime
 from postgresql.config.db import session
-from postgresql.database_models import PostTrends, Posts, Authors, PostsChallenges, Challenges
+from postgresql.database_models import (
+    PostTrends,
+    Posts,
+    Authors,
+    PostsChallenges,
+    Challenges,
+)
 from pydantic import BaseModel
 
 router = APIRouter()
+
 
 class PostTrendResponse(BaseModel):
     post_id: str
@@ -26,39 +33,40 @@ class PostTrendResponse(BaseModel):
     class Config:
         from_attributes = True
 
+
 class PostTrendsListResponse(BaseModel):
     items: List[PostTrendResponse]
     total: int
 
-@router.get("/post-trends", response_model=PostTrendsListResponse)
+
+@router.get("/api/post-trends", response_model=PostTrendsListResponse)
 async def get_post_trends(
     start_date: Optional[datetime] = Query(None),
     end_date: Optional[datetime] = Query(None),
     limit: int = Query(50),
-    offset: int = Query(0)
+    offset: int = Query(0),
 ) -> PostTrendsListResponse:
     async with session() as s:
-        query = select(
-            PostTrends.post_id,
-            PostTrends.collected_at,
-            PostTrends.current_views,
-            PostTrends.daily_change,
-            PostTrends.weekly_change,
-            PostTrends.monthly_change,
-            PostTrends.daily_growth_rate,
-            PostTrends.weekly_growth_rate,
-            PostTrends.monthly_growth_rate,
-            func.array_agg(Challenges.title).label('challenges'),
-            Authors.nickname.label('author_name'),
-            Posts.description.label('post_description')
-        ).select_from(PostTrends).join(
-            Posts, PostTrends.post_id == Posts.id
-        ).join(
-            Authors, Posts.author_id == Authors.id
-        ).join(
-            PostsChallenges, Posts.id == PostsChallenges.post_id
-        ).join(
-            Challenges, PostsChallenges.challenge_id == Challenges.id
+        query = (
+            select(
+                PostTrends.post_id,
+                PostTrends.collected_at,
+                PostTrends.current_views,
+                PostTrends.daily_change,
+                PostTrends.weekly_change,
+                PostTrends.monthly_change,
+                PostTrends.daily_growth_rate,
+                PostTrends.weekly_growth_rate,
+                PostTrends.monthly_growth_rate,
+                func.array_agg(Challenges.title).label("challenges"),
+                Authors.nickname.label("author_name"),
+                Posts.description.label("post_description"),
+            )
+            .select_from(PostTrends)
+            .join(Posts, PostTrends.post_id == Posts.id)
+            .join(Authors, Posts.author_id == Authors.id)
+            .join(PostsChallenges, Posts.id == PostsChallenges.post_id)
+            .join(Challenges, PostsChallenges.challenge_id == Challenges.id)
         )
 
         # Apply filters and execute query
@@ -67,34 +75,36 @@ async def get_post_trends(
         if end_date:
             query = query.where(PostTrends.collected_at <= end_date)
 
-        
-        query = query.group_by(
-            PostTrends.post_id,
-            PostTrends.collected_at,
-            PostTrends.current_views,
-            PostTrends.daily_change,
-            PostTrends.weekly_change,
-            PostTrends.monthly_change,
-            PostTrends.daily_growth_rate,
-            PostTrends.weekly_growth_rate,
-            PostTrends.monthly_growth_rate,
-            Authors.nickname,
-            Posts.description
-        ).order_by(
-            PostTrends.weekly_growth_rate.desc(),
-            PostTrends.current_views.desc()
-        ).offset(offset).limit(limit)
+        query = (
+            query.group_by(
+                PostTrends.post_id,
+                PostTrends.collected_at,
+                PostTrends.current_views,
+                PostTrends.daily_change,
+                PostTrends.weekly_change,
+                PostTrends.monthly_change,
+                PostTrends.daily_growth_rate,
+                PostTrends.weekly_growth_rate,
+                PostTrends.monthly_growth_rate,
+                Authors.nickname,
+                Posts.description,
+            )
+            .order_by(
+                PostTrends.weekly_growth_rate.desc(), PostTrends.current_views.desc()
+            )
+            .offset(offset)
+            .limit(limit)
+        )
 
         result = await s.execute(query)
         rows = result.all()
 
         # Get total count
-        count_query = select(func.count(PostTrends.post_id)).select_from(
-            PostTrends
-        ).join(
-            Posts, PostTrends.post_id == Posts.id
-        ).join(
-            Authors, Posts.author_id == Authors.id
+        count_query = (
+            select(func.count(PostTrends.post_id))
+            .select_from(PostTrends)
+            .join(Posts, PostTrends.post_id == Posts.id)
+            .join(Authors, Posts.author_id == Authors.id)
         )
         total = await s.scalar(count_query)
 
@@ -110,9 +120,14 @@ async def get_post_trends(
                 monthly_change=row.monthly_change,
                 daily_growth_rate=row.daily_growth_rate,
                 weekly_growth_rate=row.weekly_growth_rate,
-                monthly_growth_rate=row.monthly_growth_rate, 
-                challenges=['#' + challenge for challenge in row.challenges] if row.challenges else []
-            ) for row in rows
+                monthly_growth_rate=row.monthly_growth_rate,
+                challenges=(
+                    ["#" + challenge for challenge in row.challenges]
+                    if row.challenges
+                    else []
+                ),
+            )
+            for row in rows
         ]
 
         return PostTrendsListResponse(items=trends, total=total)
