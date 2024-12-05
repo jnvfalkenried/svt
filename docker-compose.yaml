@@ -278,3 +278,14 @@ services:
       - "8000:8000"
     labels:
       description: "API backend for the frontend"
+
+  nginx:
+    profiles: ["webapp"]
+    image: nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - frontend
+      - backend
