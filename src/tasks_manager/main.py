@@ -15,6 +15,10 @@ async def main():
 
     await tasks_manager.initialize()
 
+    # For development purposes, we can add some hashtags to monitor when the service starts
+    await tasks_manager.update_hashtags_to_monitor()
+    await tasks_manager.send_tasks_to_queue()
+
     scheduler = AsyncIOScheduler()
 
     # update hashtags to monitor every 30 minutes

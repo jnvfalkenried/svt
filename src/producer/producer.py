@@ -22,13 +22,35 @@ logger = setup_logger(f"producer_{replica_number}")
 
 
 class TikTokProducer(RabbitMQClient):
+    """
+    TikTokProducer class to produce TikTok data to RabbitMQ.
+    
+    It can produce messages to the exchange and consume tasks from the tasks queue.
+
+    Attributes:
+        connection_name (str): The connection name for the RabbitMQ connection.
+        exchange_name (str): The exchange name for the RabbitMQ exchange.
+        tasks_queue (str): The tasks queue name for the RabbitMQ tasks queue.
+    """
     def __init__(self, rabbitmq_server, rabbitmq_port, user, password):
+        """
+        Initialize the TikTokProducer with RabbitMQ connection details.
+
+        Args:
+            rabbitmq_server (str): The RabbitMQ server hostname.
+            rabbitmq_port (int): The RabbitMQ server port.
+            user (str): The RabbitMQ server username.
+            password (str): The RabbitMQ server password.
+        """
         super().__init__(rabbitmq_server, rabbitmq_port, user, password)
         self.connection_name = f"tiktok_data_producer_{replica_number}"
         self.exchange_name = os.environ.get("RABBITMQ_EXCHANGE")
         self.tasks_queue = os.environ.get("RMQ_PRODUCER_TASKS_QUEUE")
 
     async def initialize(self):
+        """
+        Initialize the TikTokProducer by connecting to RabbitMQ and setting up the exchange and tasks queue.
+        """
         try:
             await self.connect(self.connection_name)
             self.exchange = await self.channel.get_exchange(self.exchange_name)
@@ -43,6 +65,13 @@ class TikTokProducer(RabbitMQClient):
             logger.error(f"Error initializing TikTokProducer: {e}")
 
     async def produce_message(self, key, value):
+        """
+        Produce a message to the exchange with the given key and value.
+
+        Args:
+            key (str): The routing key for the message.
+            value (str): The message value.
+        """
         try:
             message = aio_pika.Message(
                 body=value.encode("utf-8") if isinstance(value, str) else value,
@@ -56,6 +85,9 @@ class TikTokProducer(RabbitMQClient):
             logger.error(f"Error producing message: {e}")
 
     async def consume_tasks(self):
+        """
+        Consume tasks from the tasks queue and process them.
+        """
         try:
             await self.tasks_queue.consume(callback=self.process_tasks)
             logger.info(f"Consuming tasks from queue: {self.tasks_queue.name}")
@@ -67,6 +99,12 @@ class TikTokProducer(RabbitMQClient):
             logger.error(f"Error consuming tasks: {e}")
 
     async def process_tasks(self, message: aio_pika.IncomingMessage):
+        """
+        Process the incoming task from the tasks queue.
+
+        Args:
+            message (aio_pika.IncomingMessage): The incoming task from the tasks queue.
+        """
         try:
             async with message.process(requeue=True):
                 routing_key = message.routing_key
@@ -87,6 +125,14 @@ class TikTokProducer(RabbitMQClient):
             )
 
     async def get_hashtag_videos(self, hashtag, scheduled_at, num_videos=5):
+        """
+        Get videos for a given hashtag and produce them to the exchange.
+
+        Args:
+            hashtag (str): The hashtag to search for.
+            scheduled_at (str): The scheduled time to collect the videos.
+            num_videos (int): The number of videos to collect.
+        """
         logger.info(f"Getting {num_videos} videos for hashtag: {hashtag}")
 
         # Round scheduled_at to minutes
@@ -117,10 +163,10 @@ class TikTokProducer(RabbitMQClient):
 
     async def get_video_bytes(self, video):
         """
-        Get video bytes for a given video url
+        Get the video bytes for the given video and produce them to the exchange.
 
-        Parameters:
-        video: TikTokApi.Video containing video url
+        Args:
+            video (dict): The TikTok video dictionary object.
         """
         try:
             s = requests.Session()

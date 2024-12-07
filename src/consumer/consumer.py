@@ -20,6 +20,9 @@ logger = setup_logger("consumer")
 
 
 class TikTokConsumer(RabbitMQClient):
+    """
+    TikTokConsumer class to consume TikTok data from RabbitMQ and store in database.
+    """
     def __init__(
         self,
         rabbitmq_server,
@@ -27,11 +30,23 @@ class TikTokConsumer(RabbitMQClient):
         user,
         password,
     ):
+        """
+        Initialize the TikTokConsumer with RabbitMQ connection details.
+
+        Args:
+            rabbitmq_server (str): The RabbitMQ server hostname.
+            rabbitmq_port (int): The RabbitMQ server port.
+            user (str): The RabbitMQ server username.
+            password (str): The RabbitMQ server password.
+        """
         super().__init__(rabbitmq_server, rabbitmq_port, user, password)
         self.connection_name = "tiktok_data_consumer"
         self.input_queue = os.environ.get("RABBITMQ_HASHTAG_QUEUE")
 
     async def initialize(self):
+        """
+        Initialize the TikTokConsumer by connecting to RabbitMQ and setting up the input queue.
+        """
         try:
             await self.connect(self.connection_name)
             self.queue = await self.channel.get_queue(name=self.input_queue)
@@ -45,6 +60,9 @@ class TikTokConsumer(RabbitMQClient):
             logger.error(f"Error initializing TikTokConsumer: {e}")
 
     async def consume_messages(self):
+        """
+        Consume messages from the input queue and process them.        
+        """
         try:
             await self.queue.consume(callback=self.process_message)
             logger.info(f"Consuming messages from queue: {self.queue.name}")
@@ -56,6 +74,12 @@ class TikTokConsumer(RabbitMQClient):
             logger.error(f"Error consuming tasks: {e}")
 
     async def process_message(self, message: aio_pika.IncomingMessage):
+        """
+        Process the incoming message from the input queue.
+
+        Args:
+            message (aio_pika.IncomingMessage): The incoming message from the input queue.
+        """
         try:
             async with message.process(requeue=True):
                 routing_key = message.routing_key
@@ -71,6 +95,12 @@ class TikTokConsumer(RabbitMQClient):
             logger.error(f"Error processing video: {e}")
 
     async def process_tiktok_item(self, item):
+        """
+        Process the TikTok item and store in the database.
+
+        Args:
+            item (dict): The TikTok item to process and store in the database.
+        """
         # Process TikTok item and store in database within a transaction block
         async with session() as s:
             async with s.begin():

@@ -28,12 +28,22 @@ from helpers.rabbitmq import RabbitMQClient
 
 class TikTokVideoProcessor(RabbitMQClient):
     """
-    This class is responsible for
-    - Extracting key frames from TikTok videos
-    - Generating embeddings for the key frames
+    This class handles TikTok video processing.
+
+    It extracts key frames from a video, generates embeddings for the key frames,
+    and produces the embeddings to the exchange.
     """
 
     def __init__(self, rabbitmq_server, rabbitmq_port, user, password):
+        """
+        Initialize the TikTokVideoProcessor.
+
+        Args:
+            rabbitmq_server (str): RabbitMQ server address.
+            rabbitmq_port (int): RabbitMQ server port.
+            user (str): RabbitMQ username.
+            password (str): RabbitMQ password.
+        """
         super().__init__(rabbitmq_server, rabbitmq_port, user, password)
         self.connection_name = "tiktok_video_processor"
         self.exchange_name = os.environ.get("RABBITMQ_EXCHANGE")
@@ -43,6 +53,9 @@ class TikTokVideoProcessor(RabbitMQClient):
         self.model = os.environ.get("MODEL")
 
     async def initialize(self):
+        """
+        Initialize the TikTokVideoProcessor.
+        """
         try:
             await self.connect(self.connection_name)
             self.exchange = await self.channel.get_exchange(self.exchange_name)
@@ -54,6 +67,13 @@ class TikTokVideoProcessor(RabbitMQClient):
             print(f"Error while initializing TikTokVideoProcessor: {e}")
 
     async def produce_message(self, key, value):
+        """
+        Produce a message to the exchange.
+
+        Args:
+            key (str): The routing key.
+            value (list): The message body.
+        """
         try:
             message = aio_pika.Message(
                 body=json.dumps(value).encode("utf-8"),
@@ -81,6 +101,9 @@ class TikTokVideoProcessor(RabbitMQClient):
     async def message_handler(self, message: aio_pika.IncomingMessage):
         """
         Handle the incoming message
+
+        Args:
+            message (aio_pika.IncomingMessage): The incoming message
         """
         try:
             async with message.process(requeue=True):
@@ -110,13 +133,13 @@ class TikTokVideoProcessor(RabbitMQClient):
     # The following methods are blocking, doesn't benefit from being async
     def extract_key_frames(self, video):
         """
-        Extract key frames from the video
+        Extract key frames from a video.
 
-        Parameters:
-        - video: bytes: The video bytes
+        Args:
+            video (bytes): Video file in bytes.
 
         Returns:
-        - key_frames: list: The list of key frames
+            List: A list of key frames as OpenCV image objects.
         """
         thread_id = threading.get_ident()
         # Save the video to a temp file
@@ -164,18 +187,16 @@ class TikTokVideoProcessor(RabbitMQClient):
 
         return key_frames
 
-    @sleep_and_retry
-    @limits(calls=120, period=60)
     def generate_embeddings(self, key_frames, description=None):
         """
         Generate embeddings for the key frames
 
-        Parameters:
-        - key_frames: list: The list of key frames
-        - description: str: The description
+        Args:
+            key_frames (List): A list of key frames as OpenCV image objects.
+            description (str): The contextual text description.
 
         Returns:
-        - embeddings: list: The list of embeddings
+            List: A list of embeddings.
         """
         embeddings_lst = []
         for i, key_frame in enumerate(key_frames):
@@ -200,13 +221,17 @@ class TikTokVideoProcessor(RabbitMQClient):
                 embeddings_lst.append(image_embeddings)   
             except Exception as e:
                 print(f"Error generating embeddings: {e}")
+                # Raise so we can requeue the message in main thread
+                raise e
 
                 # For testing purposes
-                print("Using dummy embeddings")
-                embeddings_lst = [[i for i in range(1408)], [i for i in range(1408)]]
+                # print("Using dummy embeddings")
+                # embeddings_lst = [[i for i in range(1408)], [i for i in range(1408)]]
 
         return embeddings_lst
 
+    @sleep_and_retry
+    @limits(calls=120, period=60)
     def get_image_video_text_embeddings(
         self,
         # project_id: str,
@@ -229,6 +254,9 @@ class TikTokVideoProcessor(RabbitMQClient):
                 https://cloud.google.com/vertex-ai/docs/generative-ai/embeddings/get-multimodal-embeddings#low-dimension
             video_segment_config: Define specific segments to generate embeddings for.
                 https://cloud.google.com/vertex-ai/docs/generative-ai/embeddings/get-multimodal-embeddings#video-best-practices
+
+        Returns:
+            Tuple[List, List]: List of image embeddings and list of text embeddings.
         """
         thread_id = threading.get_ident()
         # This is not really elegant, but it works for now

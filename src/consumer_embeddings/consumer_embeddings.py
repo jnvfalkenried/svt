@@ -20,7 +20,19 @@ from dotenv import load_dotenv
 load_dotenv()
 
 class EmbeddingsConsumer(RabbitMQClient):
+    """
+    EmbeddingsConsumer class to consume video embeddings from RabbitMQ and store in database.
+    """
     def __init__(self, rabbitmq_server, rabbitmq_port, user, password):
+        """
+        Initialize the EmbeddingsConsumer with RabbitMQ connection details.
+        
+        Args:
+            rabbitmq_server (str): The RabbitMQ server hostname.
+            rabbitmq_port (int): The RabbitMQ server port.
+            user (str): The RabbitMQ server username.
+            password (str): The RabbitMQ server password.
+        """
         super().__init__(rabbitmq_server, rabbitmq_port, user, password)
         self.connection_name = "embeddings_consumer"
         self.exchange_name = os.environ.get("RABBITMQ_EXCHANGE")
@@ -43,6 +55,9 @@ class EmbeddingsConsumer(RabbitMQClient):
         self.channel = None
 
     async def initialize(self):
+        """
+        Initialize the EmbeddingsConsumer by connecting to RabbitMQ and setting up the input queue.
+        """
         print("Consumer Embeddings: Initialized")
         try:
             print(f"Connecting to RabbitMQ at {self.rabbitmq_server}:{self.rabbitmq_port} with user {self.user}")
@@ -70,8 +85,17 @@ class EmbeddingsConsumer(RabbitMQClient):
             raise
 
     async def get_next_element_id(self, session, post_id):
+        """
+        This function gets the highest video embeddings id that exists in the DB, otherwise returns 0
+        
+        Args:
+            session (AsyncSession): The database session.
+            post_id (str): The post ID.
+        
+        Returns:
+            int: The next element ID.
+        """
         # This function gets the highest video embeddings id that exists in the DB, otherwise returns 0
-        """Get the next available element_id for a given post_id"""
         result = await session.execute(
             select(func.coalesce(func.max(VideoEmbeddings.element_id), 0))
             .where(VideoEmbeddings.post_id == post_id)
@@ -80,6 +104,14 @@ class EmbeddingsConsumer(RabbitMQClient):
         return max_element_id + 1
 
     async def process_tiktok_item(self, session, item, post_id):
+        """
+        Process embeddings for a TikTok post and store it in the database.
+
+        Args:
+            session (AsyncSession): The database session.
+            item (list): The embeddings data.
+            post_id (str): The post ID.
+        """
         try:
             # Get the next available element_id
             element_id = await self.get_next_element_id(session, post_id)
@@ -119,6 +151,9 @@ class EmbeddingsConsumer(RabbitMQClient):
             raise
 
     async def consume_messages(self):
+        """
+        Consume messages from the input queue and process them.
+        """
         try:
             await self.queue.consume(callback=self.process_message)
             print("Waiting for messages.")
@@ -130,6 +165,12 @@ class EmbeddingsConsumer(RabbitMQClient):
            print(f"Error consuming messages: {e}")
 
     async def process_message(self, message: aio_pika.IncomingMessage):
+        """
+        Process the incoming message from the input queue.
+
+        Args:
+            message (aio_pika.IncomingMessage): The incoming message from the input queue.
+        """
         try:
             async with message.process():
                 post_id = message.routing_key.split(".")[-1]
