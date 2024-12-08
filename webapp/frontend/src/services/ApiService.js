@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios from 'axios'
 
 const ApiService = {
   client: axios.create({
@@ -11,46 +11,46 @@ const ApiService = {
   }),
 
   top_authors: () => {
-    return ApiService.client.get('/top_authors');
+    return ApiService.client.get('/top_authors')
   },
 
   addHashtag: (hashtag) => {
-    return ApiService.client.post('/hashtag', { hashtag });
+    return ApiService.client.post('/hashtag', { hashtag })
   },
 
   getActiveHashtags: () => {
-    return ApiService.client.get('/hashtags');
+    return ApiService.client.get('/hashtags')
   },
 
   getTopPosts: (params) => {
-    return ApiService.client.get('/posts', { params });
+    return ApiService.client.get('/posts', { params })
   },
 
   getPlatformGrowth: (params) => {
-    return ApiService.client.get('/stats/growth', { params });
+    return ApiService.client.get('/stats/growth', { params })
   },
 
   getStats: () => {
-    return ApiService.client.get('/stats');
+    return ApiService.client.get('/stats')
   },
 
   getTopAuthors: (params) => {
-    return ApiService.client.get('/authors', { params });
+    return ApiService.client.get('/authors', { params })
   },
-};
+}
 
 // Add a request interceptor
 ApiService.client.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('access_token');
+    const token = localStorage.getItem('access_token')
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+      config.headers.Authorization = `Bearer ${token}`
     }
-    return config;
+    return config
   },
   (error) => {
-    return Promise.reject(error);
+    return Promise.reject(error)
   },
-);
+)
 
-export default ApiService;
+export default ApiService
