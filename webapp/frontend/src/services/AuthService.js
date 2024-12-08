@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios from 'axios'
 
 const AuthService = {
   client: axios.create({
@@ -16,15 +16,15 @@ const AuthService = {
       email,
       password,
       roles,
-    });
+    })
   },
 
   login: (username, password) => {
     return AuthService.client.post('/login', {
       username,
       password,
-    });
+    })
   },
-};
+}
 
-export default AuthService;
+export default AuthService

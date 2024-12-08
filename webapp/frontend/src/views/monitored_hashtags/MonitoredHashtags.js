@@ -261,7 +261,7 @@ const MonitoredHashtags = () => {
 
   const removeHashtag = async (id) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/hashtags/${id}/deactivate`, {
+      const response = await fetch(`${API_BASE_URL}/hashtags/${id}/deactivate`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
