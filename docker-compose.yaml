@@ -2,6 +2,7 @@ version: '3.8'
 
 services:
   rabbitmq:
+    profiles: ["infra", "tasks-manager", "datafactory"]
     image: rabbitmq:3-management
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
@@ -21,6 +22,7 @@ services:
       start_period: 20s
 
   rabbitmq-bindings:
+    profiles: ["infra", "tasks-manager", "datafactory"]
     build:
       context: ./src
       dockerfile: ./rabbitmq_bindings/Dockerfile
@@ -43,6 +45,7 @@ services:
       description: "RabbitMQ Bindings"
 
   postgres:
+    profiles: ["infra", "tasks-manager", "datafactory", "webapp"]
     image: pgvector/pgvector:pg14
     restart: always
     healthcheck:
@@ -63,6 +66,7 @@ services:
       description: "PostgreSQL server"
 
   alembic:
+    profiles: ["infra", "tasks-manager", "datafactory", "webapp"]
     build:
       context: ./src
       dockerfile: ./postgresql/Dockerfile
@@ -81,6 +85,7 @@ services:
       description: "Alembic migration service"
 
   tasks-manager:
+    profiles: ["tasks-manager"]
     build:
       context: ./src
       dockerfile: ./tasks_manager/Dockerfile
@@ -115,6 +120,7 @@ services:
       description: "Tasks Manager (Scheduler) for reccurent tasks"
 
   producer:
+    profiles: ["datafactory"]
     build:
       context: ./src
       dockerfile: ./producer/Dockerfile
@@ -143,6 +149,7 @@ services:
         condition: on-failure
 
   consumer:
+    profiles: ["datafactory"]
     build:
       context: ./src
       dockerfile: ./consumer/Dockerfile
@@ -176,6 +183,7 @@ services:
       description: "Embeddings Consumer"
 
   embeddings-consumer:
+    profiles: ["datafactory"]
     build:
       context: ./src
       dockerfile: ./consumer_embeddings/Dockerfile
@@ -206,6 +214,7 @@ services:
       description: "TikTok Embeddings Consumer"
   
   video-processor:
+    profiles: ["datafactory"]
     build:
       context: ./src
       dockerfile: ./video_processor/Dockerfile
@@ -228,26 +237,26 @@ services:
     labels:
       description: "TikTok Multimodal Search Producer/Consumer"
 
-  react-frontend:
+  frontend:
+    profiles: ["webapp"]
     build:
-      context: ./src
-      dockerfile: ./react_frontend/Dockerfile
+      context: ./
+      dockerfile: ./webapp/frontend/Dockerfile
     ports:
-      - "3000:3000"   # React development server
-      - "4040:4040"   # ngrok web interface
+      - "3000:3000"
     volumes:
-      - ./src/react_frontend:/app  # Mount the entire React frontend directory
-      - /app/node_modules  # Avoid mounting node_modules to prevent overwriting
+      - ./webapp/frontend:/app
+      - /app/node_modules
     environment:
-      CHOKIDAR_USEPOLLING: true  # Required for hot-reloading in Windows
-      NGROK_AUTH_TOKEN: ${NGROK_AUTH_TOKEN}
+      CHOKIDAR_USEPOLLING: true
     labels:
       description: "React App"
 
-  db-api:
+  backend:
+    profiles: ["webapp"]
     build:
-      context: ./src
-      dockerfile: ./db_api/Dockerfile
+      context: ./
+      dockerfile: ./webapp/backend/Dockerfile
     depends_on:
       postgres:
         condition: service_healthy
@@ -266,6 +275,30 @@ services:
     volumes:
       - ${HOME_DIR}/.ssh:/app/.ssh
     ports:
-      - "80:80"
+      - "8000:8000"
     labels:
-      description: "Database API"
+      description: "API backend for the frontend"
+
+  nginx:
+    profiles: ["webapp"]
+    image: nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - ./webapp/nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - frontend
+      - backend
+    restart: always
+
+  ngrok:
+    profiles: ["webapp"]
+    build:
+      context: ./webapp/ngrok
+      dockerfile: Dockerfile
+    environment:
+      NGROK_AUTHTOKEN: ${NGROK_AUTH_TOKEN}
+    depends_on:
+      - nginx
+    ports:
+      - 4040:4040
