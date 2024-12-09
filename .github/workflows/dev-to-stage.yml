@@ -1,0 +1,36 @@
+name: Deploy to Stage
+
+on:
+  push:
+    branches:
+      - stage
+
+jobs:
+  deploy:
+    name: Deploy to Stage Env on Server
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up SSH Key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H stage-server >> ~/.ssh/known_hosts
+
+      - name: Deploy to Stage
+        run: |
+          ssh ubuntu@130.238.29.26 << 'EOF'
+          mkdir -p ./stage_temp
+          cd ./stage
+          [ -f .env.stage ] && cp .env.stage ../stage_temp
+          [ -d docker_runtime ] && cp -r docker_runtime ../stage_temp
+          rm -rf docker_runtime
+          git checkout stage
+          git pull origin stage
+          docker compose --env-file .env.stage up -d --build --scale producer=2
+          docker-compose ps
+          EOF
