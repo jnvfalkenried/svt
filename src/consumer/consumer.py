@@ -1,7 +1,7 @@
 import asyncio
-from datetime import datetime
 import json
 import os
+from datetime import datetime
 
 import aio_pika
 
@@ -87,7 +87,7 @@ class TikTokConsumer(RabbitMQClient):
                         verified=author_data.get("verified"),
                         session=s,
                     )
-                    
+
                     # Process Author Stats
                     await insert_author_stats(
                         id=author_data.get("id"),

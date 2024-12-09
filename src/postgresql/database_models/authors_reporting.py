@@ -9,19 +9,19 @@ from .base import Base
 
 class AuthorsReporting(Base):
     __tablename__ = "authors_reporting"
-    
+
     id: Mapped[str] = mapped_column(String, primary_key=True)
-    collected_at: Mapped[DateTime] = mapped_column(DateTime, primary_key=True, default=func.now())
+    collected_at: Mapped[DateTime] = mapped_column(
+        DateTime, primary_key=True, default=func.now()
+    )
     digg_count: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     follower_count: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     following_count: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     heart_count: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     video_count: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
-    
-    __table_args__ = (
-        PrimaryKeyConstraint("id", "collected_at"),
-    )
-    
+
+    __table_args__ = (PrimaryKeyConstraint("id", "collected_at"),)
+
     def __repr__(self) -> str:
         return (
             f"AuthorsReporting("

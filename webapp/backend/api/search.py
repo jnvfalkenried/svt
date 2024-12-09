@@ -1,11 +1,11 @@
 # api/search.py
-from fastapi import APIRouter, HTTPException
-from vertexai.vision_models import Image, MultiModalEmbeddingModel
-from postgresql.config.db import session
-from sqlalchemy import text
-from schemas.response import MatchResponse, PostResponse, AuthorResponse
-from fastapi import Form, File, UploadFile
 import numpy as np
+from fastapi import APIRouter, File, Form, HTTPException, UploadFile
+from schemas.response import AuthorResponse, MatchResponse, PostResponse
+from sqlalchemy import text
+from vertexai.vision_models import Image, MultiModalEmbeddingModel
+
+from postgresql.config.db import session
 
 router = APIRouter()
 

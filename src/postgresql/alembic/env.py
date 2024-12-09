@@ -1,23 +1,24 @@
 # #### THIS STEP IS ONLY REQUIRED IN WINDOWS #####
 import os
+
 from dotenv import load_dotenv
+
 load_dotenv()
 PROJECT_PATH = os.getenv("PROJECT_PATH")
 import sys
+
 sys.path.append(PROJECT_PATH)
 # ################################################
 import asyncio
 from logging.config import fileConfig
 
-from sqlalchemy.ext.asyncio import AsyncEngine
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
-
 from alembic import context
+from sqlalchemy import engine_from_config, pool
+from sqlalchemy.ext.asyncio import AsyncEngine
 
 from postgresql.config.settings import DATABASE_URL
-from postgresql.database_models.base import Base
 from postgresql.database_models import *
+from postgresql.database_models.base import Base
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -88,23 +89,25 @@ def run_migrations_offline() -> None:
 #         with context.begin_transaction():
 #             context.run_migrations()
 
+
 def do_run_migrations(connection):
-    
+
     def process_revision_directives(context, revision, directives):
         if config.cmd_opts.autogenerate:
             script = directives[0]
             if script.upgrade_ops.is_empty():
                 directives[:] = []
                 print("No migration created because no changes were detected.")
-                
+
     context.configure(
-        connection=connection, 
-        target_metadata=target_metadata, 
-        process_revision_directives=process_revision_directives
+        connection=connection,
+        target_metadata=target_metadata,
+        process_revision_directives=process_revision_directives,
     )
 
     with context.begin_transaction():
         context.run_migrations()
+
 
 async def run_migrations_online():
     connectable = AsyncEngine(
@@ -112,11 +115,12 @@ async def run_migrations_online():
             context.config.get_section(context.config.config_ini_section),
             prefix="sqlalchemy.",
             poolclass=pool.NullPool,
-            future=True
+            future=True,
         )
     )
     async with connectable.connect() as connection:
         await connection.run_sync(do_run_migrations)
+
 
 if context.is_offline_mode():
     run_migrations_offline()
