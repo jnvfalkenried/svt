@@ -31,4 +31,4 @@ jobs:
         run: black --check .
 
       - name: Run isort (import sorting check)
-        run: isort --check-only .
+        run: isort --check-only --profile black .
