@@ -1,13 +1,13 @@
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
 from api.authors import router as authors_router
+from api.hashtag_trends import router as hashtag_trends_router
 from api.hashtags import router as hashtags_router
-from api.users import router as users_router
+from api.post_trends import router as post_trends_router
+from api.posts import router as posts_router
 from api.search import router as search_router
 from api.stats import router as stats_router
-from api.posts import router as posts_router
-from api.post_trends import router as post_trends_router
-from api.hashtag_trends import router as hashtag_trends_router
+from api.users import router as users_router
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 

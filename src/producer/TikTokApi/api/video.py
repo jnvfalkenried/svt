@@ -1,19 +1,21 @@
 from __future__ import annotations
-from ..helpers import extract_video_id_from_url, requests_cookie_to_playwright_cookie
-from typing import TYPE_CHECKING, ClassVar, Iterator, Optional
-from datetime import datetime
-import requests
-from ..exceptions import InvalidResponseException
+
 import json
+from datetime import datetime
+from typing import TYPE_CHECKING, AsyncIterator, ClassVar, Iterator, Optional, Union
+
 import httpx
-from typing import Union, AsyncIterator
+import requests
+
+from ..exceptions import InvalidResponseException
+from ..helpers import extract_video_id_from_url, requests_cookie_to_playwright_cookie
 
 if TYPE_CHECKING:
     from ..tiktok import TikTokApi
-    from .user import User
-    from .sound import Sound
-    from .hashtag import Hashtag
     from .comment import Comment
+    from .hashtag import Hashtag
+    from .sound import Sound
+    from .user import User
 
 
 class Video:
@@ -65,9 +67,11 @@ class Video:
             self.id = extract_video_id_from_url(
                 url,
                 headers=session.headers,
-                proxy=kwargs.get("proxy")
-                if kwargs.get("proxy") is not None
-                else session.proxy,
+                proxy=(
+                    kwargs.get("proxy")
+                    if kwargs.get("proxy") is not None
+                    else session.proxy
+                ),
             )
 
         if getattr(self, "id", None) is None:
@@ -115,7 +119,9 @@ class Video:
 
             if end == -1:
                 raise InvalidResponseException(
-                    r.text, "TikTok returned an invalid response.", error_code=r.status_code
+                    r.text,
+                    "TikTok returned an invalid response.",
+                    error_code=r.status_code,
                 )
 
             data = json.loads(r.text[start:end])
@@ -126,45 +132,56 @@ class Video:
             # extract tag <script id="__UNIVERSAL_DATA_FOR_REHYDRATION__" type="application/json">{..}</script>
             # extract json in the middle
 
-            start = r.text.find('<script id="__UNIVERSAL_DATA_FOR_REHYDRATION__" type="application/json">')
+            start = r.text.find(
+                '<script id="__UNIVERSAL_DATA_FOR_REHYDRATION__" type="application/json">'
+            )
             if start == -1:
                 raise InvalidResponseException(
-                    r.text, "TikTok returned an invalid response.", error_code=r.status_code
+                    r.text,
+                    "TikTok returned an invalid response.",
+                    error_code=r.status_code,
                 )
 
-            start += len('<script id="__UNIVERSAL_DATA_FOR_REHYDRATION__" type="application/json">')
+            start += len(
+                '<script id="__UNIVERSAL_DATA_FOR_REHYDRATION__" type="application/json">'
+            )
             end = r.text.find("</script>", start)
 
             if end == -1:
                 raise InvalidResponseException(
-                    r.text, "TikTok returned an invalid response.", error_code=r.status_code
+                    r.text,
+                    "TikTok returned an invalid response.",
+                    error_code=r.status_code,
                 )
 
             data = json.loads(r.text[start:end])
             default_scope = data.get("__DEFAULT_SCOPE__", {})
             video_detail = default_scope.get("webapp.video-detail", {})
-            if video_detail.get("statusCode", 0) != 0: # assume 0 if not present
+            if video_detail.get("statusCode", 0) != 0:  # assume 0 if not present
                 raise InvalidResponseException(
-                    r.text, "TikTok returned an invalid response structure.", error_code=r.status_code
+                    r.text,
+                    "TikTok returned an invalid response structure.",
+                    error_code=r.status_code,
                 )
             video_info = video_detail.get("itemInfo", {}).get("itemStruct")
             if video_info is None:
                 raise InvalidResponseException(
-                    r.text, "TikTok returned an invalid response structure.", error_code=r.status_code
+                    r.text,
+                    "TikTok returned an invalid response structure.",
+                    error_code=r.status_code,
                 )
-            
+
         self.as_dict = video_info
         self.__extract_from_data()
 
         cookies = [requests_cookie_to_playwright_cookie(c) for c in r.cookies]
 
-        await self.parent.set_session_cookies(
-            session, 
-            cookies
-        )
+        await self.parent.set_session_cookies(session, cookies)
         return video_info
 
-    async def bytes(self, stream: bool = False, **kwargs) -> Union[bytes, AsyncIterator[bytes]]:
+    async def bytes(
+        self, stream: bool = False, **kwargs
+    ) -> Union[bytes, AsyncIterator[bytes]]:
         """
         Returns the bytes of a TikTok Video.
 
@@ -190,16 +207,20 @@ class Video:
         cookies = await self.parent.get_session_cookies(session)
 
         h = session.headers
-        h["range"] = 'bytes=0-'
-        h["accept-encoding"] = 'identity;q=1, *;q=0'
-        h["referer"] = 'https://www.tiktok.com/'
+        h["range"] = "bytes=0-"
+        h["accept-encoding"] = "identity;q=1, *;q=0"
+        h["referer"] = "https://www.tiktok.com/"
 
         if stream:
+
             async def stream_bytes():
                 async with httpx.AsyncClient() as client:
-                    async with client.stream('GET', downloadAddr, headers=h, cookies=cookies) as response:
+                    async with client.stream(
+                        "GET", downloadAddr, headers=h, cookies=cookies
+                    ) as response:
                         async for chunk in response.aiter_bytes():
                             yield chunk
+
             return stream_bytes()
         else:
             resp = requests.get(downloadAddr, headers=h, cookies=cookies)
@@ -217,7 +238,7 @@ class Video:
                 pass
 
         self.create_time = datetime.fromtimestamp(timestamp)
-        self.stats = data.get('statsV2') or data.get('stats')
+        self.stats = data.get("statsV2") or data.get("stats")
 
         author = data.get("author")
         if isinstance(author, str):

@@ -1,5 +1,6 @@
-from sqlalchemy import text
 from datetime import datetime
+
+from sqlalchemy import text
 
 
 async def insert_post_stats(
@@ -40,6 +41,7 @@ async def insert_post_stats(
         )
     )
 
+
 async def get_top_posts(
     start_date: datetime,
     end_date: datetime,
@@ -47,7 +49,7 @@ async def get_top_posts(
     hashtag: str = "all",
     category: str = "max_play_count",
     # additional_filters: Optional[dict] = None,
-    limit: int = 10
+    limit: int = 10,
 ) -> list[dict]:
     """
     Fetches top posts based on play counts within the specified date range and filters.
@@ -61,7 +63,7 @@ async def get_top_posts(
     :param limit: The maximum number of posts to return.
     :return: A list of dictionaries representing the top posts.
     """
-    
+
     # Base query components
     filters = ["collected_at >= :start_date", "collected_at <= :end_date"]
     params = {
@@ -72,7 +74,9 @@ async def get_top_posts(
 
     # Add hashtag-specific filtering
     if hashtag != "all":
-        filters.append("id IN (SELECT post_id FROM posts_challenges WHERE challenge_id = (SELECT id FROM challenges WHERE title = :hashtag))")
+        filters.append(
+            "id IN (SELECT post_id FROM posts_challenges WHERE challenge_id = (SELECT id FROM challenges WHERE title = :hashtag))"
+        )
         params["hashtag"] = hashtag
 
     # Add additional filters dynamically
@@ -82,7 +86,8 @@ async def get_top_posts(
     #         params[key] = value
 
     # Common query
-    query = text(f"""
+    query = text(
+        f"""
         WITH posts_reporting AS (
             SELECT 
                 id,
@@ -119,11 +124,13 @@ async def get_top_posts(
         LEFT JOIN authors ON posts.author_id = authors.id
         ORDER BY CAST(posts_reporting.{category} AS INTEGER) DESC
         LIMIT :limit
-    """)
+    """
+    )
 
     # Execute query
     result = await session.execute(query.params(**params))
     return result.fetchall()
+
 
 async def get_top_feed_posts(
     start_date: datetime,
@@ -131,7 +138,7 @@ async def get_top_feed_posts(
     session,
     hashtag: str = "all",
     # additional_filters: Optional[dict] = None,
-    limit: int = 10
+    limit: int = 10,
 ) -> list[dict]:
     """
     Fetches top feed posts based on appearances in feed within the specified date range and filters.
@@ -154,7 +161,9 @@ async def get_top_feed_posts(
 
     # Add hashtag-specific filtering
     if hashtag != "all":
-        filters.append("id IN (SELECT post_id FROM posts_challenges WHERE challenge_id = (SELECT id FROM challenges WHERE title = :hashtag))")
+        filters.append(
+            "id IN (SELECT post_id FROM posts_challenges WHERE challenge_id = (SELECT id FROM challenges WHERE title = :hashtag))"
+        )
         params["hashtag"] = hashtag
 
     # Add additional filters dynamically
@@ -164,7 +173,8 @@ async def get_top_feed_posts(
     #         params[key] = value
 
     # Construct the query dynamically
-    query = text(f"""
+    query = text(
+        f"""
         WITH posts_reporting AS (
             SELECT 
                 id,
@@ -203,7 +213,8 @@ async def get_top_feed_posts(
         LEFT JOIN authors ON posts.author_id = authors.id
         ORDER BY CAST(posts_reporting.appearances_in_feed AS INTEGER) DESC
         LIMIT :limit
-    """)
+    """
+    )
 
     # Execute the query
     result = await session.execute(query.params(**params))

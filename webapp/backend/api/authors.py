@@ -1,13 +1,14 @@
-from fastapi import APIRouter, Depends, Query
-from sqlalchemy.future import select
-from postgresql.database_models import Users
-from postgresql.database_scripts.authors_reporting import get_top_authors
-from postgresql.config.db import session
-from core.auth import verify_token
-from schemas.request import PostsRequest
 from typing import Annotated
 
+from core.auth import verify_token
+from fastapi import APIRouter, Depends, Query
+from schemas.request import PostsRequest
 from schemas.response import AuthorResponse
+from sqlalchemy.future import select
+
+from postgresql.config.db import session
+from postgresql.database_models import Users
+from postgresql.database_scripts.authors_reporting import get_top_authors
 
 router = APIRouter()
 

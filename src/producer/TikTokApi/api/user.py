@@ -1,5 +1,7 @@
 from __future__ import annotations
+
 from typing import TYPE_CHECKING, ClassVar, Iterator, Optional
+
 from ..exceptions import InvalidResponseException
 
 if TYPE_CHECKING:
@@ -86,7 +88,7 @@ class User:
         self.as_dict = resp
         self.__extract_from_data()
         return resp
-    
+
     async def playlists(self, count=20, cursor=0, **kwargs) -> Iterator[dict]:
         """
         Returns a dictionary of information associated with this User's playlist.
@@ -109,31 +111,32 @@ class User:
         found = 0
 
         while found < count:
-          params = {
-              "secUid": sec_uid,
-              "count": 20,
-              "cursor": cursor,
-          }
+            params = {
+                "secUid": sec_uid,
+                "count": 20,
+                "cursor": cursor,
+            }
 
-          resp = await self.parent.make_request(
-              url="https://www.tiktok.com/api/user/playlist",
-              params=params,
-              headers=kwargs.get("headers"),
-              session_index=kwargs.get("session_index"),
-          )
+            resp = await self.parent.make_request(
+                url="https://www.tiktok.com/api/user/playlist",
+                params=params,
+                headers=kwargs.get("headers"),
+                session_index=kwargs.get("session_index"),
+            )
 
-          if resp is None:
-              raise InvalidResponseException(resp, "TikTok returned an invalid response.")
-          
-          for playlist in resp.get("playList", []):
-              yield playlist
-              found += 1
-          
-          if not resp.get("hasMore", False):
-              return
-          
-          cursor = resp.get("cursor")
-        
+            if resp is None:
+                raise InvalidResponseException(
+                    resp, "TikTok returned an invalid response."
+                )
+
+            for playlist in resp.get("playList", []):
+                yield playlist
+                found += 1
+
+            if not resp.get("hasMore", False):
+                return
+
+            cursor = resp.get("cursor")
 
     async def videos(self, count=30, cursor=0, **kwargs) -> Iterator[Video]:
         """

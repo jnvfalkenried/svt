@@ -1,7 +1,8 @@
-from .exceptions import *
+import random
 
 import requests
-import random
+
+from .exceptions import *
 
 
 def extract_video_id_from_url(url, headers={}, proxy=None):
@@ -23,14 +24,15 @@ def random_choice(choices: list):
         return None
     return random.choice(choices)
 
+
 def requests_cookie_to_playwright_cookie(req_c):
     c = {
-        'name': req_c.name,
-        'value': req_c.value,
-        'domain': req_c.domain,
-        'path': req_c.path,
-        'secure': req_c.secure
+        "name": req_c.name,
+        "value": req_c.value,
+        "domain": req_c.domain,
+        "path": req_c.path,
+        "secure": req_c.secure,
     }
     if req_c.expires:
-        c['expires'] = req_c.expires
+        c["expires"] = req_c.expires
     return c

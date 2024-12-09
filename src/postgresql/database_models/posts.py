@@ -1,8 +1,9 @@
 from typing import Optional
 
-from .base import Base
 from sqlalchemy import Boolean, ForeignKey, Index, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from .base import Base
 
 
 class Posts(Base):
@@ -15,7 +16,7 @@ class Posts(Base):
     duet_from_id: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     is_ad: Mapped[Optional[bool]] = mapped_column(Boolean, nullable=True)
     can_repost: Mapped[Optional[bool]] = mapped_column(Boolean, nullable=True)
-    
+
     author_id: Mapped[Optional[str]] = mapped_column(
         ForeignKey("authors.id"), nullable=True
     )
@@ -28,9 +29,11 @@ class Posts(Base):
     )
     authors = relationship("Authors", back_populates="posts")
     music = relationship("Music", back_populates="posts")
-    video_embeddings = relationship("VideoEmbeddings", back_populates="posts", cascade="all, delete-orphan")
+    video_embeddings = relationship(
+        "VideoEmbeddings", back_populates="posts", cascade="all, delete-orphan"
+    )
     url: Mapped[Optional[str]] = mapped_column(String, nullable=True)
-   
+
     __table_args__ = (
         Index("posts_id", "id"),
         Index("posts_created_at", "created_at"),

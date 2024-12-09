@@ -5,21 +5,23 @@ Revises: 36d31a642534
 Create Date: 2024-12-02 20:38:07.787520
 
 """
+
 from typing import Sequence, Union
 
-from alembic import op
 import sqlalchemy as sa
-
+from alembic import op
 
 # revision identifiers, used by Alembic.
-revision: str = 'e09dfb2b3d86'
-down_revision: Union[str, None] = '36d31a642534'
+revision: str = "e09dfb2b3d86"
+down_revision: Union[str, None] = "36d31a642534"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
+
 def upgrade() -> None:
     # Create materialized view
-    op.execute("""
+    op.execute(
+        """
         CREATE MATERIALIZED VIEW IF NOT EXISTS challenge_trends AS
         WITH latest_trends AS (
             SELECT 
@@ -56,10 +58,16 @@ def upgrade() -> None:
         JOIN latest_trends t ON pc.post_id = t.post_id
         WHERE t.rn = 1
         GROUP BY ahc.hashtag_id, ahc.hashtag_title
-    """)
+    """
+    )
     # Create indexes for the view columns
-    op.execute("CREATE INDEX IF NOT EXISTS idx_challenge_trends_id ON challenge_trends(challenge_id)")
-    op.execute("CREATE INDEX IF NOT EXISTS idx_challenge_trends_title ON challenge_trends(challenge_title)")
+    op.execute(
+        "CREATE INDEX IF NOT EXISTS idx_challenge_trends_id ON challenge_trends(challenge_id)"
+    )
+    op.execute(
+        "CREATE INDEX IF NOT EXISTS idx_challenge_trends_title ON challenge_trends(challenge_title)"
+    )
+
 
 def downgrade() -> None:
     op.execute("DROP MATERIALIZED VIEW IF EXISTS challenge_trends CASCADE")

@@ -1,7 +1,8 @@
 from __future__ import annotations
-from ..exceptions import *
 
 from typing import TYPE_CHECKING, ClassVar, Iterator, Optional
+
+from ..exceptions import *
 
 if TYPE_CHECKING:
     from ..tiktok import TikTokApi

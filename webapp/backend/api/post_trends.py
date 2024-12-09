@@ -1,17 +1,19 @@
-from fastapi import APIRouter, Query
-from sqlalchemy.future import select
-from sqlalchemy import func, join
-from typing import List, Optional
 from datetime import datetime
+from typing import List, Optional
+
+from fastapi import APIRouter, Query
+from pydantic import BaseModel
+from sqlalchemy import func, join
+from sqlalchemy.future import select
+
 from postgresql.config.db import session
 from postgresql.database_models import (
-    PostTrends,
-    Posts,
     Authors,
-    PostsChallenges,
     Challenges,
+    Posts,
+    PostsChallenges,
+    PostTrends,
 )
-from pydantic import BaseModel
 
 router = APIRouter()
 

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import json
 from dataclasses import dataclass
-from typing import Tuple, Optional, Dict
+from typing import Dict, Optional, Tuple
 
 from playwright.async_api import Page as AsyncPage
 
@@ -20,9 +20,9 @@ from .js.navigator_platform import navigator_platform
 from .js.navigator_plugins import navigator_plugins
 from .js.navigator_userAgent import navigator_userAgent
 from .js.navigator_vendor import navigator_vendor
+from .js.utils import utils
 from .js.webgl_vendor import webgl_vendor
 from .js.window_outerdimensions import window_outerdimensions
-from .js.utils import utils
 
 SCRIPTS: Dict[str, str] = {
     "chrome_csi": chrome_csi,

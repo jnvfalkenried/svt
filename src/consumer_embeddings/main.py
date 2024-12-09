@@ -1,7 +1,8 @@
-import os
 import asyncio
+import os
 
 from dotenv import load_dotenv
+
 from consumer_embeddings import EmbeddingsConsumer
 
 load_dotenv()
