@@ -1,8 +1,9 @@
 from __future__ import annotations
-from ..exceptions import InvalidResponseException
-from .video import Video
 
 from typing import TYPE_CHECKING, Iterator
+
+from ..exceptions import InvalidResponseException
+from .video import Video
 
 if TYPE_CHECKING:
     from ..tiktok import TikTokApi

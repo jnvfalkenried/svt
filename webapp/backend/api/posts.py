@@ -1,12 +1,14 @@
+from typing import Annotated, Union
+
 from fastapi import APIRouter, Query
+from schemas.request import PostsRequest
+from schemas.response import ReportFeedResponse, ReportPostResponse
+
 from postgresql.config.db import session
 from postgresql.database_scripts.posts_reporting import (
     get_top_feed_posts,
     get_top_posts,
 )
-from schemas.request import PostsRequest
-from schemas.response import ReportFeedResponse, ReportPostResponse
-from typing import Annotated, Union
 
 router = APIRouter()
 

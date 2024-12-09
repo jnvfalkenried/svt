@@ -4,13 +4,13 @@ import os
 import pickle
 import sys
 import threading
-from typing import Optional, Tuple, List
+from typing import List, Optional, Tuple
 
 import aio_pika
 import cv2
 import vertexai
-from ratelimit import limits, sleep_and_retry
 from google.oauth2 import service_account
+from ratelimit import limits, sleep_and_retry
 from scenedetect import AdaptiveDetector, SceneManager, StatsManager, open_video
 from vertexai.vision_models import (
     Image,
@@ -93,7 +93,7 @@ class TikTokVideoProcessor(RabbitMQClient):
                 )
                 print(f"Extracted {len(key_frames)} key frames")
 
-                # pre-process text 
+                # pre-process text
                 text_description = body["description"].strip().lower()
 
                 # TODO: Calculate similarity between key frames and filter out similar frames
@@ -194,10 +194,10 @@ class TikTokVideoProcessor(RabbitMQClient):
                         dimension=1408,
                     )
                 )
-                
+
                 if text_embeddings:
                     embeddings_lst.append(text_embeddings)
-                embeddings_lst.append(image_embeddings)   
+                embeddings_lst.append(image_embeddings)
             except Exception as e:
                 print(f"Error generating embeddings: {e}")
 

@@ -1,5 +1,6 @@
-from sqlalchemy import text
 from datetime import datetime
+
+from sqlalchemy import text
 
 
 async def insert_author(
