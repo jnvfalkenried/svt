@@ -19,18 +19,32 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H stage-server >> ~/.ssh/known_hosts
+          ssh-keyscan -H 130.238.29.26 >> ~/.ssh/known_hosts
 
       - name: Deploy to Stage
         run: |
           ssh ubuntu@130.238.29.26 << 'EOF'
+          set -e  # Exit on error
+          
+          echo "Preparing stage environment..."
           mkdir -p ./stage_temp
           cd ./stage
-          [ -f .env.stage ] && cp .env.stage ../stage_temp
-          [ -d docker_runtime ] && cp -r docker_runtime ../stage_temp
-          rm -rf docker_runtime
+          [ -f .env ] && cp .env ../stage_temp
+          [ -d docker_runtime ] && sudo cp -r docker_runtime ../stage_temp
+          
+          echo "Cleaning up old environment..."
+          sudo rm -rf docker_runtime
+          
+          echo "Checking out the stage branch..."
           git checkout stage
           git pull origin stage
-          docker compose --env-file .env.stage up -d --build --scale producer=2
+          
+          echo "Building and starting services with Docker Compose..."
+          docker-compose up -d --build
+
+          echo "Getting ngrok link..."
+          docker-compose logs ngrok
+
+          echo "Stage environment is ready!"
           docker-compose ps
           EOF
