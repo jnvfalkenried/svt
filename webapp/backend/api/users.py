@@ -1,11 +1,13 @@
 import uuid
+
+from core.auth import create_access_token, hash_password, verify_password
+from fastapi import APIRouter, HTTPException
+from schemas.request import LoginRequest, UserRequest
+from sqlalchemy.future import select
+
 from postgresql.config.db import session
 from postgresql.database_models import Users
 from postgresql.database_scripts.users import insert_user
-from sqlalchemy.future import select
-from fastapi import APIRouter, HTTPException
-from schemas.request import UserRequest, LoginRequest
-from core.auth import hash_password, verify_password, create_access_token
 
 router = APIRouter()
 

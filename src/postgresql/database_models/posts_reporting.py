@@ -9,9 +9,11 @@ from .base import Base
 
 class PostsReporting(Base):
     __tablename__ = "posts_reporting"
-    
+
     id: Mapped[str] = mapped_column(String, primary_key=True)
-    collected_at: Mapped[DateTime] = mapped_column(DateTime, primary_key=True, default=func.now())
+    collected_at: Mapped[DateTime] = mapped_column(
+        DateTime, primary_key=True, default=func.now()
+    )
     collect_count: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     comment_count: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     digg_count: Mapped[Optional[str]] = mapped_column(String, nullable=True)
@@ -20,10 +22,8 @@ class PostsReporting(Base):
     share_count: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     url: Mapped[Optional[str]] = mapped_column(String, nullable=True)
 
-    __table_args__ = (
-        PrimaryKeyConstraint("id", "collected_at"),
-    )
-    
+    __table_args__ = (PrimaryKeyConstraint("id", "collected_at"),)
+
     def __repr__(self) -> str:
         return (
             f"PostsReporting("

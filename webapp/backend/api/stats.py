@@ -1,17 +1,19 @@
+from typing import Annotated
+
 from fastapi import APIRouter, Query
-from sqlalchemy.future import select
+from schemas.request import PlatformGrowthRequest
+from schemas.response import PlatformGrowthResponse, StatsResponse
 from sqlalchemy import func
+from sqlalchemy.future import select
+
 from postgresql.config.db import session
 from postgresql.database_models import (
-    Authors,
-    Posts,
     ActiveHashtags,
+    Authors,
     Challenges,
+    Posts,
     VideoEmbeddings,
 )
-from schemas.request import PlatformGrowthRequest
-from schemas.response import StatsResponse, PlatformGrowthResponse
-from typing import Annotated
 
 router = APIRouter()
 

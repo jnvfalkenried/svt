@@ -40,7 +40,7 @@ class TasksManager(RabbitMQClient):
             )
             await self.exchange.publish(message, routing_key=str(key))
             logger.info(f"Successfully produced message with key: {key}")
-            #logger.debug(f"Message details - Key: {key}, Value: {value}")
+            # logger.debug(f"Message details - Key: {key}, Value: {value}")
         except Exception as e:
             logger.error(f"Error producing message: {e}", exc_info=True)
             raise  # Re-raise to let caller handle the error
@@ -49,7 +49,9 @@ class TasksManager(RabbitMQClient):
         try:
             async with session() as s:
                 self.hashtags_to_monitor = await get_active_hashtags(s)
-                logger.info(f"Updated hashtags to monitor: {[h.title for h in self.hashtags_to_monitor]}")  # Log just the titles
+                logger.info(
+                    f"Updated hashtags to monitor: {[h.title for h in self.hashtags_to_monitor]}"
+                )  # Log just the titles
         except Exception as e:
             logger.error(f"Error updating hashtags to monitor: {e}", exc_info=True)
             self.hashtags_to_monitor = []  # Reset to empty list on error
@@ -63,19 +65,19 @@ class TasksManager(RabbitMQClient):
                     "timestamp": datetime.datetime.now().isoformat(),
                 }
                 await self.produce_message(
-                    key="producer.hashtag_search", 
-                    value=json.dumps(task_data)
+                    key="producer.hashtag_search", value=json.dumps(task_data)
                 )
                 logger.info(f"Sent task for hashtag: {hashtag.title}")
         except Exception as e:
             logger.error(f"Error sending tasks to queue: {e}", exc_info=True)
 
     async def refresh_post_trends_view(self):
-        # Refreshes posts_trends materialized DB view 
+        # Refreshes posts_trends materialized DB view
         try:
             async with session() as s:
                 # Import at the top of file
                 from postgresql.database_models.post_trends import PostTrends
+
                 await PostTrends.refresh_view(s)
                 logger.info("Successfully refreshed post_trends materialized view")
         except Exception as e:

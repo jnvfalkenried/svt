@@ -1,12 +1,12 @@
-from fastapi import APIRouter, Query
-from sqlalchemy.future import select
-from sqlalchemy import func
-from typing import List
-from pydantic import BaseModel
-from postgresql.config.db import session
 from typing import List, Optional
-from postgresql.database_models import ChallengeTrends
 
+from fastapi import APIRouter, Query
+from pydantic import BaseModel
+from sqlalchemy import func
+from sqlalchemy.future import select
+
+from postgresql.config.db import session
+from postgresql.database_models import ChallengeTrends
 
 router = APIRouter()
 

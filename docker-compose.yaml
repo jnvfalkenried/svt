@@ -2,36 +2,32 @@ version: '3.8'
 
 services:
   rabbitmq:
-    profiles: ["infra", "tasks-manager", "datafactory"]
     image: rabbitmq:3-management
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
     ports:
-      - "5672:5672"
-      - "15672:15672"
+      - "${RABBITMQ_UI_PORT_MAP}:15672"
     volumes:
       - ./docker_runtime/rabbitmq_data:/var/lib/rabbitmq
-    labels:
-      description: "RabbitMQ server"
     healthcheck:
-      test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"] # Check if RabbitMQ port are open
+      test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
       interval: 10s
       timeout: 30s
       retries: 5
       start_period: 20s
+    labels:
+      description: "RabbitMQ server"
 
   rabbitmq-bindings:
-    profiles: ["infra", "tasks-manager", "datafactory"]
     build:
       context: ./src
       dockerfile: ./rabbitmq_bindings/Dockerfile
     depends_on:
       rabbitmq:
         condition: service_healthy
-    # command: sh -c "sleep 10 && python bindings.py" #binding will have to wait for rabbitmq first
     environment:
-      RABBITMQ_SERVER: rabbitmq  # RabbitMQ hostname within Docker network
+      RABBITMQ_SERVER: ${RABBITMQ_HOST}
       RABBITMQ_PORT: ${RABBITMQ_PORT}
       RABBITMQ_USER: ${RABBITMQ_USER}
       RABBITMQ_PASSWORD: ${RABBITMQ_PASS}
@@ -45,7 +41,6 @@ services:
       description: "RabbitMQ Bindings"
 
   postgres:
-    profiles: ["infra", "tasks-manager", "datafactory", "webapp"]
     image: pgvector/pgvector:pg14
     restart: always
     healthcheck:
@@ -59,14 +54,13 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
     ports:
-      - "5432:5432"
+      - "${POSTGRES_PORT_MAP}:5432"
     volumes:
       - ./docker_runtime/postgres_data:/var/lib/postgresql/data
     labels:
       description: "PostgreSQL server"
 
   alembic:
-    profiles: ["infra", "tasks-manager", "datafactory", "webapp"]
     build:
       context: ./src
       dockerfile: ./postgresql/Dockerfile
@@ -79,13 +73,12 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_HOST: postgres
+      POSTGRES_HOST: ${POSTGRES_HOST}
       POSTGRES_PORT: ${POSTGRES_PORT}
     labels:
       description: "Alembic migration service"
 
   tasks-manager:
-    profiles: ["tasks-manager"]
     build:
       context: ./src
       dockerfile: ./tasks_manager/Dockerfile
@@ -99,7 +92,7 @@ services:
       alembic:
         condition: service_completed_successfully
     environment:
-      RABBITMQ_SERVER: rabbitmq  # RabbitMQ hostname within Docker network
+      RABBITMQ_SERVER: ${RABBITMQ_HOST}
       RABBITMQ_PORT: ${RABBITMQ_PORT}
       RABBITMQ_USER: ${RABBITMQ_USER}
       RABBITMQ_PASSWORD: ${RABBITMQ_PASS}
@@ -108,7 +101,7 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_HOST: postgres
+      POSTGRES_HOST: ${POSTGRES_HOST}
       POSTGRES_PORT: ${POSTGRES_PORT}
     volumes:
       - ./src/tasks_manager/main.py:/app/main.py
@@ -120,7 +113,6 @@ services:
       description: "Tasks Manager (Scheduler) for reccurent tasks"
 
   producer:
-    profiles: ["datafactory"]
     build:
       context: ./src
       dockerfile: ./producer/Dockerfile
@@ -130,7 +122,7 @@ services:
       rabbitmq-bindings:
         condition: service_completed_successfully
     environment:
-      RABBITMQ_SERVER: rabbitmq  # RabbitMQ hostname within Docker network
+      RABBITMQ_SERVER: ${RABBITMQ_HOST}
       RABBITMQ_PORT: ${RABBITMQ_PORT}
       RABBITMQ_USER: ${RABBITMQ_USER}
       RABBITMQ_PASSWORD: ${RABBITMQ_PASS}
@@ -144,12 +136,11 @@ services:
     labels:
       description: "TikTok Data Producer"
     deploy:
-      replicas: 5
+      replicas: 2
       restart_policy:
         condition: on-failure
 
   consumer:
-    profiles: ["datafactory"]
     build:
       context: ./src
       dockerfile: ./consumer/Dockerfile
@@ -163,7 +154,7 @@ services:
       alembic:
         condition: service_completed_successfully
     environment:
-      RABBITMQ_SERVER: rabbitmq  # RabbitMQ hostname within Docker network
+      RABBITMQ_SERVER: ${RABBITMQ_HOST}
       RABBITMQ_PORT: ${RABBITMQ_PORT}
       RABBITMQ_USER: ${RABBITMQ_USER}
       RABBITMQ_PASS: ${RABBITMQ_PASS}
@@ -171,7 +162,7 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_HOST: postgres
+      POSTGRES_HOST: ${POSTGRES_HOST}
       POSTGRES_PORT: ${POSTGRES_PORT}
     volumes:
       - ./src/consumer/main.py:/app/main.py
@@ -183,7 +174,6 @@ services:
       description: "Embeddings Consumer"
 
   embeddings-consumer:
-    profiles: ["datafactory"]
     build:
       context: ./src
       dockerfile: ./consumer_embeddings/Dockerfile
@@ -197,24 +187,21 @@ services:
       alembic:
         condition: service_completed_successfully
     environment:
-      RABBITMQ_SERVER: rabbitmq 
+      RABBITMQ_SERVER: ${RABBITMQ_HOST} 
       RABBITMQ_PORT: ${RABBITMQ_PORT}
       RABBITMQ_USER: ${RABBITMQ_USER}
       RABBITMQ_PASS: ${RABBITMQ_PASS}
-      #RABBITMQ_HOST: ${RABBITMQ_HOST}
       RABBITMQ_EXCHANGE: ${RABBITMQ_EXCHANGE}
       RABBITMQ_EMBEDDINGS_QUEUE: ${RABBITMQ_EMBEDDINGS_QUEUE}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_HOST: postgres
+      POSTGRES_HOST: ${POSTGRES_HOST}
       POSTGRES_PORT: ${POSTGRES_PORT}
-    #command: python -u /app/consumer_embeddings/consumer_embeddings.py
     labels:
       description: "TikTok Embeddings Consumer"
   
   video-processor:
-    profiles: ["datafactory"]
     build:
       context: ./src
       dockerfile: ./video_processor/Dockerfile
@@ -224,7 +211,7 @@ services:
       rabbitmq-bindings:
         condition: service_completed_successfully
     environment:
-      RABBITMQ_SERVER: rabbitmq  # RabbitMQ hostname within Docker network
+      RABBITMQ_SERVER: ${RABBITMQ_HOST}
       RABBITMQ_PORT: ${RABBITMQ_PORT}
       RABBITMQ_USER: ${RABBITMQ_USER}
       RABBITMQ_PASS: ${RABBITMQ_PASS}
@@ -238,12 +225,9 @@ services:
       description: "TikTok Multimodal Search Producer/Consumer"
 
   frontend:
-    profiles: ["webapp"]
     build:
       context: ./
       dockerfile: ./webapp/frontend/Dockerfile
-    ports:
-      - "3000:3000"
     volumes:
       - ./webapp/frontend:/app
       - /app/node_modules
@@ -253,7 +237,6 @@ services:
       description: "React App"
 
   backend:
-    profiles: ["webapp"]
     build:
       context: ./
       dockerfile: ./webapp/backend/Dockerfile
@@ -274,16 +257,11 @@ services:
       GOOGLE_APPLICATION_CREDENTIALS: /app/.ssh/google-credentials.json
     volumes:
       - ${HOME_DIR}/.ssh:/app/.ssh
-    ports:
-      - "8000:8000"
     labels:
       description: "API backend for the frontend"
 
   nginx:
-    profiles: ["webapp"]
     image: nginx:latest
-    ports:
-      - "80:80"
     volumes:
       - ./webapp/nginx.conf:/etc/nginx/nginx.conf
     depends_on:
@@ -292,7 +270,6 @@ services:
     restart: always
 
   ngrok:
-    profiles: ["webapp"]
     build:
       context: ./webapp/ngrok
       dockerfile: Dockerfile
@@ -301,4 +278,4 @@ services:
     depends_on:
       - nginx
     ports:
-      - 4040:4040
+      - ${NGROK_PORT_MAP}:4040

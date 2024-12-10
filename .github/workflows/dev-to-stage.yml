@@ -1,0 +1,50 @@
+name: Deploy to Stage
+
+on:
+  push:
+    branches:
+      - stage
+
+jobs:
+  deploy:
+    name: Deploy to Stage Env on Server
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up SSH Key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H 130.238.29.26 >> ~/.ssh/known_hosts
+
+      - name: Deploy to Stage
+        run: |
+          ssh ubuntu@130.238.29.26 << 'EOF'
+          set -e  # Exit on error
+          
+          echo "Preparing stage environment..."
+          mkdir -p ./stage_temp
+          cd ./stage
+          [ -f .env ] && cp .env ../stage_temp
+          [ -d docker_runtime ] && sudo cp -r docker_runtime ../stage_temp
+          
+          echo "Cleaning up old environment..."
+          sudo rm -rf docker_runtime
+          
+          echo "Checking out the stage branch..."
+          git checkout stage
+          git pull origin stage
+          
+          echo "Building and starting services with Docker Compose..."
+          docker-compose up -d --build
+
+          echo "Getting ngrok link..."
+          docker-compose logs ngrok
+
+          echo "Stage environment is ready!"
+          docker-compose ps
+          EOF

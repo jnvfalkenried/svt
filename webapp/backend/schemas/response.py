@@ -1,5 +1,7 @@
-from pydantic import BaseModel, Field
 from datetime import datetime
+
+from pydantic import BaseModel, Field
+
 
 class AuthorResponse(BaseModel):
     id: str
@@ -13,7 +15,7 @@ class AuthorResponse(BaseModel):
     max_digg_count: int = Field(default=0)
     max_heart_count: int = Field(default=0)
     max_video_count: int = Field(default=0)
-    
+
 
 class PostResponse(BaseModel):
     id: str
@@ -30,6 +32,7 @@ class PostResponse(BaseModel):
     max_share_count: int = Field(default=0)
     max_collect_count: int = Field(default=0)
 
+
 class MatchResponse(BaseModel):
     post_id: str
     description: str = Field(default="Unknown")
@@ -38,16 +41,19 @@ class MatchResponse(BaseModel):
     author: AuthorResponse
     post: PostResponse
 
+
 class HashtagResponse(BaseModel):
     id: str
     title: str = Field(default="Unknown")
     active: bool = Field(default=True)
+
 
 class StatsResponse(BaseModel):
     author_count: int
     post_count: int
     active_hashtags_count: int
     challenge_count: int
+
 
 class ReportPostResponse(BaseModel):
     id: str
@@ -67,8 +73,10 @@ class ReportPostResponse(BaseModel):
     max_repost_count: int
     max_share_count: int
 
+
 class ReportFeedResponse(ReportPostResponse):
     appearances_in_feed: int
+
 
 class PlatformGrowthResponse(BaseModel):
     author_growth: list[dict]

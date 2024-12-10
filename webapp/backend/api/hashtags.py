@@ -1,12 +1,14 @@
 import uuid
-from postgresql.config.db import session
-from sqlalchemy.sql import text
+
 from fastapi import APIRouter, HTTPException
 from schemas.request import HashtagRequest
 from schemas.response import HashtagResponse
+from sqlalchemy.sql import text
+
+from postgresql.config.db import session
 from postgresql.database_scripts.active_hashtags import (
-    insert_or_update_active_hashtag,
     get_active_hashtags,
+    insert_or_update_active_hashtag,
 )
 
 router = APIRouter()

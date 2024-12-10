@@ -1,8 +1,11 @@
-from pydantic import BaseModel
 from datetime import datetime
+
+from pydantic import BaseModel
+
 
 class HashtagRequest(BaseModel):
     hashtag: str
+
 
 class UserRequest(BaseModel):
     username: str
@@ -10,9 +13,11 @@ class UserRequest(BaseModel):
     password: str
     roles: str
 
+
 class LoginRequest(BaseModel):
     username: str
     password: str
+
 
 class PostsRequest(BaseModel):
     feed: bool
@@ -21,6 +26,7 @@ class PostsRequest(BaseModel):
     hashtag: str
     category: str
     limit: int
+
 
 class PlatformGrowthRequest(BaseModel):
     interval: str
