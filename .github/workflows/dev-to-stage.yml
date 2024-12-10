@@ -33,7 +33,7 @@ jobs:
           [ -d docker_runtime ] && sudo cp -r docker_runtime ../stage_temp
           
           echo "Cleaning up old environment..."
-          rm -rf docker_runtime
+          sudo rm -rf docker_runtime
           
           echo "Checking out the stage branch..."
           git checkout stage
