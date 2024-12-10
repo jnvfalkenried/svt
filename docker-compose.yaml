@@ -7,8 +7,7 @@ services:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
     ports:
-      - "${RABBITMQ_PORT}:5672"
-      - "${RABBITMQ_UI_PORT}:15672"
+      - "${RABBITMQ_UI_PORT_MAP}:15672"
     volumes:
       - ./docker_runtime/rabbitmq_data:/var/lib/rabbitmq
     healthcheck:
@@ -55,7 +54,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
     ports:
-      - "${POSTGRES_PORT}:5432"
+      - "${POSTGRES_PORT_MAP}:5432"
     volumes:
       - ./docker_runtime/postgres_data:/var/lib/postgresql/data
     labels:
@@ -137,7 +136,7 @@ services:
     labels:
       description: "TikTok Data Producer"
     deploy:
-      replicas: 5
+      replicas: 2
       restart_policy:
         condition: on-failure
 
@@ -229,8 +228,6 @@ services:
     build:
       context: ./
       dockerfile: ./webapp/frontend/Dockerfile
-    ports:
-      - "${FRONTEND_PORT}:3000"
     volumes:
       - ./webapp/frontend:/app
       - /app/node_modules
@@ -260,15 +257,11 @@ services:
       GOOGLE_APPLICATION_CREDENTIALS: /app/.ssh/google-credentials.json
     volumes:
       - ${HOME_DIR}/.ssh:/app/.ssh
-    ports:
-      - "${BACKTEND_PORT}:8000"
     labels:
       description: "API backend for the frontend"
 
   nginx:
     image: nginx:latest
-    ports:
-      - "${NGINX_PORT}:80"
     volumes:
       - ./webapp/nginx.conf:/etc/nginx/nginx.conf
     depends_on:
@@ -285,4 +278,4 @@ services:
     depends_on:
       - nginx
     ports:
-      - ${NGROK_PORT}:4040
+      - ${NGROK_PORT_MAP}:4040

@@ -40,6 +40,11 @@ jobs:
           git pull origin stage
           
           echo "Building and starting services with Docker Compose..."
-          docker-compose up -d --build --scale producer=2
+          docker-compose up -d --build
+
+          echo "Getting ngrok link..."
+          docker-compose logs ngrok
+
+          echo "Stage environment is ready!"
           docker-compose ps
           EOF
