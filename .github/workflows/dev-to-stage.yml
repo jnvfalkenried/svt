@@ -24,13 +24,22 @@ jobs:
       - name: Deploy to Stage
         run: |
           ssh ubuntu@130.238.29.26 << 'EOF'
+          set -e  # Exit on error
+          
+          echo "Preparing stage environment..."
           mkdir -p ./stage_temp
           cd ./stage
-          [ -f .env.stage ] && cp .env.stage ../stage_temp
+          [ -f .env ] && cp .env ../stage_temp
           [ -d docker_runtime ] && cp -r docker_runtime ../stage_temp
+          
+          echo "Cleaning up old environment..."
           rm -rf docker_runtime
+          
+          echo "Checking out the stage branch..."
           git checkout stage
           git pull origin stage
-          docker compose --env-file .env.stage up -d --build --scale producer=2
+          
+          echo "Building and starting services with Docker Compose..."
+          docker-compose up -d --build --scale producer=2
           docker-compose ps
           EOF
