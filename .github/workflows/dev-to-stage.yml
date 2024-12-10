@@ -30,7 +30,7 @@ jobs:
           mkdir -p ./stage_temp
           cd ./stage
           [ -f .env ] && cp .env ../stage_temp
-          [ -d docker_runtime ] && cp -r docker_runtime ../stage_temp
+          [ -d docker_runtime ] && sudo cp -r docker_runtime ../stage_temp
           
           echo "Cleaning up old environment..."
           rm -rf docker_runtime
