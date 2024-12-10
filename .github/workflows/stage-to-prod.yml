@@ -1,0 +1,47 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Deploy to Prod Env on Server
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up SSH Key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H 130.238.29.26 >> ~/.ssh/known_hosts
+
+      - name: Deploy to Prod
+        run: |
+          ssh ubuntu@130.238.29.26 << 'EOF'
+          set -e  # Exit on error
+          
+          echo "Preparing prod environment..."
+          mkdir -p ./prod_temp
+          cd ./prod
+          [ -f .env ] && cp .env ../prod_temp
+          [ -d docker_runtime ] && sudo cp -r docker_runtime ../prod_temp
+          
+          echo "Checking out the main branch..."
+          git checkout main
+          git pull origin main
+          
+          echo "Building and starting services with Docker Compose..."
+          docker-compose up -d --build --scale producer=5
+
+          echo "Getting ngrok link..."
+          docker-compose logs ngrok
+
+          echo "Prod environment is ready!"
+          docker-compose ps
+          EOF
