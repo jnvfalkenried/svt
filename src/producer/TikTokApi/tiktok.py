@@ -1,3 +1,17 @@
+"""
+This file is based on the TikTok-Api project by David Teather (https://github.com/davidteather/TikTok-Api).
+License: MIT License
+
+Original Copyright (c) 2019 David Teather
+
+Modifications made by Rustam Ismailov, 2024:
+- Added support for specifying a custom region, language, and timezone when generating sessions.
+- Enhanced session parameter initialization for better configurability.
+
+This file retains the original MIT License. For more information about the original project, please visit:
+https://github.com/davidteather/TikTok-Api
+"""
+
 import asyncio
 import dataclasses
 import json
@@ -85,20 +99,28 @@ class TikTokApi:
         handler.setFormatter(formatter)
         self.logger.addHandler(handler)
 
-    async def __set_session_params(self, session: TikTokPlaywrightSession):
+    async def __set_session_params(
+        self,
+        session: TikTokPlaywrightSession,
+        language: str = "sv",
+        region: str = "SE",
+        timezone: str = "Europe/Stockholm",
+    ):
         """Set the session params for a TikTokPlaywrightSession"""
         user_agent = await session.page.evaluate("() => navigator.userAgent")
-        language = await session.page.evaluate(
-            "() => navigator.language || navigator.userLanguage"
-        )
+        if language is None:
+            language = await session.page.evaluate(
+                "() => navigator.language || navigator.userLanguage"
+            )
         platform = await session.page.evaluate("() => navigator.platform")
         device_id = str(random.randint(10**18, 10**19 - 1))  # Random device id
         history_len = str(random.randint(1, 10))  # Random history length
         screen_height = str(random.randint(600, 1080))  # Random screen height
         screen_width = str(random.randint(800, 1920))  # Random screen width
-        timezone = await session.page.evaluate(
-            "() => Intl.DateTimeFormat().resolvedOptions().timeZone"
-        )
+        if timezone is None:
+            timezone = await session.page.evaluate(
+                "() => Intl.DateTimeFormat().resolvedOptions().timeZone"
+            )
 
         session_params = {
             "aid": "1988",
@@ -122,7 +144,7 @@ class TikTokApi:
             "os": platform,
             "priority_region": "",
             "referer": "",
-            "region": "US",  # TODO: TikTokAPI option
+            "region": region if region else "US",
             "screen_height": screen_height,
             "screen_width": screen_width,
             "tz_name": timezone,
@@ -139,6 +161,7 @@ class TikTokApi:
         sleep_after: int = 1,
         cookies: dict = None,
         suppress_resource_load_types: list[str] = None,
+        sessions_regional_params: dict = {},
     ):
         """Create a TikTokPlaywrightSession"""
         if ms_token is not None:
@@ -196,7 +219,7 @@ class TikTokApi:
                     f"Failed to get msToken on session index {len(self.sessions)}, you should consider specifying ms_tokens"
                 )
         self.sessions.append(session)
-        await self.__set_session_params(session)
+        await self.__set_session_params(session, **sessions_regional_params)
 
     async def create_sessions(
         self,
@@ -212,6 +235,7 @@ class TikTokApi:
         suppress_resource_load_types: list[str] = None,
         browser: str = "chromium",
         executable_path: str = None,
+        sessions_regional_params: dict = {},
     ):
         """
         Create sessions for use within the TikTokApi class.
@@ -232,6 +256,7 @@ class TikTokApi:
             suppress_resource_load_types (list[str]): Types of resources to suppress playwright from loading, excluding more types will make playwright faster.. Types: document, stylesheet, image, media, font, script, textrack, xhr, fetch, eventsource, websocket, manifest, other.
             browser (str): specify either firefox or chromium, default is chromium
             executable_path (str): Path to the browser executable
+            sessions_regional_params (dict): A dictionary containing regional parameters to pass to the sessions
 
         Example Usage:
             .. code-block:: python
@@ -278,6 +303,7 @@ class TikTokApi:
                     sleep_after=sleep_after,
                     cookies=random_choice(cookies),
                     suppress_resource_load_types=suppress_resource_load_types,
+                    sessions_regional_params=sessions_regional_params,
                 )
                 for _ in range(num_sessions)
             )

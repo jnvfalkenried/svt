@@ -49,3 +49,8 @@ POSTGRES_DB=
 
 # Other environment variables
 HOME_DIR=
+
+
+This project incorporates certain parts of the TikTok-Api project by David Teather
+(https://github.com/davidteather/TikTok-Api), licensed under the MIT License.
+The utilized portions include functionality for session creation and TikTok API interactions.
