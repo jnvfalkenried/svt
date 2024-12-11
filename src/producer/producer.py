@@ -46,6 +46,7 @@ class TikTokProducer(RabbitMQClient):
         self.connection_name = f"tiktok_data_producer_{replica_number}"
         self.exchange_name = os.environ.get("RABBITMQ_EXCHANGE")
         self.tasks_queue = os.environ.get("RMQ_PRODUCER_TASKS_QUEUE")
+        self.semaphore = asyncio.Semaphore(1)  # Allow only 1 task at a time
 
     async def initialize(self):
         """
@@ -55,7 +56,8 @@ class TikTokProducer(RabbitMQClient):
             await self.connect(self.connection_name)
             self.exchange = await self.channel.get_exchange(self.exchange_name)
             self.tasks_queue = await self.channel.get_queue(name=self.tasks_queue)
-            await self.channel.set_qos(prefetch_count=100)
+            # Get only 1 message at a time
+            await self.channel.set_qos(prefetch_count=1)
 
             logger.info(f"Initialized TikTokProducer")
             logger.debug(
@@ -105,24 +107,25 @@ class TikTokProducer(RabbitMQClient):
         Args:
             message (aio_pika.IncomingMessage): The incoming task from the tasks queue.
         """
-        try:
-            async with message.process(requeue=True):
-                routing_key = message.routing_key
-                task_type = routing_key.split(".")[1]
-                task_params = json.loads(message.body.decode("utf-8"))
+        async with self.semaphore:  # Ensure only one task runs at a time
+            try:
+                async with message.process(requeue=True):
+                    routing_key = message.routing_key
+                    task_type = routing_key.split(".")[1]
+                    task_params = json.loads(message.body.decode("utf-8"))
 
-                logger.info(f"Processing {task_type} task: {task_params}")
+                    logger.info(f"Processing {task_type} task: {task_params}")
 
-                if task_type == "hashtag_search":
-                    await self.get_hashtag_videos(
-                        hashtag=task_params["hashtag"],
-                        num_videos=task_params["num_videos"],
-                        scheduled_at=task_params["timestamp"],
-                    )
-        except Exception as e:
-            logger.error(
-                f"Error {e} occured while processing task {task_params}. Rescheduling!"
-            )
+                    if task_type == "hashtag_search":
+                        await self.get_hashtag_videos(
+                            hashtag=task_params["hashtag"],
+                            num_videos=task_params["num_videos"],
+                            scheduled_at=task_params["timestamp"],
+                        )
+            except Exception as e:
+                logger.error(
+                    f"Error {e} occurred while processing task {task_params}. Rescheduling!"
+                )
 
     async def get_hashtag_videos(self, hashtag, scheduled_at, num_videos=5):
         """

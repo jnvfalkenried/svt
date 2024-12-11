@@ -1,8 +1,9 @@
 from typing import Optional
 
-from .base import Base
 from sqlalchemy import Boolean, Index, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from .base import Base
 
 
 class Authors(Base):
@@ -13,7 +14,6 @@ class Authors(Base):
     signature: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     unique_id: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     verified: Mapped[Optional[bool]] = mapped_column(Boolean, nullable=True)
-    
 
     posts = relationship("Posts", back_populates="authors")
 

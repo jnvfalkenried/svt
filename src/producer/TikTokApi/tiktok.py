@@ -1,28 +1,24 @@
 import asyncio
-import logging
 import dataclasses
-from typing import Any
+import json
+import logging
 import random
 import time
-import json
+from typing import Any
+from urllib.parse import quote, urlencode, urlparse
 
 from playwright.async_api import async_playwright
-from urllib.parse import urlencode, quote, urlparse
-from .stealth import stealth_async
-from .helpers import random_choice
 
+from .api.comment import Comment
+from .api.hashtag import Hashtag
+from .api.search import Search
+from .api.sound import Sound
+from .api.trending import Trending
 from .api.user import User
 from .api.video import Video
-from .api.sound import Sound
-from .api.hashtag import Hashtag
-from .api.comment import Comment
-from .api.trending import Trending
-from .api.search import Search
-
-from .exceptions import (
-    InvalidJSONException,
-    EmptyResponseException,
-)
+from .exceptions import EmptyResponseException, InvalidJSONException
+from .helpers import random_choice
+from .stealth import stealth_async
 
 
 @dataclasses.dataclass
@@ -173,9 +169,11 @@ class TikTokApi:
         if suppress_resource_load_types is not None:
             await page.route(
                 "**/*",
-                lambda route, request: route.abort()
-                if request.resource_type in suppress_resource_load_types
-                else route.continue_(),
+                lambda route, request: (
+                    route.abort()
+                    if request.resource_type in suppress_resource_load_types
+                    else route.continue_()
+                ),
             )
 
         await page.goto(url)
@@ -213,7 +211,7 @@ class TikTokApi:
         cookies: list[dict] = None,
         suppress_resource_load_types: list[str] = None,
         browser: str = "chromium",
-        executable_path: str = None
+        executable_path: str = None,
     ):
         """
         Create sessions for use within the TikTokApi class.
@@ -248,15 +246,24 @@ class TikTokApi:
                 override_browser_args = ["--headless=new"]
                 headless = False  # managed by the arg
             self.browser = await self.playwright.chromium.launch(
-                headless=headless, args=override_browser_args, proxy=random_choice(proxies), executable_path=executable_path
+                headless=headless,
+                args=override_browser_args,
+                proxy=random_choice(proxies),
+                executable_path=executable_path,
             )
         elif browser == "firefox":
             self.browser = await self.playwright.firefox.launch(
-                headless=headless, args=override_browser_args, proxy=random_choice(proxies), executable_path=executable_path
+                headless=headless,
+                args=override_browser_args,
+                proxy=random_choice(proxies),
+                executable_path=executable_path,
             )
         elif browser == "webkit":
             self.browser = await self.playwright.webkit.launch(
-                headless=headless, args=override_browser_args, proxy=random_choice(proxies), executable_path=executable_path
+                headless=headless,
+                args=override_browser_args,
+                proxy=random_choice(proxies),
+                executable_path=executable_path,
             )
         else:
             raise ValueError("Invalid browser argument passed")
@@ -452,7 +459,9 @@ class TikTokApi:
                 raise Exception("TikTokApi.run_fetch_script returned None")
 
             if result == "":
-                raise EmptyResponseException(result, "TikTok returned an empty response")
+                raise EmptyResponseException(
+                    result, "TikTok returned an empty response"
+                )
 
             try:
                 data = json.loads(result)

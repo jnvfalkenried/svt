@@ -1,5 +1,6 @@
-from sqlalchemy import text
 from datetime import datetime
+
+from sqlalchemy import text
 
 
 async def insert_author_stats(
@@ -36,6 +37,7 @@ async def insert_author_stats(
         )
     )
 
+
 async def get_top_authors(
     start_date: datetime,
     end_date: datetime,
@@ -43,7 +45,7 @@ async def get_top_authors(
     hashtag: str = "all",
     category: str = "max_play_count",
     # additional_filters: Optional[dict] = None,
-    limit: int = 10
+    limit: int = 10,
 ) -> list[dict]:
     """
     Fetches top authors based on follower counts within the specified date range and filters.
@@ -89,10 +91,10 @@ async def get_top_authors(
     #     for key, value in additional_filters.items():
     #         filters.append(f"{key} = :{key}")
     #         params[key] = value
-    
 
     # Common query
-    query = text(f"""
+    query = text(
+        f"""
         WITH authors_rep AS (
             SELECT 
                 id,
@@ -122,7 +124,8 @@ async def get_top_authors(
         INNER JOIN authors_rep ON authors.id = authors_rep.id
         ORDER BY CAST(authors_rep.{category} AS INTEGER) DESC
         LIMIT :limit
-    """)
+    """
+    )
 
     # Execute query
     result = await session.execute(query.params(**params))

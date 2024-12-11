@@ -7,18 +7,17 @@ services:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
     ports:
-      - "5672:5672"
-      - "15672:15672"
+      - "${RABBITMQ_UI_PORT_MAP}:15672"
     volumes:
       - ./docker_runtime/rabbitmq_data:/var/lib/rabbitmq
-    labels:
-      description: "RabbitMQ server"
     healthcheck:
-      test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"] # Check if RabbitMQ port are open
+      test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
       interval: 10s
       timeout: 30s
       retries: 5
       start_period: 20s
+    labels:
+      description: "RabbitMQ server"
 
   rabbitmq-bindings:
     build:
@@ -27,9 +26,8 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
-    # command: sh -c "sleep 10 && python bindings.py" #binding will have to wait for rabbitmq first
     environment:
-      RABBITMQ_SERVER: rabbitmq  # RabbitMQ hostname within Docker network
+      RABBITMQ_SERVER: ${RABBITMQ_HOST}
       RABBITMQ_PORT: ${RABBITMQ_PORT}
       RABBITMQ_USER: ${RABBITMQ_USER}
       RABBITMQ_PASSWORD: ${RABBITMQ_PASS}
@@ -56,7 +54,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
     ports:
-      - "5432:5432"
+      - "${POSTGRES_PORT_MAP}:5432"
     volumes:
       - ./docker_runtime/postgres_data:/var/lib/postgresql/data
     labels:
@@ -75,7 +73,7 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_HOST: postgres
+      POSTGRES_HOST: ${POSTGRES_HOST}
       POSTGRES_PORT: ${POSTGRES_PORT}
     labels:
       description: "Alembic migration service"
@@ -94,7 +92,7 @@ services:
       alembic:
         condition: service_completed_successfully
     environment:
-      RABBITMQ_SERVER: rabbitmq  # RabbitMQ hostname within Docker network
+      RABBITMQ_SERVER: ${RABBITMQ_HOST}
       RABBITMQ_PORT: ${RABBITMQ_PORT}
       RABBITMQ_USER: ${RABBITMQ_USER}
       RABBITMQ_PASSWORD: ${RABBITMQ_PASS}
@@ -103,7 +101,7 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_HOST: postgres
+      POSTGRES_HOST: ${POSTGRES_HOST}
       POSTGRES_PORT: ${POSTGRES_PORT}
     volumes:
       - ./src/tasks_manager/main.py:/app/main.py
@@ -124,7 +122,7 @@ services:
       rabbitmq-bindings:
         condition: service_completed_successfully
     environment:
-      RABBITMQ_SERVER: rabbitmq  # RabbitMQ hostname within Docker network
+      RABBITMQ_SERVER: ${RABBITMQ_HOST}
       RABBITMQ_PORT: ${RABBITMQ_PORT}
       RABBITMQ_USER: ${RABBITMQ_USER}
       RABBITMQ_PASSWORD: ${RABBITMQ_PASS}
@@ -138,7 +136,7 @@ services:
     labels:
       description: "TikTok Data Producer"
     deploy:
-      replicas: 5
+      replicas: 2
       restart_policy:
         condition: on-failure
 
@@ -156,7 +154,7 @@ services:
       alembic:
         condition: service_completed_successfully
     environment:
-      RABBITMQ_SERVER: rabbitmq  # RabbitMQ hostname within Docker network
+      RABBITMQ_SERVER: ${RABBITMQ_HOST}
       RABBITMQ_PORT: ${RABBITMQ_PORT}
       RABBITMQ_USER: ${RABBITMQ_USER}
       RABBITMQ_PASS: ${RABBITMQ_PASS}
@@ -164,7 +162,7 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_HOST: postgres
+      POSTGRES_HOST: ${POSTGRES_HOST}
       POSTGRES_PORT: ${POSTGRES_PORT}
     volumes:
       - ./src/consumer/main.py:/app/main.py
@@ -189,19 +187,17 @@ services:
       alembic:
         condition: service_completed_successfully
     environment:
-      RABBITMQ_SERVER: rabbitmq 
+      RABBITMQ_SERVER: ${RABBITMQ_HOST} 
       RABBITMQ_PORT: ${RABBITMQ_PORT}
       RABBITMQ_USER: ${RABBITMQ_USER}
       RABBITMQ_PASS: ${RABBITMQ_PASS}
-      #RABBITMQ_HOST: ${RABBITMQ_HOST}
       RABBITMQ_EXCHANGE: ${RABBITMQ_EXCHANGE}
       RABBITMQ_EMBEDDINGS_QUEUE: ${RABBITMQ_EMBEDDINGS_QUEUE}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_HOST: postgres
+      POSTGRES_HOST: ${POSTGRES_HOST}
       POSTGRES_PORT: ${POSTGRES_PORT}
-    #command: python -u /app/consumer_embeddings/consumer_embeddings.py
     labels:
       description: "TikTok Embeddings Consumer"
   
@@ -215,7 +211,7 @@ services:
       rabbitmq-bindings:
         condition: service_completed_successfully
     environment:
-      RABBITMQ_SERVER: rabbitmq  # RabbitMQ hostname within Docker network
+      RABBITMQ_SERVER: ${RABBITMQ_HOST}
       RABBITMQ_PORT: ${RABBITMQ_PORT}
       RABBITMQ_USER: ${RABBITMQ_USER}
       RABBITMQ_PASS: ${RABBITMQ_PASS}
@@ -228,26 +224,22 @@ services:
     labels:
       description: "TikTok Multimodal Search Producer/Consumer"
 
-  react-frontend:
+  frontend:
     build:
-      context: ./src
-      dockerfile: ./react_frontend/Dockerfile
-    ports:
-      - "3000:3000"   # React development server
-      - "4040:4040"   # ngrok web interface
+      context: ./
+      dockerfile: ./webapp/frontend/Dockerfile
     volumes:
-      - ./src/react_frontend:/app  # Mount the entire React frontend directory
-      - /app/node_modules  # Avoid mounting node_modules to prevent overwriting
+      - ./webapp/frontend:/app
+      - /app/node_modules
     environment:
-      CHOKIDAR_USEPOLLING: true  # Required for hot-reloading in Windows
-      NGROK_AUTH_TOKEN: ${NGROK_AUTH_TOKEN}
+      CHOKIDAR_USEPOLLING: true
     labels:
       description: "React App"
 
-  db-api:
+  backend:
     build:
-      context: ./src
-      dockerfile: ./db_api/Dockerfile
+      context: ./
+      dockerfile: ./webapp/backend/Dockerfile
     depends_on:
       postgres:
         condition: service_healthy
@@ -265,8 +257,28 @@ services:
       GOOGLE_APPLICATION_CREDENTIALS: /app/.ssh/google-credentials.json
     volumes:
       - ${HOME_DIR}/.ssh:/app/.ssh
+    labels:
+      description: "API backend for the frontend"
+
+  nginx:
+    image: nginx:latest
+    volumes:
+      - ./webapp/nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - frontend
+      - backend
+    restart: always
+
+  ngrok:
+    build:
+      context: ./webapp/ngrok
+      dockerfile: Dockerfile
+    environment:
+      NGROK_AUTHTOKEN: ${NGROK_AUTH_TOKEN}
+    depends_on:
+      - nginx
     ports:
-      - "80:80"
+      - ${NGROK_PORT_MAP}:4040
     labels:
       description: "Database API"
 
