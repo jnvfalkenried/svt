@@ -2,7 +2,9 @@ import asyncio
 import json
 import os
 from datetime import datetime
+
 import aio_pika
+
 from helpers.logging import setup_logger
 from helpers.rabbitmq import RabbitMQClient
 from postgresql.config.db import session
