@@ -1,3 +1,4 @@
 [] Refactor streamlit_app
 [] Add streamlit to container and expose to web via ngrok
 [] Add volumes mapping for the rest of services to ease development process (no need to rebuild, just restart on changes)
+[] showcasing
