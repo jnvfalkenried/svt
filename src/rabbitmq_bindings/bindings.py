@@ -24,6 +24,27 @@ RMQ_PRODUCER_TASKS_QUEUE = os.getenv("RMQ_PRODUCER_TASKS_QUEUE")
 
 
 async def main():
+    """
+    RabbitMQ Queue and Exchange Setup Script
+
+    Sets up a distributed message routing system.
+
+    Exchanges:
+        - Main exchange for data processing messages
+        - Tasks exchange for producer-related tasks
+
+    Queues:
+        - Hashtag queue: TikTok hashtag-related messages
+        - Video bytes queue: Raw video byte data
+        - Embeddings queue: Video embedding generation messages
+        - Producer tasks queue: Producer background tasks
+
+    Routing key patterns:
+        - tiktok.hashtag.#: Matches all hashtag-related messages
+        - tiktok.bytes.#: Captures video byte-related messages
+        - tiktok.embeddings.#: Routes embedding generation messages
+        - producer.#: Handles producer task messages
+    """
     rabbitmq_client = RabbitMQClient(
         os.getenv("RABBITMQ_SERVER"),
         os.getenv("RABBITMQ_PORT"),

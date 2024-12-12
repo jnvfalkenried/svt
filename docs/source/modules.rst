@@ -9,3 +9,5 @@ Class and Module Overview
    producer
    video_processor
    tasks_manager
+   rabbitmq_bindings
+   helpers
