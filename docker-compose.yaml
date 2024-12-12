@@ -268,6 +268,8 @@ services:
       - frontend
       - backend
     restart: always
+    ports:
+      - "80:80"
 
   ngrok:
     build:

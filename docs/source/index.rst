@@ -19,7 +19,6 @@ documentation for details.
    architecture
    setup
    usage
-   api
    deployment
    contribution
    modules

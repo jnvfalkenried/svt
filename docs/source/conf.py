@@ -22,6 +22,7 @@ extensions = [
     'sphinx.ext.viewcode', # Adds links to source code
     # 'sphinx.ext.intersphinx', # Links to external documentation
     # 'sphinx_autodoc_typehints', # Type hint support
+    "autoapi.extension",
 ]
 
 templates_path = ['_templates']
@@ -36,6 +37,7 @@ html_theme = 'furo'
 html_static_path = ['_static']
 
 sys.path.insert(0, os.path.abspath('../../src'))
+sys.path.insert(0, os.path.abspath('../../webapp'))
 
 autodoc_mock_imports = [
     "cv2",
@@ -49,6 +51,14 @@ autodoc_mock_imports = [
     "dotenv",
     "TikTokApi",
     "pgvector",
+    "fastapi",
+    "bcrypt",
+    "jwt",
+    "pydantic",
 ]
 
-
+autoapi_type = 'python'
+autoapi_dirs = ['../../webapp/backend']
+autoapi_options = ['members', 'inherited-members', 'undoc-members', 'show-inheritance', 'show-module-summary']
+autoapi_format = 'html'
+autoapi_add_toctree = False

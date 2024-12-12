@@ -17,6 +17,23 @@ router = APIRouter()
 async def get_posts(
     request: Annotated[PostsRequest, Query()]
 ) -> Union[list[ReportFeedResponse], list[ReportPostResponse]]:
+    """
+    Retrieve top posts based on various engagement metrics or feed appearance.
+
+    This endpoint returns a list of top posts, either based on their appearance in the feed 
+    or by a specific engagement metric (views, likes, comments, etc.). The result can be 
+    filtered by a date range, hashtag, and sorted according to the specified category.
+
+    Args:
+        request (PostsRequest): The request object containing filtering criteria.
+
+    Returns:
+        Union[list[ReportFeedResponse], list[ReportPostResponse]]: A list of posts sorted
+        by either their feed appearance or specific engagement metrics.
+
+    Raises:
+        HTTPException: If an error occurs while fetching the posts.
+    """
     category_mapping = {
         "Views": "max_play_count",
         "Likes": "max_digg_count",

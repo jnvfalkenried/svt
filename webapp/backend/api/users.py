@@ -14,6 +14,18 @@ router = APIRouter()
 
 @router.post("/api/register")
 async def register(user: UserRequest) -> dict[str, str]:
+    """
+    Register a new user with a username, email, and password.
+    
+    This endpoint checks if the user already exists in the database.
+    If not, it hashes the user's password, generates a new user ID, and inserts the user into the database.
+
+    Args:
+        user (UserRequest): The user details including username, email, password, and roles.
+    
+    Returns:
+        dict: A message indicating successful registration or an error message if the user already exists.
+    """
     # Run a query to register a user
     async with session() as s:
         # Check if the user already exists
@@ -45,6 +57,18 @@ async def register(user: UserRequest) -> dict[str, str]:
 
 @router.post("/api/login")
 async def login(login_request: LoginRequest) -> dict[str, str]:
+    """
+    Login an existing user by validating their username and password.
+    
+    This endpoint checks if the provided username exists and whether the password matches the stored hash.
+    If successful, a JWT access token is returned for authentication.
+
+    Args:
+        login_request (LoginRequest): The login credentials (username and password).
+    
+    Returns:
+        dict: The JWT access token and token type.
+    """
     # Run a query to login a user
     async with session() as s:
         # Check if the user exists

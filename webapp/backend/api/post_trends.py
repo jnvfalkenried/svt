@@ -14,31 +14,9 @@ from postgresql.database_models import (
     PostsChallenges,
     PostTrends,
 )
+from schemas.response import PostTrendResponse, PostTrendsListResponse
 
 router = APIRouter()
-
-
-class PostTrendResponse(BaseModel):
-    post_id: str
-    author_name: str
-    post_description: str
-    collected_at: datetime
-    current_views: int
-    daily_change: int
-    weekly_change: int
-    monthly_change: int
-    daily_growth_rate: float
-    weekly_growth_rate: float
-    monthly_growth_rate: float
-    challenges: List[str]
-
-    class Config:
-        from_attributes = True
-
-
-class PostTrendsListResponse(BaseModel):
-    items: List[PostTrendResponse]
-    total: int
 
 
 @router.get("/api/post-trends", response_model=PostTrendsListResponse)
@@ -48,6 +26,26 @@ async def get_post_trends(
     limit: int = Query(50),
     offset: int = Query(0),
 ) -> PostTrendsListResponse:
+    """
+    Retrieve post trends based on growth and engagement metrics.
+
+    This endpoint returns a list of trending posts, including various metrics like views, 
+    growth rates (daily, weekly, monthly), and associated challenges. The results can be 
+    filtered by a date range and support pagination through `limit` and `offset` parameters.
+
+    Args:
+        start_date (Optional[datetime]): The start date to filter the post trends by their collection date.
+        end_date (Optional[datetime]): The end date to filter the post trends by their collection date.
+        limit (int): The maximum number of post trends to return (default is 50).
+        offset (int): The number of items to skip, used for pagination (default is 0).
+
+    Returns:
+        PostTrendsListResponse: A response object containing a list of trending posts, 
+                                 along with the total count of matching records.
+    
+    Raises:
+        HTTPException: If there's an error while processing the query, an appropriate error message is raised.
+    """
     async with session() as s:
         query = (
             select(
