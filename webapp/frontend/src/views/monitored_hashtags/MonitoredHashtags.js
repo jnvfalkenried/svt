@@ -164,7 +164,7 @@ const HashtagCard = ({ tag, onRemove }) => {
           </CButton>
         </div>
 
-        <div className="bg-light p-3 rounded mb-4">
+        <div className="bg-body-tertiary p-3 rounded mb-4">
           <CRow>
             <CCol className="text-center mb-3">
               <p className="text-medium-bold mb-0">Posts growth</p>
@@ -199,7 +199,7 @@ const HashtagCard = ({ tag, onRemove }) => {
           </div>
           <div className="d-flex flex-wrap gap-2">
             {tag.related.map((related) => (
-              <span key={related.id} className="badge bg-light text-primary rounded-pill">
+              <span key={related.id} className="badge bg-body-tertiary text-primary rounded-pill">
                 #{related.title}
               </span>
             ))}

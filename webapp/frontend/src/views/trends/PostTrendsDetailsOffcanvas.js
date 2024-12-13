@@ -25,7 +25,7 @@ const PostTrendsDetailsOffcanvas = ({ visible, onClose, post }) => {
           <div>
             <div className="d-flex flex-wrap gap-2 mb-3">
               {post.challenges.map((tag, i) => (
-                <span key={i} className="badge bg-light text-dark">
+                <span key={i} className="badge bg-body-tertiary text-medium-emphasis">
                   {tag}
                 </span>
               ))}

@@ -55,7 +55,7 @@ const PostTrendsTable = () => {
               <CTableDataCell>
                 <div className="d-flex flex-wrap gap-2" style={{ maxWidth: '200px' }}>
                   {trend.challenges.slice(0, 3).map((tag, i) => (
-                    <span key={i} className="badge bg-light text-dark">
+                    <span key={i} className="badge bg-body-tertiary text-medium-emphasis">
                       {tag}
                     </span>
                   ))}
