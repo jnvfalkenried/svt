@@ -54,6 +54,11 @@ class StatsResponse(BaseModel):
     active_hashtags_count: int
     challenge_count: int
 
+class RelatedHashtagResponse(BaseModel):
+    active_hashtag_id: str
+    active_hashtag_title: str
+    related_hashtag_id: str
+    related_hashtag_title: str
 
 class ReportPostResponse(BaseModel):
     id: str

@@ -5,10 +5,15 @@ from schemas.request import HashtagRequest
 from schemas.response import HashtagResponse
 from sqlalchemy.sql import text
 
+from typing import List
+from schemas.response import RelatedHashtagResponse
+
+
 from postgresql.config.db import session
 from postgresql.database_scripts.active_hashtags import (
     get_active_hashtags,
     insert_or_update_active_hashtag,
+    fetch_related_challenges,
 )
 
 router = APIRouter()
@@ -63,4 +68,15 @@ async def deactivate_hashtag(hashtag_id: str) -> dict[str, str]:
 
         except Exception as e:
             await s.rollback()
+            raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/api/hashtags/related", response_model=List[RelatedHashtagResponse])
+async def get_related_hashtags() -> List[RelatedHashtagResponse]:
+    async with session() as s:
+        try:
+            results = await fetch_related_challenges(s)
+            print("Debug - Fetched results:", results)  # Debug print
+            return results
+        except Exception as e:
+            print("Debug - Error:", str(e))  # Debug print
             raise HTTPException(status_code=500, detail=str(e))
