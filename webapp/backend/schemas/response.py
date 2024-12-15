@@ -89,3 +89,15 @@ class PlatformGrowthResponse(BaseModel):
     # active_hashtags_growth: list[dict]
     challenge_growth: list[dict]
     # video_embeddings_growth: list[dict]
+
+class HashtagPostsResponse(BaseModel):
+    related_hashtag_title: str
+    post_id: str
+    collected_at: datetime
+    current_views: float
+    daily_change: float
+    weekly_change: float
+    monthly_change: float
+    daily_growth_percentage: float
+    weekly_growth_percentage: float
+    monthly_growth_percentage: float

@@ -6,7 +6,7 @@ from schemas.response import HashtagResponse
 from sqlalchemy.sql import text
 
 from typing import List
-from schemas.response import RelatedHashtagResponse
+from schemas.response import RelatedHashtagResponse, HashtagPostsResponse
 
 
 from postgresql.config.db import session
@@ -14,6 +14,7 @@ from postgresql.database_scripts.active_hashtags import (
     get_active_hashtags,
     insert_or_update_active_hashtag,
     fetch_related_challenges,
+    fetch_related_hashtag_growth,
 )
 
 router = APIRouter()
@@ -79,4 +80,19 @@ async def get_related_hashtags() -> List[RelatedHashtagResponse]:
             return results
         except Exception as e:
             print("Debug - Error:", str(e))  # Debug print
+            raise HTTPException(status_code=500, detail=str(e))
+        
+@router.get("/api/hashtags/{active_hashtag}/trends")
+async def get_related_hashtag_trends(active_hashtag: str):
+    async with session() as s:
+        try:
+            results = await fetch_related_hashtag_growth(s, active_hashtag)
+            if not results:
+                raise HTTPException(
+                    status_code=404,
+                    detail=f"No trends found for hashtags related to #{active_hashtag}"
+                )
+            return results
+        except Exception as e:
+            print("Debug - Error:", str(e))
             raise HTTPException(status_code=500, detail=str(e))
