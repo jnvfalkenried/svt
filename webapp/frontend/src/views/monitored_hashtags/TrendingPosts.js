@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useParams } from 'react-router-dom'
 import {
   CTable,
   CTableBody,
@@ -19,26 +20,39 @@ const TrendingPosts = () => {
   const [selectedPost, setSelectedPost] = useState(null)
   const [showOffcanvas, setShowOffcanvas] = useState(false)
 
+  const { hashtag_title } = useParams()
+
   useEffect(() => {
     const fetchTrends = async () => {
       try {
         setLoading(true)
         setError(null)
-        const response = await fetch('/api/hashtags/puppy/trends')
+  
+        console.log('Fetching trends for hashtag:', hashtag_title)
+  
+        const response = await fetch(`/api/hashtags/${encodeURIComponent(hashtag_title)}/trends`)
+        
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`)
         }
+        
         const data = await response.json()
+        
+        console.log('Fetched data:', data)
+        
         setTrends(data || [])
       } catch (error) {
         console.error('Error fetching trends:', error)
-        setError('Failed to load hashtag trends. Please try again later.')
+        setError(error.message || 'Failed to load hashtag trends')
       } finally {
         setLoading(false)
       }
     }
-    fetchTrends()
-  }, [])
+  
+    if (hashtag_title) {
+      fetchTrends()
+    }
+  }, [hashtag_title])
 
   const getProgressColor = (growth) => {
     if (growth >= 75) return 'success'

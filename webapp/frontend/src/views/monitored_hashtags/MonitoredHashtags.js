@@ -187,7 +187,7 @@ const HashtagCard = ({ tag, onRemove }) => {
         </div>
 
         <div className="d-flex justify-content-center my-2">
-          <Link to={`/monitored_hashtags/${tag.id}/trending`}>
+          <Link to={`/monitored_hashtags/${tag.title}/trending`}>
             <CButton color="primary">View trending posts for hashtag</CButton>
           </Link>
         </div>

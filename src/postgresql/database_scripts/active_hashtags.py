@@ -55,21 +55,26 @@ async def fetch_related_challenges(session) -> List[dict]:
         for row in result.fetchall()
     ]
 
-async def fetch_related_hashtag_growth(session, active_hashtag_title: str) -> List[dict]:
+async def fetch_related_hashtag_growth(session, active_hashtag_id: str) -> List[dict]:
     query = text("""
         WITH related_hashtag_ids AS (
             SELECT DISTINCT c2.id as related_id, c2.title as related_title
-            FROM active_hashtags ah
-            JOIN challenges c1 ON ah.title = c1.title
+            FROM challenges c1
             JOIN posts_challenges pc1 ON c1.id = pc1.challenge_id
             JOIN posts_challenges pc2 ON pc1.post_id = pc2.post_id
             JOIN challenges c2 ON pc2.challenge_id = c2.id
-            WHERE ah.active = 't'
+            WHERE c1.id = :active_hashtag_id
             AND c2.id != c1.id
-            AND ah.title = :active_hashtag_title
+        ),
+        distinct_posts AS (
+            SELECT DISTINCT post_id
+            FROM related_hashtag_ids rh
+            JOIN posts_challenges pc ON pc.challenge_id = rh.related_id
         )
         SELECT 
-            rh.related_title as hashtag_title,
+            :active_hashtag_id AS active_hashtag_id,
+            c1.title AS active_hashtag_title,
+            string_agg(DISTINCT rh.related_title, ', ') as hashtag_titles,
             pt.post_id,
             pt.collected_at,
             pt.current_views,
@@ -79,19 +84,34 @@ async def fetch_related_hashtag_growth(session, active_hashtag_title: str) -> Li
             pt.daily_growth_rate,
             pt.weekly_growth_rate,
             pt.monthly_growth_rate
-        FROM related_hashtag_ids rh
-        JOIN posts_challenges pc ON pc.challenge_id = rh.related_id
-        JOIN post_trends pt ON pt.post_id = pc.post_id
+        FROM distinct_posts dp
+        JOIN posts_challenges pc ON pc.post_id = dp.post_id
+        JOIN related_hashtag_ids rh ON rh.related_id = pc.challenge_id
+        JOIN post_trends pt ON pt.post_id = dp.post_id
+        JOIN challenges c1 ON c1.id = :active_hashtag_id
         WHERE pt.collected_at = (
             SELECT MAX(collected_at) 
             FROM post_trends
         )
-        ORDER BY rh.related_title, pt.current_views DESC
+        GROUP BY 
+            c1.title,
+            pt.post_id,
+            pt.collected_at,
+            pt.current_views,
+            pt.daily_change,
+            pt.weekly_change,
+            pt.monthly_change,
+            pt.daily_growth_rate,
+            pt.weekly_growth_rate,
+            pt.monthly_growth_rate
+        ORDER BY pt.current_views DESC
     """)
     
-    result = await session.execute(query, {"active_hashtag_title": active_hashtag_title})
+    result = await session.execute(query, {"active_hashtag_id": active_hashtag_id})
     return [{
-        "hashtag_title": row.hashtag_title,
+        "active_hashtag_id": row.active_hashtag_id,
+        "active_hashtag_title": row.active_hashtag_title,
+        "hashtag_title": row.hashtag_titles,
         "post_id": row.post_id,
         "collected_at": row.collected_at,
         "current_views": row.current_views,
