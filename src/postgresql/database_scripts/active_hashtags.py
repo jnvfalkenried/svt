@@ -66,10 +66,18 @@ async def fetch_related_hashtag_growth(session, active_hashtag_id: str) -> List[
             WHERE c1.id = :active_hashtag_id
             AND c2.id != c1.id
         ),
-        distinct_posts AS (
+        active_hashtag_posts AS (
+            -- First get all posts that have the active hashtag
             SELECT DISTINCT post_id
-            FROM related_hashtag_ids rh
-            JOIN posts_challenges pc ON pc.challenge_id = rh.related_id
+            FROM posts_challenges
+            WHERE challenge_id = :active_hashtag_id
+        ),
+        distinct_posts AS (
+            -- Then get related hashtags only for posts that have the active hashtag
+            SELECT DISTINCT ahp.post_id
+            FROM active_hashtag_posts ahp
+            JOIN posts_challenges pc ON pc.post_id = ahp.post_id
+            JOIN related_hashtag_ids rh ON rh.related_id = pc.challenge_id
         )
         SELECT 
             :active_hashtag_id AS active_hashtag_id,
