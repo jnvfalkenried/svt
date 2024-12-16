@@ -177,6 +177,10 @@ async def get_related_hashtag_trends(active_hashtag: str):
                 select(Challenges).where(Challenges.title == active_hashtag)
             )
             hashtag = hashtag_query.scalar_one_or_none()
+
+            print(f"Found hashtag: {active_hashtag if active_hashtag else 'None'}")
+
+            print(f"Found hashtag ID: {hashtag.id if hashtag else 'None'}")
             
             if not hashtag:
                 raise HTTPException(status_code=404, detail="Hashtag not found")

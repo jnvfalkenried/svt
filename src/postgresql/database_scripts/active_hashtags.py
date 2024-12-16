@@ -76,6 +76,9 @@ async def fetch_related_hashtag_growth(session, active_hashtag_id: str) -> List[
             c1.title AS active_hashtag_title,
             string_agg(DISTINCT rh.related_title, ', ') as hashtag_titles,
             pt.post_id,
+            p.description AS post_description,
+            a.unique_id AS author_unique_id,
+            a.nickname AS author_nickname,
             pt.collected_at,
             pt.current_views,
             pt.daily_change,
@@ -89,6 +92,8 @@ async def fetch_related_hashtag_growth(session, active_hashtag_id: str) -> List[
         JOIN related_hashtag_ids rh ON rh.related_id = pc.challenge_id
         JOIN post_trends pt ON pt.post_id = dp.post_id
         JOIN challenges c1 ON c1.id = :active_hashtag_id
+        JOIN posts p ON p.id = dp.post_id
+        JOIN authors a ON a.id = p.author_id
         WHERE pt.collected_at = (
             SELECT MAX(collected_at) 
             FROM post_trends
@@ -96,6 +101,9 @@ async def fetch_related_hashtag_growth(session, active_hashtag_id: str) -> List[
         GROUP BY 
             c1.title,
             pt.post_id,
+            p.description,
+            a.unique_id,
+            a.nickname,
             pt.collected_at,
             pt.current_views,
             pt.daily_change,
@@ -113,6 +121,9 @@ async def fetch_related_hashtag_growth(session, active_hashtag_id: str) -> List[
         "active_hashtag_title": row.active_hashtag_title,
         "hashtag_title": row.hashtag_titles,
         "post_id": row.post_id,
+        "post_description": row.post_description,
+        "author_unique_id": row.author_unique_id,
+        "author_nickname": row.author_nickname,
         "collected_at": row.collected_at,
         "current_views": row.current_views,
         "daily_change": row.daily_change,
