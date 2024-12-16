@@ -64,7 +64,6 @@ async def fetch_related_hashtag_growth(session, active_hashtag_id: str) -> List[
             JOIN posts_challenges pc2 ON pc1.post_id = pc2.post_id
             JOIN challenges c2 ON pc2.challenge_id = c2.id
             WHERE c1.id = :active_hashtag_id
-            AND c2.id != c1.id
         ),
         active_hashtag_posts AS (
             -- First get all posts that have the active hashtag
@@ -102,10 +101,6 @@ async def fetch_related_hashtag_growth(session, active_hashtag_id: str) -> List[
         JOIN challenges c1 ON c1.id = :active_hashtag_id
         JOIN posts p ON p.id = dp.post_id
         JOIN authors a ON a.id = p.author_id
-        WHERE pt.collected_at = (
-            SELECT MAX(collected_at) 
-            FROM post_trends
-        )
         GROUP BY 
             c1.title,
             pt.post_id,
