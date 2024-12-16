@@ -83,6 +83,8 @@ const TrendingPosts = () => {
         <CTableHead className="text-nowrap">
           <CTableRow>
             <CTableHeaderCell className="bg-body-tertiary">Hashtag</CTableHeaderCell>
+            <CTableHeaderCell className="bg-body-tertiary">Author</CTableHeaderCell>
+            <CTableHeaderCell className="bg-body-tertiary">Post description</CTableHeaderCell>
             <CTableHeaderCell className="bg-body-tertiary">Post ID</CTableHeaderCell>
             <CTableHeaderCell className="bg-body-tertiary">Views</CTableHeaderCell>
             <CTableHeaderCell className="bg-body-tertiary">Daily Change</CTableHeaderCell>
@@ -101,6 +103,8 @@ const TrendingPosts = () => {
               <CTableDataCell>
                 <div className="fw-semibold">{trend.hashtag_title}</div>
               </CTableDataCell>
+              <CTableDataCell>{trend.author_name}</CTableDataCell>
+              <CTableDataCell>{trend.post_description}</CTableDataCell>
               <CTableDataCell>{trend.post_id}</CTableDataCell>
               <CTableDataCell>{trend.current_views.toLocaleString()}</CTableDataCell>
               <CTableDataCell>
