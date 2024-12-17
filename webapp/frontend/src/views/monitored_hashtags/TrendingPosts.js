@@ -27,12 +27,12 @@ const TrendingPosts = () => {
         setLoading(true)
         setError(null)
         console.log('Fetching trends for hashtag:', hashtag_title)
-        
+
         const response = await fetch(`/api/hashtags/${encodeURIComponent(hashtag_title)}/trends`)
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`)
         }
-        
+
         const data = await response.json()
         console.log('Fetched data:', data)
         setTrends(data || [])
@@ -61,9 +61,28 @@ const TrendingPosts = () => {
     setShowOffcanvas(true)
   }
 
+  const formatChange = (change, growthRate) => {
+    if (change === 0 && growthRate === 0) {
+      return <div className="text-muted fst-italic">No growth data yet</div>
+    }
+
+    return (
+      <>
+        <div className="d-flex justify-content-between">
+          <div className="fw-semibold">{change.toLocaleString()}</div>
+        </div>
+        <CProgress
+          thin
+          color={getProgressColor(growthRate)}
+          value={Math.min(100, Math.abs(growthRate * 100))}
+        />
+      </>
+    )
+  }
+
   const renderHashtagCell = (hashtagTitle) => {
-    const hashtags = hashtagTitle ? hashtagTitle.split(',').map(tag => tag.trim()) : []
-    
+    const hashtags = hashtagTitle ? hashtagTitle.split(',').map((tag) => tag.trim()) : []
+
     return (
       <div className="d-flex flex-wrap gap-2" style={{ maxWidth: '200px' }}>
         {hashtags.slice(0, 3).map((tag, i) => (
@@ -72,10 +91,7 @@ const TrendingPosts = () => {
           </span>
         ))}
         {hashtags.length > 3 && (
-          <span 
-            className="badge bg-secondary"
-            title={hashtags.slice(3).join(' ')}
-          >
+          <span className="badge bg-secondary" title={hashtags.slice(3).join(' ')}>
             +{hashtags.length - 3}
           </span>
         )}
@@ -111,46 +127,19 @@ const TrendingPosts = () => {
         </CTableHead>
         <CTableBody>
           {trends.map((trend, index) => (
-            <CTableRow
-              key={index}
-              onClick={() => handleRowClick(trend)}
-              style={{ cursor: 'pointer' }}
-            >
-              <CTableDataCell>
-                {renderHashtagCell(trend.hashtag_title)}
-              </CTableDataCell>
+            <CTableRow key={index} onClick={() => handleRowClick(trend)} style={{ cursor: 'pointer' }}>
+              <CTableDataCell>{renderHashtagCell(trend.hashtag_title)}</CTableDataCell>
               <CTableDataCell>{trend.author_nickname}</CTableDataCell>
               <CTableDataCell>{trend.post_description}</CTableDataCell>
               <CTableDataCell>{trend.current_views.toLocaleString()}</CTableDataCell>
               <CTableDataCell>
-                <div className="d-flex justify-content-between">
-                  <div className="fw-semibold">{trend.daily_change.toLocaleString()}</div>
-                </div>
-                <CProgress
-                  thin
-                  color={getProgressColor(trend.daily_growth_rate)}
-                  value={Math.min(100, Math.abs(trend.daily_growth_rate * 100))}
-                />
+                {formatChange(trend.daily_change, trend.daily_growth_rate)}
               </CTableDataCell>
               <CTableDataCell>
-                <div className="d-flex justify-content-between">
-                  <div className="fw-semibold">{trend.weekly_change.toLocaleString()}</div>
-                </div>
-                <CProgress
-                  thin
-                  color={getProgressColor(trend.weekly_growth_rate)}
-                  value={Math.min(100, Math.abs(trend.weekly_growth_rate * 100))}
-                />
+                {formatChange(trend.weekly_change, trend.weekly_growth_rate)}
               </CTableDataCell>
               <CTableDataCell>
-                <div className="d-flex justify-content-between">
-                  <div className="fw-semibold">{trend.monthly_change.toLocaleString()}</div>
-                </div>
-                <CProgress
-                  thin
-                  color={getProgressColor(trend.monthly_growth_rate)}
-                  value={Math.min(100, Math.abs(trend.monthly_growth_rate * 100))}
-                />
+                {formatChange(trend.monthly_change, trend.monthly_growth_rate)}
               </CTableDataCell>
               <CTableDataCell>{new Date(trend.collected_at).toLocaleDateString()}</CTableDataCell>
             </CTableRow>
