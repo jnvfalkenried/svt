@@ -19,7 +19,6 @@ const TrendingPosts = () => {
   const [error, setError] = useState(null)
   const [selectedPost, setSelectedPost] = useState(null)
   const [showOffcanvas, setShowOffcanvas] = useState(false)
-
   const { hashtag_title } = useParams()
 
   useEffect(() => {
@@ -27,19 +26,15 @@ const TrendingPosts = () => {
       try {
         setLoading(true)
         setError(null)
-  
         console.log('Fetching trends for hashtag:', hashtag_title)
-  
-        const response = await fetch(`/api/hashtags/${encodeURIComponent(hashtag_title)}/trends`)
         
+        const response = await fetch(`/api/hashtags/${encodeURIComponent(hashtag_title)}/trends`)
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`)
         }
         
         const data = await response.json()
-        
         console.log('Fetched data:', data)
-        
         setTrends(data || [])
       } catch (error) {
         console.error('Error fetching trends:', error)
@@ -48,7 +43,7 @@ const TrendingPosts = () => {
         setLoading(false)
       }
     }
-  
+
     if (hashtag_title) {
       fetchTrends()
     }
@@ -64,6 +59,28 @@ const TrendingPosts = () => {
   const handleRowClick = (post) => {
     setSelectedPost(post)
     setShowOffcanvas(true)
+  }
+
+  const renderHashtagCell = (hashtagTitle) => {
+    const hashtags = hashtagTitle ? hashtagTitle.split(',').map(tag => tag.trim()) : []
+    
+    return (
+      <div className="d-flex flex-wrap gap-2" style={{ maxWidth: '200px' }}>
+        {hashtags.slice(0, 3).map((tag, i) => (
+          <span key={i} className="badge bg-body-tertiary text-medium-emphasis">
+            {tag}
+          </span>
+        ))}
+        {hashtags.length > 3 && (
+          <span 
+            className="badge bg-secondary"
+            title={hashtags.slice(3).join(' ')}
+          >
+            +{hashtags.length - 3}
+          </span>
+        )}
+      </div>
+    )
   }
 
   if (loading) {
@@ -85,7 +102,6 @@ const TrendingPosts = () => {
             <CTableHeaderCell className="bg-body-tertiary">Hashtag</CTableHeaderCell>
             <CTableHeaderCell className="bg-body-tertiary">Author</CTableHeaderCell>
             <CTableHeaderCell className="bg-body-tertiary">Post description</CTableHeaderCell>
-            <CTableHeaderCell className="bg-body-tertiary">Post ID</CTableHeaderCell>
             <CTableHeaderCell className="bg-body-tertiary">Views</CTableHeaderCell>
             <CTableHeaderCell className="bg-body-tertiary">Daily Change</CTableHeaderCell>
             <CTableHeaderCell className="bg-body-tertiary">Weekly Change</CTableHeaderCell>
@@ -101,11 +117,10 @@ const TrendingPosts = () => {
               style={{ cursor: 'pointer' }}
             >
               <CTableDataCell>
-                <div className="fw-semibold">{trend.hashtag_title}</div>
+                {renderHashtagCell(trend.hashtag_title)}
               </CTableDataCell>
-              <CTableDataCell>{trend.author_name}</CTableDataCell>
+              <CTableDataCell>{trend.author_nickname}</CTableDataCell>
               <CTableDataCell>{trend.post_description}</CTableDataCell>
-              <CTableDataCell>{trend.post_id}</CTableDataCell>
               <CTableDataCell>{trend.current_views.toLocaleString()}</CTableDataCell>
               <CTableDataCell>
                 <div className="d-flex justify-content-between">
@@ -149,8 +164,8 @@ const TrendingPosts = () => {
         post={{
           ...selectedPost,
           challenges: selectedPost ? [selectedPost.hashtag_title] : [],
-          author_name: 'N/A', // You'll need to fetch this separately or modify your API
-          post_description: 'N/A', // You'll need to fetch this separately or modify your API
+          author_name: selectedPost?.author_nickname || 'N/A',
+          post_description: selectedPost?.post_description || 'N/A',
         }}
       />
     </>
