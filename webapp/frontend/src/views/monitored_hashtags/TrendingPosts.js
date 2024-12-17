@@ -119,9 +119,6 @@ const TrendingPosts = () => {
             <CTableHeaderCell className="bg-body-tertiary">Author</CTableHeaderCell>
             <CTableHeaderCell className="bg-body-tertiary">Post description</CTableHeaderCell>
             <CTableHeaderCell className="bg-body-tertiary">Views</CTableHeaderCell>
-            <CTableHeaderCell className="bg-body-tertiary">Daily Change</CTableHeaderCell>
-            <CTableHeaderCell className="bg-body-tertiary">Weekly Change</CTableHeaderCell>
-            <CTableHeaderCell className="bg-body-tertiary">Monthly Change</CTableHeaderCell>
             <CTableHeaderCell className="bg-body-tertiary">Last Updated</CTableHeaderCell>
           </CTableRow>
         </CTableHead>
@@ -132,15 +129,6 @@ const TrendingPosts = () => {
               <CTableDataCell>{trend.author_nickname}</CTableDataCell>
               <CTableDataCell>{trend.post_description}</CTableDataCell>
               <CTableDataCell>{trend.current_views.toLocaleString()}</CTableDataCell>
-              <CTableDataCell>
-                {formatChange(trend.daily_change, trend.daily_growth_rate)}
-              </CTableDataCell>
-              <CTableDataCell>
-                {formatChange(trend.weekly_change, trend.weekly_growth_rate)}
-              </CTableDataCell>
-              <CTableDataCell>
-                {formatChange(trend.monthly_change, trend.monthly_growth_rate)}
-              </CTableDataCell>
               <CTableDataCell>{new Date(trend.collected_at).toLocaleDateString()}</CTableDataCell>
             </CTableRow>
           ))}

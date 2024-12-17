@@ -1,14 +1,15 @@
-from typing import Annotated
+from typing import Annotated, Optional
 
 from core.auth import verify_token
 from fastapi import APIRouter, Depends, Query
 from schemas.request import PostsRequest
-from schemas.response import AuthorResponse
+from schemas.response import AuthorResponse, AuthorTrendsResponse
 from sqlalchemy.future import select
 
 from postgresql.config.db import session
 from postgresql.database_models import Users
 from postgresql.database_scripts.authors_reporting import get_top_authors
+from postgresql.database_scripts.authors_trends import get_author_trends
 
 router = APIRouter()
 
@@ -33,6 +34,22 @@ async def get_authors(
             session=s,
             hashtag=request.hashtag,
             category=hashtag_mapping[request.category],
+            limit=request.limit,
+        )
+        return result
+    
+@router.get("/api/author-trends")
+async def get_author_trends_data(
+    request: Annotated[PostsRequest, Query()],
+    author_id: Optional[str] = None,
+    current_user: Users = Depends(verify_token),
+) -> list[AuthorTrendsResponse]:
+    async with session() as s:
+        result = await get_author_trends(
+            start_date=request.start_date.replace(tzinfo=None),
+            end_date=request.end_date.replace(tzinfo=None),
+            session=s,
+            author_id=author_id,
             limit=request.limit,
         )
         return result

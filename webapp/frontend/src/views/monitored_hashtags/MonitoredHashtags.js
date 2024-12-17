@@ -193,10 +193,6 @@ const HashtagCard = ({ tag, onRemove }) => {
         </div>
 
         <div>
-          <div className="d-flex align-items-center mb-2">
-            <CIcon icon={cilLoopCircular} size="sm" className="text-primary me-2" />
-            <small className="text-medium-emphasis">Related Hashtags</small>
-          </div>
           <div className="d-flex flex-wrap gap-2">
             {tag.related.map((related) => (
               <span key={related.id} className="badge bg-body-tertiary text-primary rounded-pill">

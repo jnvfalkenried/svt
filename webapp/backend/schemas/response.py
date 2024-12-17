@@ -101,3 +101,17 @@ class HashtagPostsResponse(BaseModel):
     daily_growth_percentage: float
     weekly_growth_percentage: float
     monthly_growth_percentage: float
+
+class AuthorTrendsResponse(BaseModel):
+    author_id: str
+    collected_at: datetime
+    current_followers: int
+    current_hearts: int
+    current_diggs: int
+    current_videos: int
+    daily_followers_change: int
+    weekly_followers_change: int
+    monthly_followers_change: int
+    daily_followers_growth_rate: float
+    weekly_followers_growth_rate: float
+    monthly_followers_growth_rate: float
