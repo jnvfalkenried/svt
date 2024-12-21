@@ -1,9 +1,5 @@
 # TikTok Data Intelligence Application
 
-The **TikTok Data Intelligence Application** is a streamlined, open-source solution for retrieving and analyzing TikTok content. Built with both user-friendliness and technical flexibility in mind, this platform provides an intuitive interface along with a customizable architecture that developers can extend and adapt to their specific needs.
-
-This application was created as a product for the Swedish National Television Company, Sveriges Television (SVT). SVT asked us to build an application that fetches and processes open source tiktok data. 
-
 ---
 
 ## Table of Contents
@@ -21,7 +17,9 @@ This application was created as a product for the Swedish National Television Co
 
 ## About
 
-The TikTok Data Intelligence Application allows you to monitor hashtags, track content trends, and perform advanced image searches. Designed for both general users and developers, it features flexible scheduling, and customizable monitoring capabilities.
+The **TikTok Data Intelligence Application** is a streamlined, open-source solution for retrieving and analyzing TikTok content. Built with both user-friendliness and technical flexibility in mind, this platform provides an intuitive interface along with a customizable architecture that developers can extend and adapt to their specific needs.
+
+This application was created as a product for the Swedish National Television Company, Sveriges Television (SVT). SVT asked us to build an application that fetches and processes open source tiktok data. 
 
 ---
 
