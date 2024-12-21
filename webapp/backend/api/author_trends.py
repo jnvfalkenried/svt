@@ -1,25 +1,28 @@
 from datetime import datetime
 from typing import List, Optional
+
 from fastapi import APIRouter, Query
 from pydantic import BaseModel
 from sqlalchemy import func
 from sqlalchemy.future import select
-from postgresql.database_models import Authors, AuthorTrends
+
 from postgresql.config.db import session
+from postgresql.database_models import Authors, AuthorTrends
 
 router = APIRouter()
+
 
 class AuthorTrendResponse(BaseModel):
     author_id: str
     author_nickname: str
     collected_at: datetime
-    
+
     # Current metrics
     current_followers: int
     current_hearts: int
     current_diggs: int
     current_videos: int
-    
+
     # Changes
     daily_followers_change: int
     weekly_followers_change: int
@@ -33,7 +36,7 @@ class AuthorTrendResponse(BaseModel):
     daily_videos_change: int
     weekly_videos_change: int
     monthly_videos_change: int
-    
+
     # Growth rates
     daily_followers_growth_rate: float
     weekly_followers_growth_rate: float
@@ -42,9 +45,11 @@ class AuthorTrendResponse(BaseModel):
     class Config:
         from_attributes = True
 
+
 class AuthorTrendsListResponse(BaseModel):
     items: List[AuthorTrendResponse]
     total: int
+
 
 @router.get("/api/author-trends", response_model=AuthorTrendsListResponse)
 async def get_author_trends(
@@ -97,7 +102,7 @@ async def get_author_trends(
         query = (
             query.order_by(
                 AuthorTrends.daily_followers_growth_rate.desc(),
-                AuthorTrends.current_followers.desc()
+                AuthorTrends.current_followers.desc(),
             )
             .offset(offset)
             .limit(limit)

@@ -54,11 +54,13 @@ class StatsResponse(BaseModel):
     active_hashtags_count: int
     challenge_count: int
 
+
 class RelatedHashtagResponse(BaseModel):
     active_hashtag_id: str
     active_hashtag_title: str
     related_hashtag_id: str
     related_hashtag_title: str
+
 
 class ReportPostResponse(BaseModel):
     id: str
@@ -90,6 +92,7 @@ class PlatformGrowthResponse(BaseModel):
     challenge_growth: list[dict]
     # video_embeddings_growth: list[dict]
 
+
 class HashtagPostsResponse(BaseModel):
     related_hashtag_title: str
     post_id: str
@@ -101,6 +104,7 @@ class HashtagPostsResponse(BaseModel):
     daily_growth_percentage: float
     weekly_growth_percentage: float
     monthly_growth_percentage: float
+
 
 class AuthorTrendsResponse(BaseModel):
     author_id: str

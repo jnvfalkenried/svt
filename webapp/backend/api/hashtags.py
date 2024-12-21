@@ -1,23 +1,18 @@
 import uuid
+from typing import List
 
 from fastapi import APIRouter, HTTPException
 from schemas.request import HashtagRequest
-from schemas.response import HashtagResponse
-from sqlalchemy.sql import text
+from schemas.response import (HashtagPostsResponse, HashtagResponse,
+                              RelatedHashtagResponse)
 from sqlalchemy import select
-
-from typing import List
-from schemas.response import RelatedHashtagResponse, HashtagPostsResponse
-from postgresql.database_models import Challenges
-
+from sqlalchemy.sql import text
 
 from postgresql.config.db import session
+from postgresql.database_models import Challenges
 from postgresql.database_scripts.active_hashtags import (
-    get_active_hashtags,
-    insert_or_update_active_hashtag,
-    fetch_related_challenges,
-    fetch_related_hashtag_growth,
-)
+    fetch_related_challenges, fetch_related_hashtag_growth,
+    get_active_hashtags, insert_or_update_active_hashtag)
 
 router = APIRouter()
 
@@ -73,6 +68,7 @@ async def deactivate_hashtag(hashtag_id: str) -> dict[str, str]:
             await s.rollback()
             raise HTTPException(status_code=500, detail=str(e))
 
+
 @router.get("/api/hashtags/related", response_model=List[RelatedHashtagResponse])
 async def get_related_hashtags() -> List[RelatedHashtagResponse]:
     async with session() as s:
@@ -83,25 +79,21 @@ async def get_related_hashtags() -> List[RelatedHashtagResponse]:
         except Exception as e:
             print("Debug - Error:", str(e))  # Debug print
             raise HTTPException(status_code=500, detail=str(e))
-        
+
+
 import uuid
+from typing import List
 
 from fastapi import APIRouter, HTTPException
 from schemas.request import HashtagRequest
-from schemas.response import HashtagResponse
+from schemas.response import (HashtagPostsResponse, HashtagResponse,
+                              RelatedHashtagResponse)
 from sqlalchemy.sql import text
-
-from typing import List
-from schemas.response import RelatedHashtagResponse, HashtagPostsResponse
-
 
 from postgresql.config.db import session
 from postgresql.database_scripts.active_hashtags import (
-    get_active_hashtags,
-    insert_or_update_active_hashtag,
-    fetch_related_challenges,
-    fetch_related_hashtag_growth,
-)
+    fetch_related_challenges, fetch_related_hashtag_growth,
+    get_active_hashtags, insert_or_update_active_hashtag)
 
 router = APIRouter()
 
@@ -157,6 +149,7 @@ async def deactivate_hashtag(hashtag_id: str) -> dict[str, str]:
             await s.rollback()
             raise HTTPException(status_code=500, detail=str(e))
 
+
 @router.get("/api/hashtags/related", response_model=List[RelatedHashtagResponse])
 async def get_related_hashtags() -> List[RelatedHashtagResponse]:
     async with session() as s:
@@ -167,7 +160,8 @@ async def get_related_hashtags() -> List[RelatedHashtagResponse]:
         except Exception as e:
             print("Debug - Error:", str(e))  # Debug print
             raise HTTPException(status_code=500, detail=str(e))
-        
+
+
 @router.get("/api/hashtags/{active_hashtag}/trends")
 async def get_related_hashtag_trends(active_hashtag: str):
     async with session() as s:
@@ -181,14 +175,14 @@ async def get_related_hashtag_trends(active_hashtag: str):
             print(f"Found hashtag: {active_hashtag if active_hashtag else 'None'}")
 
             print(f"Found hashtag ID: {hashtag.id if hashtag else 'None'}")
-            
+
             if not hashtag:
                 raise HTTPException(status_code=404, detail="Hashtag not found")
-            
+
             # Fetch related hashtag growth using the ID
             results = await fetch_related_hashtag_growth(s, hashtag.id)
             return results
-        
+
         except HTTPException:
             raise
         except Exception as e:

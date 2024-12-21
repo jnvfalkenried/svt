@@ -1,5 +1,6 @@
-from sqlalchemy import select, text
 from typing import List
+
+from sqlalchemy import select, text
 
 from postgresql.database_models import ActiveHashtags
 
@@ -26,9 +27,11 @@ async def insert_or_update_active_hashtag(id: str, title: str, session) -> None:
         print(f"Error in insert_or_update_active_hashtag: {e}")
         print(f"Error type: {type(e)}")
         raise e
-    
+
+
 async def fetch_related_challenges(session) -> List[dict]:
-    query = text("""
+    query = text(
+        """
         SELECT 
             c1.id AS active_hashtag_id,
             ah.title AS active_hashtag_title,
@@ -41,8 +44,9 @@ async def fetch_related_challenges(session) -> List[dict]:
         JOIN challenges c2 ON pc2.challenge_id = c2.id
         WHERE ah.active = 't'
         AND c2.id != c1.id
-    """)
-    
+    """
+    )
+
     result = await session.execute(query)
     # Explicitly create dictionaries with the expected keys
     return [
@@ -50,13 +54,15 @@ async def fetch_related_challenges(session) -> List[dict]:
             "active_hashtag_id": row.active_hashtag_id,
             "active_hashtag_title": row.active_hashtag_title,
             "related_hashtag_id": row.related_hashtag_id,
-            "related_hashtag_title": row.related_hashtag_title
+            "related_hashtag_title": row.related_hashtag_title,
         }
         for row in result.fetchall()
     ]
 
+
 async def fetch_related_hashtag_growth(session, active_hashtag_id: str) -> List[dict]:
-    query = text("""
+    query = text(
+        """
         WITH active_hashtag_posts AS (
         SELECT DISTINCT post_id
         FROM posts_challenges
@@ -111,23 +117,27 @@ async def fetch_related_hashtag_growth(session, active_hashtag_id: str) -> List[
         ORDER BY pt.post_id, pt.collected_at DESC
     ) sub
     ORDER BY current_views DESC
-    """)
-    
+    """
+    )
+
     result = await session.execute(query, {"active_hashtag_id": active_hashtag_id})
-    return [{
-        "active_hashtag_id": row.active_hashtag_id,
-        "active_hashtag_title": row.active_hashtag_title,
-        "hashtag_title": row.hashtag_titles,
-        "post_id": row.post_id,
-        "post_description": row.post_description,
-        "author_unique_id": row.author_unique_id,
-        "author_nickname": row.author_nickname,
-        "collected_at": row.collected_at,
-        "current_views": row.current_views,
-        "daily_change": row.daily_change,
-        "weekly_change": row.weekly_change,
-        "monthly_change": row.monthly_change,
-        "daily_growth_rate": row.daily_growth_rate,
-        "weekly_growth_rate": row.weekly_growth_rate,
-        "monthly_growth_rate": row.monthly_growth_rate
-    } for row in result.fetchall()]
+    return [
+        {
+            "active_hashtag_id": row.active_hashtag_id,
+            "active_hashtag_title": row.active_hashtag_title,
+            "hashtag_title": row.hashtag_titles,
+            "post_id": row.post_id,
+            "post_description": row.post_description,
+            "author_unique_id": row.author_unique_id,
+            "author_nickname": row.author_nickname,
+            "collected_at": row.collected_at,
+            "current_views": row.current_views,
+            "daily_change": row.daily_change,
+            "weekly_change": row.weekly_change,
+            "monthly_change": row.monthly_change,
+            "daily_growth_rate": row.daily_growth_rate,
+            "weekly_growth_rate": row.weekly_growth_rate,
+            "monthly_growth_rate": row.monthly_growth_rate,
+        }
+        for row in result.fetchall()
+    ]

@@ -13,33 +13,33 @@ class AuthorTrends(Base):
 
     author_id: Mapped[str] = mapped_column(String, primary_key=True)
     collected_at: Mapped[datetime] = mapped_column(DateTime, primary_key=True)
-    
+
     # Current metrics
     current_followers: Mapped[int] = mapped_column(Numeric)
     current_hearts: Mapped[int] = mapped_column(Numeric)
     current_diggs: Mapped[int] = mapped_column(Numeric)
     current_videos: Mapped[int] = mapped_column(Numeric)
-    
+
     # Follower changes
     daily_followers_change: Mapped[int] = mapped_column(Numeric)
     weekly_followers_change: Mapped[int] = mapped_column(Numeric)
     monthly_followers_change: Mapped[int] = mapped_column(Numeric)
-    
+
     # Heart changes
     daily_hearts_change: Mapped[int] = mapped_column(Numeric)
     weekly_hearts_change: Mapped[int] = mapped_column(Numeric)
     monthly_hearts_change: Mapped[int] = mapped_column(Numeric)
-    
+
     # Digg changes
     daily_diggs_change: Mapped[int] = mapped_column(Numeric)
     weekly_diggs_change: Mapped[int] = mapped_column(Numeric)
     monthly_diggs_change: Mapped[int] = mapped_column(Numeric)
-    
+
     # Video changes
     daily_videos_change: Mapped[int] = mapped_column(Numeric)
     weekly_videos_change: Mapped[int] = mapped_column(Numeric)
     monthly_videos_change: Mapped[int] = mapped_column(Numeric)
-    
+
     # Growth rates
     daily_followers_growth_rate: Mapped[float] = mapped_column(Numeric(10, 2))
     weekly_followers_growth_rate: Mapped[float] = mapped_column(Numeric(10, 2))

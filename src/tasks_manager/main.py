@@ -34,10 +34,15 @@ async def main():
     scheduler.add_job(tasks_manager.refresh_post_trends_view, "cron", hour=9, minute=0)
     scheduler.add_job(tasks_manager.refresh_post_trends_view, "cron", hour=17, minute=0)
 
-    scheduler.add_job(tasks_manager.refresh_author_trends_view, "cron", hour=1, minute=5)
-    scheduler.add_job(tasks_manager.refresh_author_trends_view, "cron", hour=9, minute=5)
-    scheduler.add_job(tasks_manager.refresh_author_trends_view, "cron", hour=17, minute=5)
-    
+    scheduler.add_job(
+        tasks_manager.refresh_author_trends_view, "cron", hour=1, minute=5
+    )
+    scheduler.add_job(
+        tasks_manager.refresh_author_trends_view, "cron", hour=9, minute=5
+    )
+    scheduler.add_job(
+        tasks_manager.refresh_author_trends_view, "cron", hour=17, minute=5
+    )
 
     scheduler.start()
 

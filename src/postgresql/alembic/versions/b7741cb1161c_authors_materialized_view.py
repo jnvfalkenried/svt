@@ -5,15 +5,15 @@ Revises: e09dfb2b3d86
 Create Date: 2024-12-17 09:07:16.518500
 
 """
+
 from typing import Sequence, Union
 
-from alembic import op
 import sqlalchemy as sa
-
+from alembic import op
 
 # revision identifiers, used by Alembic.
-revision: str = 'b7741cb1161c'
-down_revision: Union[str, None] = 'e09dfb2b3d86'
+revision: str = "b7741cb1161c"
+down_revision: Union[str, None] = "e09dfb2b3d86"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
@@ -152,7 +152,7 @@ def upgrade() -> None:
         FROM time_period_changes
         """
     )
-    
+
     # Create indexes for better query performance
     op.execute(
         """
@@ -160,21 +160,21 @@ def upgrade() -> None:
         ON author_trends(author_id)
         """
     )
-    
+
     op.execute(
         """
         CREATE INDEX IF NOT EXISTS idx_author_trends_collected_at 
         ON author_trends(collected_at)
         """
     )
-    
+
     op.execute(
         """
         CREATE INDEX IF NOT EXISTS idx_author_trends_followers_changes 
         ON author_trends(daily_followers_change, weekly_followers_change, monthly_followers_change)
         """
     )
-    
+
     op.execute(
         """
         CREATE INDEX IF NOT EXISTS idx_author_trends_growth_rates 
