@@ -25,85 +25,88 @@ def upgrade() -> None:
         CREATE MATERIALIZED VIEW IF NOT EXISTS author_trends AS
         WITH time_period_changes AS (
             SELECT 
-                id as author_id,
-                collected_at,
-                follower_count as current_followers,
-                heart_count as current_hearts,
-                digg_count as current_diggs,
-                video_count as current_videos,
+                ar.id as author_id,
+                a.nickname as author_nickname,
+                ar.collected_at,
+                ar.follower_count as current_followers,
+                ar.heart_count as current_hearts,
+                ar.digg_count as current_diggs,
+                ar.video_count as current_videos,
                 
                 -- Followers changes over time
-                LAG(follower_count) OVER (
-                    PARTITION BY id 
-                    ORDER BY collected_at
+                LAG(ar.follower_count) OVER (
+                    PARTITION BY ar.id 
+                    ORDER BY ar.collected_at
                     RANGE BETWEEN INTERVAL '1 day' PRECEDING AND CURRENT ROW
                 ) as day_ago_followers,
-                LAG(follower_count) OVER (
-                    PARTITION BY id 
-                    ORDER BY collected_at
+                LAG(ar.follower_count) OVER (
+                    PARTITION BY ar.id 
+                    ORDER BY ar.collected_at
                     RANGE BETWEEN INTERVAL '7 days' PRECEDING AND CURRENT ROW
                 ) as week_ago_followers,
-                LAG(follower_count) OVER (
-                    PARTITION BY id 
-                    ORDER BY collected_at
+                LAG(ar.follower_count) OVER (
+                    PARTITION BY ar.id 
+                    ORDER BY ar.collected_at
                     RANGE BETWEEN INTERVAL '30 days' PRECEDING AND CURRENT ROW
                 ) as month_ago_followers,
                 
                 -- Hearts changes over time
-                LAG(heart_count) OVER (
-                    PARTITION BY id 
-                    ORDER BY collected_at
+                LAG(ar.heart_count) OVER (
+                    PARTITION BY ar.id 
+                    ORDER BY ar.collected_at
                     RANGE BETWEEN INTERVAL '1 day' PRECEDING AND CURRENT ROW
                 ) as day_ago_hearts,
-                LAG(heart_count) OVER (
-                    PARTITION BY id 
-                    ORDER BY collected_at
+                LAG(ar.heart_count) OVER (
+                    PARTITION BY ar.id 
+                    ORDER BY ar.collected_at
                     RANGE BETWEEN INTERVAL '7 days' PRECEDING AND CURRENT ROW
                 ) as week_ago_hearts,
-                LAG(heart_count) OVER (
-                    PARTITION BY id 
-                    ORDER BY collected_at
+                LAG(ar.heart_count) OVER (
+                    PARTITION BY ar.id 
+                    ORDER BY ar.collected_at
                     RANGE BETWEEN INTERVAL '30 days' PRECEDING AND CURRENT ROW
                 ) as month_ago_hearts,
                 
                 -- Diggs changes over time
-                LAG(digg_count) OVER (
-                    PARTITION BY id 
-                    ORDER BY collected_at
+                LAG(ar.digg_count) OVER (
+                    PARTITION BY ar.id 
+                    ORDER BY ar.collected_at
                     RANGE BETWEEN INTERVAL '1 day' PRECEDING AND CURRENT ROW
                 ) as day_ago_diggs,
-                LAG(digg_count) OVER (
-                    PARTITION BY id 
-                    ORDER BY collected_at
+                LAG(ar.digg_count) OVER (
+                    PARTITION BY ar.id 
+                    ORDER BY ar.collected_at
                     RANGE BETWEEN INTERVAL '7 days' PRECEDING AND CURRENT ROW
                 ) as week_ago_diggs,
-                LAG(digg_count) OVER (
-                    PARTITION BY id 
-                    ORDER BY collected_at
+                LAG(ar.digg_count) OVER (
+                    PARTITION BY ar.id 
+                    ORDER BY ar.collected_at
                     RANGE BETWEEN INTERVAL '30 days' PRECEDING AND CURRENT ROW
                 ) as month_ago_diggs,
                 
                 -- Videos changes over time
-                LAG(video_count) OVER (
-                    PARTITION BY id 
-                    ORDER BY collected_at
+                LAG(ar.video_count) OVER (
+                    PARTITION BY ar.id 
+                    ORDER BY ar.collected_at
                     RANGE BETWEEN INTERVAL '1 day' PRECEDING AND CURRENT ROW
                 ) as day_ago_videos,
-                LAG(video_count) OVER (
-                    PARTITION BY id 
-                    ORDER BY collected_at
+                LAG(ar.video_count) OVER (
+                    PARTITION BY ar.id 
+                    ORDER BY ar.collected_at
                     RANGE BETWEEN INTERVAL '7 days' PRECEDING AND CURRENT ROW
                 ) as week_ago_videos,
-                LAG(video_count) OVER (
-                    PARTITION BY id 
-                    ORDER BY collected_at
+                LAG(ar.video_count) OVER (
+                    PARTITION BY ar.id 
+                    ORDER BY ar.collected_at
                     RANGE BETWEEN INTERVAL '30 days' PRECEDING AND CURRENT ROW
                 ) as month_ago_videos
-            FROM authors_reporting
-            WHERE follower_count IS NOT NULL
+            FROM authors_reporting ar
+            JOIN authors a ON ar.id = a.id
+            WHERE ar.follower_count IS NOT NULL
         )
         SELECT 
             author_id,
+            author_nickname,
             collected_at,
             current_followers,
             current_hearts,

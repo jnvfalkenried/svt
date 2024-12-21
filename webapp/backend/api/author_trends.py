@@ -11,7 +11,7 @@ router = APIRouter()
 
 class AuthorTrendResponse(BaseModel):
     author_id: str
-    author_name: str
+    author_nickname: str
     collected_at: datetime
     
     # Current metrics
@@ -58,7 +58,7 @@ async def get_author_trends(
         query = (
             select(
                 Authors.id.label("author_id"),
-                Authors.nickname.label("author_name"),
+                Authors.nickname.label("author_nickname"),
                 AuthorTrends.collected_at,
                 # Current metrics
                 AuthorTrends.current_followers,
@@ -122,7 +122,7 @@ async def get_author_trends(
         trends = [
             AuthorTrendResponse(
                 author_id=row.author_id,
-                author_name=row.author_name,
+                author_nickname=row.author_nickname,
                 collected_at=row.collected_at,
                 current_followers=row.current_followers,
                 current_hearts=row.current_hearts,

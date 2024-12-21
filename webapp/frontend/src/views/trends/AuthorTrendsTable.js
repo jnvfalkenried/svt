@@ -94,7 +94,7 @@ const AuthorTrendsTable = () => {
               style={{ cursor: 'pointer' }}
             >
               <CTableDataCell>
-                <div className="fw-semibold">{trend.nickname}</div>
+                <div className="fw-semibold">{trend.author_nickname}</div>
                 <div className="small text-body-secondary">@{trend.unique_id}</div>
               </CTableDataCell>
               <CTableDataCell>
