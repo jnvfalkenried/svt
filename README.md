@@ -7,7 +7,7 @@
 - [About](#about)
 - [Key Features](#key-features)
 - [Getting Started](#getting-started)
-- [Technical Architecture](#Technical Architecture)
+- [Technical Architecture](#technical-architecture)
 - [Project Links](#project-links)
 - [Version](#version)
 - [Resources](#resources)
