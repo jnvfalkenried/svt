@@ -37,19 +37,3 @@ async def get_authors(
             limit=request.limit,
         )
         return result
-    
-@router.get("/api/author-trends")
-async def get_author_trends_data(
-    request: Annotated[PostsRequest, Query()],
-    author_id: Optional[str] = None,
-    current_user: Users = Depends(verify_token),
-) -> list[AuthorTrendsResponse]:
-    async with session() as s:
-        result = await get_author_trends(
-            start_date=request.start_date.replace(tzinfo=None),
-            end_date=request.end_date.replace(tzinfo=None),
-            session=s,
-            author_id=author_id,
-            limit=request.limit,
-        )
-        return result
