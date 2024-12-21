@@ -54,7 +54,7 @@ Make sure you have the following installed on your system:
 1. **Clone the repository:**
 
     ```sh
-    git clone [https://github.com/jnvfalkenried/svt.git](https://github.com/jnvfalkenried/svt.git)
+    git clone https://github.com/jnvfalkenried/svt.git
     cd your-repo
     ```
 
