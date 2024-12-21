@@ -56,7 +56,7 @@ Make sure you have the following installed on your system:
 1. **Clone the repository:**
 
     ```sh
-    git clone https://github.com/your-username/your-repo.git](https://github.com/jnvfalkenried/svt.git
+    git clone [https://github.com/jnvfalkenried/svt.git](https://github.com/jnvfalkenried/svt.git)
     cd your-repo
     ```
 
@@ -165,12 +165,9 @@ For more details on the license, view the full [LICENSE](LICENSE) file in our Gi
 (https://github.com/davidteather/TikTok-Api), licensed under the MIT License.
 The utilized portions include functionality for session creation and TikTok API interactions.
 
+## Misc
 
-
-
-
-
-## Code Quality Tools:
+### Code Quality Tools:
 To keep your code clean, organized, and easy to maintain, here are some handy tools to consider (first 2 is highly recommended):
 * Black: A strict, no-nonsense code formatter for Python that enforces consistent style. (VSCode Extension ID: ms-python.black-formatter)
 * isort: Automatically sorts your imports, making them cleaner and easier to read. (VSCode Extension ID: ms-python.isort)
