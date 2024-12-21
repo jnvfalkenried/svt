@@ -137,10 +137,10 @@ const AuthorTrendsTable = () => {
             <CTableHeaderCell className="bg-body-tertiary">Monthly Growth</CTableHeaderCell>
             <CTableHeaderCell className="bg-body-tertiary">Last Updated</CTableHeaderCell>
             <CTableHeaderCell className="bg-body-tertiary text-end">
-              <CButton 
-                color="primary" 
-                size="sm" 
-                onClick={downloadCSV} 
+              <CButton
+                color="primary"
+                size="sm"
+                onClick={downloadCSV}
                 disabled={!trends.length}
                 className="p-1"
               >
@@ -231,8 +231,8 @@ const AuthorTrendsTable = () => {
       {totalPages > 1 && (
         <div className="d-flex justify-content-end mt-3">
           <CPagination aria-label="Page navigation">
-            <CPaginationItem 
-              aria-label="Previous" 
+            <CPaginationItem
+              aria-label="Previous"
               disabled={currentPage === 1}
               onClick={() => setCurrentPage(currentPage - 1)}
             >

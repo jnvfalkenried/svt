@@ -8,10 +8,11 @@ import {
   CCloseButton,
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
-import { cilMediaPlay, cilLink, cilCalendar } from '@coreui/icons'
+import { cilLink, cilCalendar, cilMediaPlay } from '@coreui/icons'
 
 const PostTrendsDetailsOffcanvas = ({ visible, onClose, post }) => {
   const tiktokUrl = `https://www.tiktok.com/@${post?.author_name}/video/${post?.post_id}`
+
   return (
     <COffcanvas placement="end" visible={visible} onHide={onClose} style={{ width: '30%' }}>
       <COffcanvasHeader>
@@ -31,20 +32,21 @@ const PostTrendsDetailsOffcanvas = ({ visible, onClose, post }) => {
               ))}
             </div>
             <p>
-              <strong>Current Views:</strong> {post.current_views?.toLocaleString()}
+              <strong>Author:</strong>
+              {post.author_name}
             </p>
             <p>
-              <strong>Daily Change:</strong> {post.daily_change?.toLocaleString()}
+              <strong>Description:</strong>
+              {post.post_description}
             </p>
             <p>
-              <strong>Weekly Change:</strong> {post.weekly_change?.toLocaleString()}
-            </p>
-            <p>
-              <strong>Monthly Change:</strong> {post.monthly_change?.toLocaleString()}
+              <CIcon icon={cilMediaPlay} className="me-2" />
+              <strong>Views:</strong>
+              {post.current_views.toLocaleString()}
             </p>
             <p>
               <CIcon icon={cilCalendar} className="me-2 text-muted" />
-              <strong>Last Updated:</strong>{' '}
+              <strong>Last Updated:</strong>
               {new Date(post.collected_at).toLocaleString()}
             </p>
             <p>
@@ -68,10 +70,8 @@ PostTrendsDetailsOffcanvas.propTypes = {
   post: PropTypes.shape({
     post_id: PropTypes.string,
     author_name: PropTypes.string,
+    post_description: PropTypes.string,
     current_views: PropTypes.number,
-    daily_change: PropTypes.number,
-    weekly_change: PropTypes.number,
-    monthly_change: PropTypes.number,
     collected_at: PropTypes.string,
     challenges: PropTypes.arrayOf(PropTypes.string),
   }),
