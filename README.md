@@ -40,9 +40,87 @@ The TikTok Data Intelligence Application allows you to monitor hashtags, track c
 
 ## Getting Started
 
-> **Note**: This section will be filled out soon.
+> **Note**: Add more text here
 
-Instructions on how to set up the project locally, install dependencies, and run the application will be included here.
+Follow these steps to get started with using this project.
+
+### Prerequisites
+
+Make sure you have the following installed on your system:
+- Docker
+- Docker Compose
+
+### Installation
+
+1. **Clone the repository:**
+
+    ```sh
+    git clone https://github.com/your-username/your-repo.git
+    cd your-repo
+    ```
+
+2. **Copy the example environment file and configure it:**
+
+    ```sh
+    cp .env.example .env
+    # Edit the .env file to configure your environment variables
+    ```
+
+3. **Build and start the Docker containers:**
+
+    ```sh
+    docker-compose up -d --build
+    ```
+
+4. **Check the status of the containers:**
+
+    ```sh
+    docker-compose ps
+    ```
+
+### Usage
+
+Once the containers are up and running, you can access the services as follows:
+
+- **FastAPI**: Access the FastAPI documentation at [http://localhost/docs](http://localhost/docs)
+- **RabbitMQ**: Access the RabbitMQ web interface at [http://localhost:15672](http://localhost:15672)
+- **PostgreSQL**: Access the PostgreSQL database by running:
+
+    ```sh
+    docker exec -it svt-postgres-1 psql -U postgres -d svt_db
+    ```
+
+### Additional Commands
+
+- **Clean old cache:**
+
+    ```sh
+    docker builder prune
+    ```
+
+- **Build with no cache:**
+
+    ```sh
+    docker-compose build --no-cache
+    ```
+
+- **Remove old containers and volumes:**
+
+    ```sh
+    docker-compose down -v
+    ```
+
+- **Start specific containers:**
+
+    ```sh
+    docker-compose up postgres db-api react-frontend
+    ```
+
+For more detailed information, refer to the individual Dockerfiles and scripts in the repository.
+
+---
+
+Feel free to reach out to the contributors if you have any questions or need further assistance.
 
 ---
 
