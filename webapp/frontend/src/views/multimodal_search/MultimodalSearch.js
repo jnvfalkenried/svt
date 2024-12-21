@@ -1,8 +1,7 @@
 import React, { useState } from 'react'
 import { CCard, CCardBody, CCardHeader, CRow, CCol, CButton, CSpinner, CBadge } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
-import { cilSearch, cilImage, cilX, cilHeart, cilPeople, cilUserFollow } from '@coreui/icons'
-import ApiService from '../../services/ApiService'
+import { cilSearch, cilImage, cilX } from '@coreui/icons'
 
 const MultimodalSearch = () => {
   const [searchQuery, setSearchQuery] = useState('')

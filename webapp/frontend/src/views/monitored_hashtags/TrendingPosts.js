@@ -223,8 +223,9 @@ const TrendingPosts = () => {
           author_name: selectedPost?.author_nickname || 'N/A',
           post_description: selectedPost?.post_description || 'N/A',
           current_views: selectedPost?.current_views?.toLocaleString() || 'N/A',
-          collected_at: selectedPost?.collected_at ? 
-            new Date(selectedPost.collected_at).toLocaleDateString() : 'N/A',
+          collected_at: selectedPost?.collected_at
+            ? new Date(selectedPost.collected_at).toLocaleDateString()
+            : 'N/A',
         }}
       />
     </div>

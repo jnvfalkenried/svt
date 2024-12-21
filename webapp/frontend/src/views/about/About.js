@@ -80,9 +80,14 @@ const About = () => {
             </h4>
           </CCardHeader>
           <CCardBody>
-          <p className="text-justify">
-          Our TikTok Data Monitoring Application provides a streamlined, open-source solution for comprehensive content retrieval and analysis. Designed with both user-friendliness and technical flexibility in mind, the platform offers an intuitive interface and a customizable technical architecture that developers can easily extend and adapt to specific needs.
-          </p>
+            <p className="text-justify">
+              Our TikTok Data Monitoring Application provides a streamlined, open-source solution
+              for comprehensive content retrieval and analysis. Designed with both user-friendliness
+              and technical flexibility in mind, the platform offers an intuitive interface and a
+              customizable technical architecture that developers can easily extend and adapt to
+              specific needs.
+            </p>
+
             <h5 className="mt-3">Key Features</h5>
             <CListGroup>
               <CListGroupItem>Comprehensive TikTok Content Retrieval</CListGroupItem>
@@ -96,27 +101,28 @@ const About = () => {
 
         {/* Data Refresh Card */}
         <CCard className="mb-4">
-      <CCardHeader>
-        <h4 className="m-0">
-          <CIcon icon={cilClock} className="me-2" />
-          Data Refresh and Synchronization
-        </h4>
-      </CCardHeader>
-      <CCardBody>
-        <p>
-          Our application fetches the most up-to-date hashtag insights through a sophisticated scheduling mechanism:
-        </p>
-        <ul>
-          <li>Hashtag monitoring updates every 30 minutes</li>
-          <li>Processing retrieved content at 00:01, 08:01, and 16:01</li>
-          <li>Post trends view refresh at 01:00, 09:00, and 17:00</li>
-          <li>Author trends view refresh at 01:05, 09:05, and 17:05</li>
-        </ul>
-      </CCardBody>
-      </CCard>
+          <CCardHeader>
+            <h4 className="m-0">
+              <CIcon icon={cilClock} className="me-2" />
+              Data Refresh and Synchronization
+            </h4>
+          </CCardHeader>
+          <CCardBody>
+            <p>
+              Our application fetches the most up-to-date hashtag insights through a sophisticated
+              scheduling mechanism:
+            </p>
+            <ul>
+              <li>Hashtag monitoring updates every 30 minutes</li>
+              <li>Processing retrieved content at 00:01, 08:01, and 16:01</li>
+              <li>Post trends view refresh at 01:00, 09:00, and 17:00</li>
+              <li>Author trends view refresh at 01:05, 09:05, and 17:05</li>
+            </ul>
+          </CCardBody>
+        </CCard>
 
-          {/* Project Links Card */}
-          <CCard className="mb-4">
+        {/* Project Links Card */}
+        <CCard className="mb-4">
           <CCardHeader>
             <h4 className="m-0">Project Links</h4>
           </CCardHeader>
