@@ -70,7 +70,11 @@ const routes = [
   { path: '/reports', name: 'Reports', element: Reports },
   { path: '/fetched_data', name: 'Fetched Data', element: FetchedData },
   { path: '/about', name: 'About', element: About },
-  { path: '/monitored_hashtags/:id/trending', name: 'Trending Posts', element: TrendingPosts },
+  {
+    path: '/monitored_hashtags/:hashtag_title/trending',
+    name: 'Trending Posts',
+    element: TrendingPosts,
+  },
   { path: '/overview', name: 'Overview', element: Overview },
   { path: '/dashboard', name: 'Dashboard', element: Dashboard },
   { path: '/theme', name: 'Theme', element: Colors, exact: true },
