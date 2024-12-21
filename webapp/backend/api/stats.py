@@ -7,8 +7,13 @@ from sqlalchemy import func
 from sqlalchemy.future import select
 
 from postgresql.config.db import session
-from postgresql.database_models import (ActiveHashtags, Authors, Challenges,
-                                        Posts, VideoEmbeddings)
+from postgresql.database_models import (
+    ActiveHashtags,
+    Authors,
+    Challenges,
+    Posts,
+    VideoEmbeddings,
+)
 
 router = APIRouter()
 

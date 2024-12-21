@@ -11,11 +11,14 @@ import cv2
 import vertexai
 from google.oauth2 import service_account
 from ratelimit import limits, sleep_and_retry
-from scenedetect import (AdaptiveDetector, SceneManager, StatsManager,
-                         open_video)
-from vertexai.vision_models import (Image, MultiModalEmbeddingModel,
-                                    MultiModalEmbeddingResponse, Video,
-                                    VideoSegmentConfig)
+from scenedetect import AdaptiveDetector, SceneManager, StatsManager, open_video
+from vertexai.vision_models import (
+    Image,
+    MultiModalEmbeddingModel,
+    MultiModalEmbeddingResponse,
+    Video,
+    VideoSegmentConfig,
+)
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(current_dir)
