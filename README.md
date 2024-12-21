@@ -7,6 +7,7 @@
 - [About](#about)
 - [Key Features](#key-features)
 - [Getting Started](#getting-started)
+- [Technical Architecture](#Technical Architecture)
 - [Project Links](#project-links)
 - [Version](#version)
 - [Resources](#resources)
@@ -120,6 +121,42 @@ For more detailed information, refer to the individual Dockerfiles and scripts i
 Feel free to reach out to the contributors if you have any questions or need further assistance.
 
 ---
+
+## Technical Architecture
+
+### Overview
+The application is built using a microservices architecture, leveraging Docker and Docker Compose for containerization and orchestration.
+
+### Components
+- **FastAPI**: Serves as the backend API, handling HTTP requests and providing endpoints for various functionalities.
+- **RabbitMQ**: Acts as the message broker, facilitating communication between different services.
+- **PostgreSQL**: Serves as the primary database for storing application data.
+- **React Frontend**: Provides the user interface for interacting with the application.
+
+### Containerization
+- Each component runs in its own Docker container, ensuring isolation and ease of deployment.
+- Docker Compose is used to manage multi-container applications, allowing for easy setup and scaling.
+
+### Communication
+- **Internal Communication**: Services communicate with each other using RabbitMQ for message passing.
+- **External Communication**: The FastAPI backend exposes RESTful APIs that the React frontend consumes.
+
+### Data Flow
+- User interactions with the React frontend trigger API calls to the FastAPI backend.
+- The FastAPI backend processes the requests, interacts with the PostgreSQL database, and may publish messages to RabbitMQ.
+- Other services subscribed to RabbitMQ channels process the messages and perform necessary actions.
+
+### Deployment
+- The application can be deployed on any system with Docker and Docker Compose installed.
+- Environment variables are managed through a `.env` file, allowing for easy configuration.
+
+### Scalability
+- The microservices architecture allows individual components to be scaled independently based on load.
+- Docker Compose makes it easy to add or remove containers as needed.
+
+---
+
+Feel free to reach out to the contributors if you have any questions or need further assistance.
 
 ## Version
 
