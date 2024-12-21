@@ -48,9 +48,8 @@ Instructions on how to set up the project locally, install dependencies, and run
 
 ## Project Links
 
-- GitHub Repository: [https://github.com/your-repo-link](https://github.com/your-repo-link)
+- GitHub Repository: [https://github.com/jnvfalkenried/svt/](https://github.com/jnvfalkenried/svt/)
 - Documentation: [Coming soon]
-- Issues Tracker: [https://github.com/your-repo-link/issues](https://github.com/your-repo-link/issues)
 
 ---
 
@@ -72,10 +71,10 @@ The initial release of the application, with features for hashtag tracking, cont
 
 ## Contributors
 
-- **Anand Mathew M S** — Data Scientist [https://github.com/your-repo-link](https://github.com/anandmatt)
-- **Elise Hammarström** — Data Scientist [https://github.com/your-repo-link](https://github.com/elisehammarstrom)
-- **Just Niklas von Falkenried** — Data Scientist [https://github.com/your-repo-link](https://github.com/jnvfalkenried)
-- **Rustam Ismailov** — Data Scientist [https://github.com/your-repo-link](https://github.com/Ftalysh)
+- **Anand Mathew M S** — Data Scientist [https://github.com/anandmatt](https://github.com/anandmatt)
+- **Elise Hammarström** — Data Scientist [https://github.com/elisehammarstrom](https://github.com/elisehammarstrom)
+- **Just Niklas von Falkenried** — Data Scientist [https://github.com/jnvfalkenried](https://github.com/jnvfalkenried)
+- **Rustam Ismailov** — Data Scientist [https://github.com/Ftalysh](https://github.com/Ftalysh)
 
 ---
 
