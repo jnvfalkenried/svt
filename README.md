@@ -131,7 +131,7 @@ The initial release of the application, with features for hashtag tracking, cont
 
 ## Resources
 
-- **GitHub Repository**: [https://github.com/your-repo-link](https://github.com/your-repo-link)
+- **GitHub Repository**: [https://github.com/jnvfalkenried/svt/](https://github.com/jnvfalkenried/svt/)
 - **Documentation**: [Coming soon]
 - **API Documentation**: [Coming soon]
 
