@@ -9,6 +9,8 @@ import {
   CProgress,
   CSpinner,
   CButton,
+  CPagination,
+  CPaginationItem,
 } from '@coreui/react'
 import { cilCloudDownload } from '@coreui/icons'
 import CIcon from '@coreui/icons-react'
@@ -17,6 +19,8 @@ const AuthorTrendsTable = () => {
   const [trends, setTrends] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 10
 
   useEffect(() => {
     const fetchTrends = async () => {
@@ -91,6 +95,12 @@ const AuthorTrendsTable = () => {
     document.body.removeChild(link)
   }
 
+  // Pagination logic
+  const totalPages = Math.ceil(trends.length / itemsPerPage)
+  const startIndex = (currentPage - 1) * itemsPerPage
+  const endIndex = startIndex + itemsPerPage
+  const currentTrends = trends.slice(startIndex, endIndex)
+
   if (loading) {
     return (
       <div className="d-flex justify-content-center p-4">
@@ -117,12 +127,6 @@ const AuthorTrendsTable = () => {
 
   return (
     <div>
-      <div className="d-flex justify-content-end mb-3">
-        <CButton color="primary" onClick={downloadCSV} disabled={!trends.length}>
-          <CIcon icon={cilCloudDownload} className="me-2" />
-          Download CSV
-        </CButton>
-      </div>
       <CTable align="middle" className="mb-0 border" hover responsive>
         <CTableHead className="text-nowrap">
           <CTableRow>
@@ -132,10 +136,21 @@ const AuthorTrendsTable = () => {
             <CTableHeaderCell className="bg-body-tertiary">Weekly Growth</CTableHeaderCell>
             <CTableHeaderCell className="bg-body-tertiary">Monthly Growth</CTableHeaderCell>
             <CTableHeaderCell className="bg-body-tertiary">Last Updated</CTableHeaderCell>
+            <CTableHeaderCell className="bg-body-tertiary text-end">
+              <CButton 
+                color="primary" 
+                size="sm" 
+                onClick={downloadCSV} 
+                disabled={!trends.length}
+                className="p-1"
+              >
+                <CIcon icon={cilCloudDownload} />
+              </CButton>
+            </CTableHeaderCell>
           </CTableRow>
         </CTableHead>
         <CTableBody>
-          {trends.map((trend, index) => (
+          {currentTrends.map((trend, index) => (
             <CTableRow key={index}>
               <CTableDataCell>
                 <div className="fw-semibold">{trend.author_nickname}</div>
@@ -208,10 +223,40 @@ const AuthorTrendsTable = () => {
                   {trend.collected_at ? new Date(trend.collected_at).toLocaleString() : 'N/A'}
                 </div>
               </CTableDataCell>
+              <CTableDataCell />
             </CTableRow>
           ))}
         </CTableBody>
       </CTable>
+      {totalPages > 1 && (
+        <div className="d-flex justify-content-end mt-3">
+          <CPagination aria-label="Page navigation">
+            <CPaginationItem 
+              aria-label="Previous" 
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage(currentPage - 1)}
+            >
+              <span aria-hidden="true">&laquo;</span>
+            </CPaginationItem>
+            {[...Array(totalPages)].map((_, index) => (
+              <CPaginationItem
+                key={index + 1}
+                active={currentPage === index + 1}
+                onClick={() => setCurrentPage(index + 1)}
+              >
+                {index + 1}
+              </CPaginationItem>
+            ))}
+            <CPaginationItem
+              aria-label="Next"
+              disabled={currentPage === totalPages}
+              onClick={() => setCurrentPage(currentPage + 1)}
+            >
+              <span aria-hidden="true">&raquo;</span>
+            </CPaginationItem>
+          </CPagination>
+        </div>
+      )}
     </div>
   )
 }
