@@ -300,6 +300,9 @@ const MonitoredHashtags = () => {
   return (
     <CRow className="justify-content-center">
       <CCol md={8}>
+        <CAlert color="info" className="mb-3">
+           Add hashtags to monitor and explore their results
+        </CAlert>
         <HashtagSearch onHashtagAdded={fetchHashtags} />
         <CCard className="mb-4">
           <CCardHeader>

@@ -8,6 +8,7 @@ import {
   CNavLink,
   CTabContent,
   CTabPane,
+  CAlert,
 } from '@coreui/react'
 import PostTrendsTable from './PostTrendsTable'
 import AuthorTrendsTable from './AuthorTrendsTable'
@@ -42,9 +43,15 @@ const Trends = () => {
       <CCardBody>
         <CTabContent>
           <CTabPane visible={activeTab === 1}>
+            <CAlert color="info" className="mb-3">
+              Discover the hashtags that have increased most in number of views
+            </CAlert>
             <PostTrendsTable />
           </CTabPane>
           <CTabPane visible={activeTab === 2}>
+            <CAlert color="info" className="mb-3">
+                Discover the authors that have increased most in number of followers
+            </CAlert>
             <AuthorTrendsTable />
           </CTabPane>
         </CTabContent>

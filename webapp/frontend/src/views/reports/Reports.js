@@ -71,7 +71,7 @@ const Reports = () => {
         <CTabPane visible={activeTab === 'topPosts'}>
           <CAlert color="info" className="mb-3">
             Discover the most viewed TikTok posts based on your selected filters. Use this section
-            to analyze which posts are gaining popularity!
+            to analyze which posts are gaining popularity
           </CAlert>
           {/* Filters */}
           <Filters
@@ -86,7 +86,7 @@ const Reports = () => {
         <CTabPane visible={activeTab === 'topAuthors'}>
           <CAlert color="info" className="mb-3">
             Discover the most viewed TikTok authors based on your selected filters. Use this section
-            to analyze which authors are gaining popularity!
+            to analyze which authors are gaining popularity
           </CAlert>
           {/* Filters */}
           <Filters
