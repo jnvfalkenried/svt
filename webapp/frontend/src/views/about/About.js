@@ -43,28 +43,28 @@ DeveloperProfile.propTypes = {
 const About = () => {
   const developers = [
     {
-      name: 'Anand',
+      name: 'Anand Mathew M S',
       role: 'Data Scientist',
-      github: 'https://github.com/janedoe',
-      linkedin: 'https://linkedin.com/in/janedoe',
+      github: 'https://github.com/anandmatt',
+      linkedin: 'https://www.linkedin.com/in/anand-mathew-m-s-34a135176/',
     },
     {
       name: 'Elise Hammarström',
       role: 'Data Scientist',
-      github: 'https://github.com/johnsmith',
-      linkedin: 'https://linkedin.com/in/johnsmith',
+      github: 'https://github.com/elisehammarstrom',
+      linkedin: 'https://www.linkedin.com/in/elise-hammarstrom/',
     },
     {
-      name: 'Just',
+      name: 'Just Niklas von Falkenried',
       role: 'Data Scientist',
-      github: 'https://github.com/janedoe',
-      linkedin: 'https://linkedin.com/in/janedoe',
+      github: 'https://github.com/jnvfalkenried',
+      linkedin: 'https://www.linkedin.com/in/just-niklas-von-falkenried/',
     },
     {
-      name: 'Rustam',
+      name: 'Rustam Ismailov',
       role: 'Data Scientist',
-      github: 'https://github.com/janedoe',
-      linkedin: 'https://linkedin.com/in/janedoe',
+      github: 'https://github.com/Ftalysh',
+      linkedin: 'https://www.linkedin.com/in/rustam-ismailov/',
     },
   ]
 
@@ -80,38 +80,40 @@ const About = () => {
             </h4>
           </CCardHeader>
           <CCardBody>
-            <p>
-              Hashtag Monitoring Application is a comprehensive social media analytics tool designed
-              to track and analyze hashtag performance across various platforms
-            </p>
+          <p className="text-justify">
+          Our TikTok Data Monitoring Application provides a streamlined, open-source solution for comprehensive content retrieval and analysis. Designed with both user-friendliness and technical flexibility in mind, the platform offers an intuitive interface and a customizable technical architecture that developers can easily extend and adapt to specific needs.
+          </p>
             <h5 className="mt-3">Key Features</h5>
             <CListGroup>
-              <CListGroupItem>Real-time hashtag tracking</CListGroupItem>
-              <CListGroupItem>Comprehensive social media analytics</CListGroupItem>
-              <CListGroupItem>Customizable reporting and insights</CListGroupItem>
+              <CListGroupItem>Comprehensive TikTok Content Retrieval</CListGroupItem>
+              <CListGroupItem>Hashtag Tracking</CListGroupItem>
+              <CListGroupItem>Advanced Image and Content Search</CListGroupItem>
+              <CListGroupItem>Direct Content Linking</CListGroupItem>
+              <CListGroupItem>Open-Source and Customizable Architecture</CListGroupItem>
             </CListGroup>
           </CCardBody>
         </CCard>
 
         {/* Data Refresh Card */}
         <CCard className="mb-4">
-          <CCardHeader>
-            <h4 className="m-0">
-              <CIcon icon={cilClock} className="me-2" />
-              Data Refresh and Synchronization
-            </h4>
-          </CCardHeader>
-          <CCardBody>
-            <p>
-              Our application fetches the most up-to-date hashtag insights at scheduled intervals:
-            </p>
-            <ul>
-              <li>Hourly data refresh for active hashtags</li>
-              <li>Daily comprehensive data synchronization</li>
-              <li>Real-time tracking for high-priority tags</li>
-            </ul>
-          </CCardBody>
-        </CCard>
+      <CCardHeader>
+        <h4 className="m-0">
+          <CIcon icon={cilClock} className="me-2" />
+          Data Refresh and Synchronization
+        </h4>
+      </CCardHeader>
+      <CCardBody>
+        <p>
+          Our application fetches the most up-to-date hashtag insights through a sophisticated scheduling mechanism:
+        </p>
+        <ul>
+          <li>Hashtag monitoring updates every 30 minutes</li>
+          <li>Processing retrieved content at 00:01, 08:01, and 16:01</li>
+          <li>Post trends view refresh at 01:00, 09:00, and 17:00</li>
+          <li>Author trends view refresh at 01:05, 09:05, and 17:05</li>
+        </ul>
+      </CCardBody>
+      </CCard>
 
           {/* Project Links Card */}
           <CCard className="mb-4">
@@ -131,9 +133,6 @@ const About = () => {
                 className="text-decoration-none"
               >
                 <CIcon icon={cibGithub} className="me-1" /> GitHub Repository
-              </a>
-              <a href="/docs" className="text-decoration-none">
-                <CIcon icon={cilBook} className="me-1" /> Documentation
               </a>
             </div>
           </CCardBody>
