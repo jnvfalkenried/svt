@@ -2,6 +2,8 @@
 
 The **TikTok Data Intelligence Application** is a streamlined, open-source solution for retrieving and analyzing TikTok content. Built with both user-friendliness and technical flexibility in mind, this platform provides an intuitive interface along with a customizable architecture that developers can extend and adapt to their specific needs.
 
+This application was created as a product for the Swedish National Television Company, Sveriges Television (SVT). SVT asked us to build an application that fetches and processes open source tiktok data. 
+
 ---
 
 ## Table of Contents
@@ -47,15 +49,14 @@ Follow these steps to get started with using this project.
 ### Prerequisites
 
 Make sure you have the following installed on your system:
-- Docker
-- Docker Compose
+- Docker Desktop
 
 ### Installation
 
 1. **Clone the repository:**
 
     ```sh
-    git clone https://github.com/your-username/your-repo.git
+    git clone https://github.com/your-username/your-repo.git](https://github.com/jnvfalkenried/svt.git
     cd your-repo
     ```
 
@@ -69,13 +70,13 @@ Make sure you have the following installed on your system:
 3. **Build and start the Docker containers:**
 
     ```sh
-    docker-compose up -d --build
+    docker compose up -d --build
     ```
 
 4. **Check the status of the containers:**
 
     ```sh
-    docker-compose ps
+    docker compose ps
     ```
 
 ### Usage
@@ -101,33 +102,24 @@ Once the containers are up and running, you can access the services as follows:
 - **Build with no cache:**
 
     ```sh
-    docker-compose build --no-cache
+    docker compose build --no-cache
     ```
 
 - **Remove old containers and volumes:**
 
     ```sh
-    docker-compose down -v
+    docker compose down -v
     ```
 
 - **Start specific containers:**
 
     ```sh
-    docker-compose up postgres db-api react-frontend
+    docker compose up postgres db-api react-frontend
     ```
 
 For more detailed information, refer to the individual Dockerfiles and scripts in the repository.
 
----
-
 Feel free to reach out to the contributors if you have any questions or need further assistance.
-
----
-
-## Project Links
-
-- GitHub Repository: [https://github.com/jnvfalkenried/svt/](https://github.com/jnvfalkenried/svt/)
-- Documentation: [Coming soon]
 
 ---
 
@@ -176,29 +168,7 @@ The utilized portions include functionality for session creation and TikTok API 
 
 
 
-# Old content
 
-## svt
-Project in Cooperation with SVT
-
-
-## Infra:
-alembic for db version control
-rabbitmq for queue management
-postgresql (pgvector for storing embeddings)
-
-
-### Alembic commands
-- If you want to make changes to database models, add or modify files in [database_models](src/postgresql/database_models/).
-- Following this, new migration script can be created using the command
-    ```bash
-        alembic revision --autogenerate -m "<Insert your message here>"
-    ``` 
-
-- The migrations can then be applied using the command:
-    ```bash
-        alembic upgrade head
-    ```
 
 ## Code Quality Tools:
 To keep your code clean, organized, and easy to maintain, here are some handy tools to consider (first 2 is highly recommended):
