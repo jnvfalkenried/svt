@@ -1,24 +1,27 @@
-from sqlalchemy import String, Numeric
+from sqlalchemy import ARRAY, Index, Numeric, String
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.schema import PrimaryKeyConstraint
 
 from .base import Base
 
+
 class RelatedHashtags(Base):
     __tablename__ = "related_hashtags"
     
-    antecedent_id: Mapped[str] = mapped_column(String, primary_key=True)
-    antecedent_title: Mapped[str] = mapped_column(String)
+    hashed_id: Mapped[str] = mapped_column(String, primary_key=True)
+    antecedent_id: Mapped[list[str]] = mapped_column(ARRAY(String), nullable=False)
+    antecedent_title: Mapped[list[str]] = mapped_column(ARRAY(String), nullable=False)
     antecedent_support: Mapped[float] = mapped_column(Numeric(precision=7, scale=5))
-    consequent_id: Mapped[str] = mapped_column(String, primary_key=True)
-    consequent_title: Mapped[str] = mapped_column(String)
+    consequent_id: Mapped[list[str]] = mapped_column(ARRAY(String), nullable=False)
+    consequent_title: Mapped[list[str]] = mapped_column(ARRAY(String), nullable=False)
     consequent_support: Mapped[float] = mapped_column(Numeric(precision=7, scale=5))
     support: Mapped[float] = mapped_column(Numeric(precision=7, scale=5))
     confidence: Mapped[float] = mapped_column(Numeric(precision=7, scale=5))
     lift: Mapped[float] = mapped_column(Numeric(precision=7, scale=5))
     
     __table_args__ = (
-        PrimaryKeyConstraint("antecedent_id", "consequent_id"),
+        Index("idx_antecedent_id_gin", "antecedent_id", postgresql_using="gin"),
+        Index("idx_consequent_id_gin", "consequent_id", postgresql_using="gin"),
     )
     
     def __repr__(self):
