@@ -1,7 +1,7 @@
 """added tables for extended hashtags
 
 Revision ID: d9eaa08778c7
-Revises: e09dfb2b3d86
+Revises: b7741cb1161c
 Create Date: 2024-12-05 11:26:36.453381
 
 """
@@ -13,7 +13,7 @@ from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "d9eaa08778c7"
-down_revision: Union[str, None] = "e09dfb2b3d86"
+down_revision: Union[str, None] = "b7741cb1161c"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
