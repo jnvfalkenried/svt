@@ -1,8 +1,7 @@
 import React, { useState } from 'react'
-import { CCard, CCardBody, CCardHeader, CRow, CCol, CButton, CSpinner, CBadge } from '@coreui/react'
+import { CCard, CCardBody, CCardHeader, CRow, CCol, CButton, CSpinner, CBadge, CAlert} from '@coreui/react'
 import CIcon from '@coreui/icons-react'
-import { cilSearch, cilImage, cilX, cilHeart, cilPeople, cilUserFollow } from '@coreui/icons'
-import ApiService from '../../services/ApiService'
+import { cilSearch, cilImage, cilX } from '@coreui/icons'
 
 const MultimodalSearch = () => {
   const [searchQuery, setSearchQuery] = useState('')
@@ -169,6 +168,9 @@ const MultimodalSearch = () => {
         <strong>Multimodal Search</strong>
       </CCardHeader>
       <CCardBody>
+        <CAlert color="info" className="mb-3">
+           Upload an image to search for similar results
+        </CAlert>
         <CRow className="mb-4">
           <CCol xs={12} md={8}>
             <div className="d-flex gap-3">
