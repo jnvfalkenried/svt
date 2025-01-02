@@ -46,6 +46,12 @@ const _navProd = [
   },
   {
     component: CNavItem,
+    name: 'Related Hashtags',
+    to: '/related_hashtags',
+    icon: <CIcon icon={cilPuzzle} customClassName="nav-icon" />,
+  },
+  {
+    component: CNavItem,
     name: 'Reports',
     to: '/reports',
     icon: <CIcon icon={cilBarChart} customClassName="nav-icon" />,
