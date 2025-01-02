@@ -1,3 +1,4 @@
+from api.author_trends import router as author_trends_router
 from api.authors import router as authors_router
 from api.hashtag_trends import router as hashtag_trends_router
 from api.hashtags import router as hashtags_router
@@ -32,3 +33,4 @@ app.include_router(posts_router)
 app.include_router(post_trends_router)
 app.include_router(hashtag_trends_router)
 app.include_router(related_hashtags_router)
+app.include_router(author_trends_router)

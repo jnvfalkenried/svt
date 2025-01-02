@@ -1,6 +1,7 @@
 from postgresql.database_models.active_hashtags import *
 from postgresql.database_models.authors import *
 from postgresql.database_models.authors_reporting import *
+from postgresql.database_models.authors_trends import *
 from postgresql.database_models.base import *
 from postgresql.database_models.challenge_trends import *
 from postgresql.database_models.challenges import *

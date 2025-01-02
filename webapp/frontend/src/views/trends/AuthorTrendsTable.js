@@ -7,19 +7,16 @@ import {
   CTableHeaderCell,
   CTableRow,
   CProgress,
+  CSpinner,
   CButton,
   CPagination,
   CPaginationItem,
-  CSpinner,
 } from '@coreui/react'
 import { cilCloudDownload } from '@coreui/icons'
 import CIcon from '@coreui/icons-react'
-import PostDetailsOffcanvas from './PostTrendsDetailsOffcanvas'
 
-const PostTrendsTable = () => {
+const AuthorTrendsTable = () => {
   const [trends, setTrends] = useState([])
-  const [selectedPost, setSelectedPost] = useState(null)
-  const [visible, setVisible] = useState(false)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [currentPage, setCurrentPage] = useState(1)
@@ -29,7 +26,7 @@ const PostTrendsTable = () => {
     const fetchTrends = async () => {
       try {
         setLoading(true)
-        const response = await fetch('/api/post-trends')
+        const response = await fetch('/api/author-trends')
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`)
         }
@@ -37,8 +34,8 @@ const PostTrendsTable = () => {
         setTrends(data.items || [])
         setError(null)
       } catch (error) {
-        console.error('Error fetching trends:', error)
-        setError('Failed to load post trends')
+        console.error('Error fetching author trends:', error)
+        setError('Failed to load author trends')
       } finally {
         setLoading(false)
       }
@@ -56,28 +53,32 @@ const PostTrendsTable = () => {
   const downloadCSV = () => {
     // Prepare CSV headers
     const headers = [
-      'Hashtags',
-      'Current Views',
+      'Author Nickname',
+      'Unique ID',
+      'Current Followers',
+      'Current Hearts',
       'Daily Growth Rate (%)',
-      'Daily Views Change',
+      'Daily Followers Change',
       'Weekly Growth Rate (%)',
-      'Weekly Views Change',
+      'Weekly Followers Change',
       'Monthly Growth Rate (%)',
-      'Monthly Views Change',
+      'Monthly Followers Change',
       'Last Updated',
     ]
 
     // Prepare CSV rows
     const csvData = trends.map((trend) => [
-      trend.challenges.join(', '),
-      trend.current_views,
-      trend.daily_growth_rate.toFixed(2),
-      trend.daily_change,
-      trend.weekly_growth_rate.toFixed(2),
-      trend.weekly_change,
-      trend.monthly_growth_rate.toFixed(2),
-      trend.monthly_change,
-      new Date(trend.collected_at).toLocaleString(),
+      trend.author_nickname,
+      trend.unique_id,
+      trend.current_followers || 0,
+      trend.current_hearts || 0,
+      trend.daily_followers_growth_rate?.toFixed(2) || 0,
+      trend.daily_followers_change || 0,
+      trend.weekly_followers_growth_rate?.toFixed(2) || 0,
+      trend.weekly_followers_change || 0,
+      trend.monthly_followers_growth_rate?.toFixed(2) || 0,
+      trend.monthly_followers_change || 0,
+      trend.collected_at ? new Date(trend.collected_at).toLocaleString() : 'N/A',
     ])
 
     // Combine headers and rows
@@ -88,7 +89,7 @@ const PostTrendsTable = () => {
     const link = document.createElement('a')
     const url = URL.createObjectURL(blob)
     link.setAttribute('href', url)
-    link.setAttribute('download', `post_trends_${new Date().toISOString().split('T')[0]}.csv`)
+    link.setAttribute('download', `author_trends_${new Date().toISOString().split('T')[0]}.csv`)
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
@@ -119,7 +120,7 @@ const PostTrendsTable = () => {
   if (!trends?.length) {
     return (
       <div className="text-center p-4 text-muted">
-        <p>No post trends data available.</p>
+        <p>No author trends data available.</p>
       </div>
     )
   }
@@ -129,9 +130,8 @@ const PostTrendsTable = () => {
       <CTable align="middle" className="mb-0 border" hover responsive>
         <CTableHead className="text-nowrap">
           <CTableRow>
-            <CTableHeaderCell className="bg-body-tertiary">Hashtags</CTableHeaderCell>
-            <CTableHeaderCell className="bg-body-tertiary">Post Info</CTableHeaderCell>
-            <CTableHeaderCell className="bg-body-tertiary">Current Views</CTableHeaderCell>
+            <CTableHeaderCell className="bg-body-tertiary">Author</CTableHeaderCell>
+            <CTableHeaderCell className="bg-body-tertiary">Current Stats</CTableHeaderCell>
             <CTableHeaderCell className="bg-body-tertiary">Daily Growth</CTableHeaderCell>
             <CTableHeaderCell className="bg-body-tertiary">Weekly Growth</CTableHeaderCell>
             <CTableHeaderCell className="bg-body-tertiary">Monthly Growth</CTableHeaderCell>
@@ -153,91 +153,81 @@ const PostTrendsTable = () => {
           {currentTrends.map((trend, index) => (
             <CTableRow key={index}>
               <CTableDataCell>
-                <div className="d-flex flex-wrap gap-2" style={{ maxWidth: '200px' }}>
-                  {trend.challenges.slice(0, 3).map((tag, i) => (
-                    <span key={i} className="badge bg-body-tertiary text-medium-emphasis">
-                      {tag}
-                    </span>
-                  ))}
-                  {trend.challenges.length > 3 && (
-                    <span
-                      className="badge bg-secondary"
-                      title={trend.challenges.slice(3).join(' ')}
-                    >
-                      +{trend.challenges.length - 3}
-                    </span>
-                  )}
+                <div className="fw-semibold">{trend.author_nickname}</div>
+                <div className="small text-body-secondary">{trend.unique_id}</div>
+              </CTableDataCell>
+              <CTableDataCell>
+                <div className="d-flex flex-column">
+                  <div className="fw-semibold">
+                    Followers: {trend.current_followers?.toLocaleString() || 0}
+                  </div>
+                  <small className="text-body-secondary">
+                    Hearts: {trend.current_hearts?.toLocaleString() || 0}
+                  </small>
                 </div>
               </CTableDataCell>
               <CTableDataCell>
-                <button
-                  className="btn btn-ghost-primary"
-                  onClick={() => {
-                    setSelectedPost(trend)
-                    setVisible(true)
-                  }}
-                >
-                  View Details
-                </button>
-              </CTableDataCell>
-              <CTableDataCell>
-                <div className="fw-semibold">{trend.current_views.toLocaleString()}</div>
-              </CTableDataCell>
-              <CTableDataCell>
                 <div className="d-flex justify-content-between">
-                  <div className="fw-semibold">{trend.daily_growth_rate.toFixed(2)}%</div>
+                  <div className="fw-semibold">
+                    {trend.daily_followers_growth_rate?.toFixed(2) || 0}%
+                  </div>
                   <div className="ms-3">
                     <small className="text-body-secondary">
-                      {trend.daily_change.toLocaleString()} views
+                      {trend.daily_followers_change?.toLocaleString() || 0} followers
                     </small>
                   </div>
                 </div>
                 <CProgress
                   thin
-                  color={getProgressColor(trend.daily_growth_rate)}
-                  value={Math.min(100, Math.abs(trend.daily_growth_rate))}
+                  color={getProgressColor(trend.daily_followers_growth_rate || 0)}
+                  value={Math.min(100, Math.abs(trend.daily_followers_growth_rate || 0))}
                 />
               </CTableDataCell>
               <CTableDataCell>
                 <div className="d-flex justify-content-between">
-                  <div className="fw-semibold">{trend.weekly_growth_rate.toFixed(2)}%</div>
+                  <div className="fw-semibold">
+                    {trend.weekly_followers_growth_rate?.toFixed(2) || 0}%
+                  </div>
                   <div className="ms-3">
                     <small className="text-body-secondary">
-                      {trend.weekly_change.toLocaleString()} views
+                      {trend.weekly_followers_change?.toLocaleString() || 0} followers
                     </small>
                   </div>
                 </div>
                 <CProgress
                   thin
-                  color={getProgressColor(trend.weekly_growth_rate)}
-                  value={Math.min(100, Math.abs(trend.weekly_growth_rate))}
+                  color={getProgressColor(trend.weekly_followers_growth_rate || 0)}
+                  value={Math.min(100, Math.abs(trend.weekly_followers_growth_rate || 0))}
                 />
               </CTableDataCell>
               <CTableDataCell>
                 <div className="d-flex justify-content-between">
-                  <div className="fw-semibold">{trend.monthly_growth_rate.toFixed(2)}%</div>
+                  <div className="fw-semibold">
+                    {trend.monthly_followers_growth_rate?.toFixed(2) || 0}%
+                  </div>
                   <div className="ms-3">
                     <small className="text-body-secondary">
-                      {trend.monthly_change.toLocaleString()} views
+                      {trend.monthly_followers_change?.toLocaleString() || 0} followers
                     </small>
                   </div>
                 </div>
                 <CProgress
                   thin
-                  color={getProgressColor(trend.monthly_growth_rate)}
-                  value={Math.min(100, Math.abs(trend.monthly_growth_rate))}
+                  color={getProgressColor(trend.monthly_followers_growth_rate || 0)}
+                  value={Math.min(100, Math.abs(trend.monthly_followers_growth_rate || 0))}
                 />
               </CTableDataCell>
               <CTableDataCell>
                 <div className="small text-body-secondary">Last updated</div>
-                <div className="fw-semibold">{new Date(trend.collected_at).toLocaleString()}</div>
+                <div className="fw-semibold">
+                  {trend.collected_at ? new Date(trend.collected_at).toLocaleString() : 'N/A'}
+                </div>
               </CTableDataCell>
               <CTableDataCell />
             </CTableRow>
           ))}
         </CTableBody>
       </CTable>
-
       {totalPages > 1 && (
         <div className="d-flex justify-content-end mt-3">
           <CPagination aria-label="Page navigation">
@@ -267,14 +257,8 @@ const PostTrendsTable = () => {
           </CPagination>
         </div>
       )}
-
-      <PostDetailsOffcanvas
-        visible={visible}
-        onClose={() => setVisible(false)}
-        post={selectedPost}
-      />
     </div>
   )
 }
 
-export default PostTrendsTable
+export default AuthorTrendsTable
