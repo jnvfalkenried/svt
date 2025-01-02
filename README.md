@@ -36,6 +36,7 @@ This application was created as a product for the Swedish National Television Co
   - **Content processing**: Runs at 00:01, 08:01, and 16:01.
   - **Post trends view refresh**: Occurs at 01:00, 09:00, and 17:00.
   - **Author trends view refresh**: Runs at 01:05, 09:05, and 17:05.
+  - **Recompute Association rules**: Runs at 01:30.
 
 ---
 
