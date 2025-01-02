@@ -92,7 +92,6 @@ class TasksManager(RabbitMQClient):
         except Exception as e:
             logger.error(f"Error computing related hashtag rules: {e}", exc_info=True)
 
-
     async def refresh_author_trends_view(self):
         """Refresh the author_trends materialized view"""
         logger.info("Refreshing author_trends materialized view")
