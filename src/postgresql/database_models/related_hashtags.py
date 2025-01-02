@@ -7,7 +7,7 @@ from .base import Base
 
 class RelatedHashtags(Base):
     __tablename__ = "related_hashtags"
-    
+
     hashed_id: Mapped[str] = mapped_column(String, primary_key=True)
     antecedent_id: Mapped[list[str]] = mapped_column(ARRAY(String), nullable=False)
     antecedent_title: Mapped[list[str]] = mapped_column(ARRAY(String), nullable=False)
@@ -18,12 +18,12 @@ class RelatedHashtags(Base):
     support: Mapped[float] = mapped_column(Numeric(precision=7, scale=5))
     confidence: Mapped[float] = mapped_column(Numeric(precision=7, scale=5))
     lift: Mapped[float] = mapped_column(Numeric(precision=7, scale=5))
-    
+
     __table_args__ = (
         Index("idx_antecedent_id_gin", "antecedent_id", postgresql_using="gin"),
         Index("idx_consequent_id_gin", "consequent_id", postgresql_using="gin"),
     )
-    
+
     def __repr__(self):
         return (
             f"RelatedHashtags("
@@ -38,4 +38,3 @@ class RelatedHashtags(Base):
             f"lift={self.lift!r}"
             f")"
         )
-    

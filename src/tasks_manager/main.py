@@ -30,9 +30,11 @@ async def main():
     scheduler.add_job(tasks_manager.refresh_post_trends_view, "cron", hour=1, minute=0)
     scheduler.add_job(tasks_manager.refresh_post_trends_view, "cron", hour=9, minute=0)
     scheduler.add_job(tasks_manager.refresh_post_trends_view, "cron", hour=17, minute=0)
-    
+
     # Compute related hashtag rules every 24 hours
-    scheduler.add_job(tasks_manager.compute_related_hashtag_rules, "cron", hour=1, minute=30)
+    scheduler.add_job(
+        tasks_manager.compute_related_hashtag_rules, "cron", hour=1, minute=30
+    )
 
     # Run the scheduler
 

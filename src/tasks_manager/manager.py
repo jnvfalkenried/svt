@@ -83,7 +83,7 @@ class TasksManager(RabbitMQClient):
                 logger.info("Successfully refreshed post_trends materialized view")
         except Exception as e:
             logger.error(f"Error refreshing post_trends view: {e}", exc_info=True)
-            
+
     async def compute_related_hashtag_rules(self):
         try:
             await compute_related_hashtags()
