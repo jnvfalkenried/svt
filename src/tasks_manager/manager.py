@@ -6,6 +6,7 @@ import aio_pika
 
 from helpers.logging import setup_logger
 from helpers.rabbitmq import RabbitMQClient
+from helpers.related_hashtags import compute_related_hashtags
 from postgresql.config.db import session
 from postgresql.database_models import AuthorTrends
 from postgresql.database_scripts.active_hashtags import get_active_hashtags
@@ -83,6 +84,13 @@ class TasksManager(RabbitMQClient):
                 logger.info("Successfully refreshed post_trends materialized view")
         except Exception as e:
             logger.error(f"Error refreshing post_trends view: {e}", exc_info=True)
+
+    async def compute_related_hashtag_rules(self):
+        try:
+            await compute_related_hashtags()
+            logger.info("Successfully computed related hashtag rules")
+        except Exception as e:
+            logger.error(f"Error computing related hashtag rules: {e}", exc_info=True)
 
     async def refresh_author_trends_view(self):
         """Refresh the author_trends materialized view"""
