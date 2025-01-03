@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { CCard, CCardBody, CCardHeader, CRow, CCol, CButton, CSpinner, CBadge, CAlert} from '@coreui/react'
+import { CCard, CCardBody, CCardHeader, CRow, CCol, CButton, CSpinner, CBadge, CAlert } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 import { cilSearch, cilImage, cilX } from '@coreui/icons'
 
@@ -37,7 +37,7 @@ const MultimodalSearch = () => {
 
   const handleSearch = async () => {
     if (!selectedImage) {
-      setError('Please enter a search query or select an image')
+      setError('Please select an image')
       return
     }
 
@@ -47,10 +47,7 @@ const MultimodalSearch = () => {
 
     try {
       const formData = new FormData()
-
-      if (selectedImage) {
-        formData.append('image', selectedImage)
-      }
+      formData.append('image', selectedImage)
 
       const response = await fetch('/api/search/multimodal', {
         method: 'POST',
@@ -204,24 +201,22 @@ const MultimodalSearch = () => {
         </CRow>
 
         {previewUrl && (
-          <CRow className="mb-4">
-            <CCol xs={12} md={4}>
-              <div className="position-relative">
-                <img
-                  src={previewUrl}
-                  alt="Preview"
-                  className="img-fluid rounded"
-                  style={{ maxHeight: '200px' }}
-                />
-                <CButton
-                  color="danger"
-                  size="sm"
-                  className="position-absolute top-0 end-0 m-2"
-                  onClick={clearImage}
-                >
-                  <CIcon icon={cilX} />
-                </CButton>
-              </div>
+          <CRow className="mb-4 justify-content-center">
+            <CCol xs={12} md={6} className="text-center position-relative">
+              <img
+                src={previewUrl}
+                alt="Preview"
+                className="img-fluid rounded"
+                style={{ maxHeight: '200px' }}
+              />
+              <CButton
+                color="danger"
+                size="sm"
+                className="position-absolute top-0 end-0 m-2"
+                onClick={clearImage}
+              >
+                <CIcon icon={cilX} />
+              </CButton>
             </CCol>
           </CRow>
         )}
