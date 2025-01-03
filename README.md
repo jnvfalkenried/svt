@@ -42,8 +42,6 @@ This application was created as a product for the Swedish National Television Co
 
 ## Getting Started
 
-> **Note**: Add more text here
-
 Follow these steps to get started with using this project.
 
 ### Prerequisites
