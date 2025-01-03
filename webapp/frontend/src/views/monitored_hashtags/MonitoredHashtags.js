@@ -16,6 +16,7 @@ import {
   CAlert,
   CPagination,
   CPaginationItem,
+  CBadge,
 } from '@coreui/react'
 import PropTypes from 'prop-types'
 import ApiService from '../../services/ApiService'
@@ -142,8 +143,9 @@ const HashtagCard = ({ tag, onRemove }) => {
   }
 
   return (
-    <CCard className="mb-4 shadow-sm">
+    <CCard className="border-0 shadow-lg hover:shadow-xl transition-shadow duration-200 mb-4">
       <CCardBody className="p-4">
+        {/* Header */}
         <div className="d-flex justify-content-between align-items-center mb-4">
           <div className="d-flex align-items-center">
             <h4 className="mb-0">#{tag.title}</h4>
@@ -166,43 +168,38 @@ const HashtagCard = ({ tag, onRemove }) => {
           </CButton>
         </div>
 
-        <div className="bg-body-tertiary p-3 rounded mb-4">
-          <CRow>
-            <CCol className="text-center mb-3">
-              <p className="text-medium-bold mb-0">Posts growth</p>
-            </CCol>
-          </CRow>
-          <CRow>
-            <CCol xs={4} className="text-center border-end">
-              <small className="text-medium-emphasis d-block mb-2">Daily</small>
-              <GrowthIndicator value={tag.daily} period="Daily" />
-            </CCol>
-            <CCol xs={4} className="text-center border-end">
-              <small className="text-medium-emphasis d-block mb-2">Weekly</small>
-              <GrowthIndicator value={tag.weekly} period="Weekly" />
-            </CCol>
-            <CCol xs={4} className="text-center">
-              <small className="text-medium-emphasis d-block mb-2">Monthly</small>
-              <GrowthIndicator value={tag.monthly} period="Monthly" />
-            </CCol>
-          </CRow>
-        </div>
-
+        {/* Action Button */}
         <div className="d-flex justify-content-center my-2">
           <Link to={`/monitored_hashtags/${tag.title}/trending`}>
-            <CButton color="primary">View trending posts for hashtag</CButton>
+            <CButton color="primary">View trending posts</CButton>
           </Link>
         </div>
 
-        <div>
-          <div className="d-flex flex-wrap gap-2">
-            {tag.related.map((related) => (
-              <span key={related.id} className="badge bg-body-tertiary text-primary rounded-pill">
-                #{related.title}
-              </span>
-            ))}
+        {/* Related Tags */}
+        {tag.related.length > 0 && (
+          <div>
+            <small className="text-medium-emphasis d-block mb-2">
+              Related Hashtags
+            </small>
+            <div className="d-flex flex-wrap gap-2">
+              {tag.related.map((related) => (
+                <Link 
+                  key={related.id}
+                  to={`/monitored_hashtags/${related.title}`}
+                  className="text-decoration-none"
+                >
+                  <CBadge 
+                    color="light" 
+                    className="px-3 py-2 text-primary hover:bg-primary hover:text-white transition-colors duration-200"
+                    shape="rounded-pill"
+                  >
+                    #{related.title}
+                  </CBadge>
+                </Link>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
       </CCardBody>
     </CCard>
   )
