@@ -4,7 +4,6 @@ import CIcon from '@coreui/icons-react'
 import { cilSearch, cilImage, cilX } from '@coreui/icons'
 
 const MultimodalSearch = () => {
-  const [searchQuery, setSearchQuery] = useState('')
   const [selectedImage, setSelectedImage] = useState(null)
   const [previewUrl, setPreviewUrl] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -37,7 +36,7 @@ const MultimodalSearch = () => {
   }
 
   const handleSearch = async () => {
-    if (!searchQuery && !selectedImage) {
+    if (!selectedImage) {
       setError('Please enter a search query or select an image')
       return
     }
@@ -48,10 +47,6 @@ const MultimodalSearch = () => {
 
     try {
       const formData = new FormData()
-
-      if (searchQuery && searchQuery.trim()) {
-        formData.append('query', searchQuery.trim())
-      }
 
       if (selectedImage) {
         formData.append('image', selectedImage)
@@ -174,13 +169,6 @@ const MultimodalSearch = () => {
         <CRow className="mb-4">
           <CCol xs={12} md={8}>
             <div className="d-flex gap-3">
-              <input
-                type="text"
-                className="form-control"
-                placeholder="Enter your search query..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
               <div className="position-relative">
                 <input
                   type="file"
@@ -200,7 +188,7 @@ const MultimodalSearch = () => {
               <CButton
                 color="primary"
                 onClick={handleSearch}
-                disabled={isLoading || (!searchQuery && !selectedImage)}
+                disabled={isLoading || (!selectedImage)}
               >
                 {isLoading ? (
                   <CSpinner size="sm" />
