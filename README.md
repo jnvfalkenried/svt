@@ -169,8 +169,6 @@ The initial release of the application, with features for hashtag tracking, cont
 ## Resources
 
 - **GitHub Repository**: [https://github.com/jnvfalkenried/svt/](https://github.com/jnvfalkenried/svt/)
-- **Documentation**: [Coming soon]
-- **API Documentation**: [Coming soon]
 
 ---
 
@@ -185,9 +183,12 @@ The initial release of the application, with features for hashtag tracking, cont
 
 ## Licensing
 
-This project is licensed under the terms specified in the [LICENSE](LICENSE) file. You are free to use, modify, and distribute the software under these terms.
+This project is licensed under GPL-3.0 with an additional commercial use restriction.
+- Non-commercial use: Permitted under GPL-3.0. For more details on the license, view the full [LICENSE](LICENSE) file in our GitHub repository.
+- Commercial use: Requires prior discussion and permission. See COMMERCIAL_USE.md
 
-For more details on the license, view the full [LICENSE](LICENSE) file in our GitHub repository.
+Please contact the contributors referenced above for commercial use inquiries.
+
 
 ---
 
