@@ -16,6 +16,14 @@ async def multimodal_search(
     image: UploadFile = File(default=None),
     limit: int = 3000,
 ) -> list[MatchResponse]:
+    """
+    Perform a multimodal search using text and/or image embeddings.
+
+    Either `query` or `image` must be provided. If both are provided, the query embedding
+    will be combined with the image embedding using cosine similarity.
+
+    The search results will be sorted by cosine similarity and limited to the first 3000 results.
+    """
     print(f"Received request - query: {query}, image present: {image is not None}")
 
     if not query and not image:

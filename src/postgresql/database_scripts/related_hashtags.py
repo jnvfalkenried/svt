@@ -4,11 +4,42 @@ from sqlalchemy import text
 
 
 def generate_hashed_id(antecedent_id, consequent_id):
+    """
+    Returns a string that is a SHA256 hash of the given antecedent_id and
+    consequent_id. The IDs are sorted before being hashed, so the order of the
+    IDs does not affect the hash.
+
+    This is used to create a unique identifier for a rule in the related_hashtags
+    table.
+    """
     key = ",".join(sorted(antecedent_id)) + "|" + ",".join(sorted(consequent_id))
     return hashlib.sha256(key.encode()).hexdigest()
 
 
 async def save_rules_to_db(rules, session):
+    """
+    Saves the given rules to the related_hashtags table in the database. If a
+    rule already exists in the table, it will be updated with the new values. If
+    the rule does not exist, it will be inserted into the table.
+
+    Args:
+        rules (pd.DataFrame): A DataFrame containing the rules, with the
+            following columns:
+
+            - antecedent_id (int): The id(s) of the antecedent hashtag(s).
+            - antecedent_title (str): The title(s) of the antecedent hashtag(s).
+            - consequent_id (int): The id(s) of the consequent hashtag(s).
+            - consequent_title (str): The title(s) of the consequent hashtag(s).
+            - antecedent_support (float): The support of the antecedent hashtag(s).
+            - consequent_support (float): The support of the consequent hashtag(s).
+            - support (float): The support of the rule.
+            - confidence (float): The confidence of the rule.
+            - lift (float): The lift of the rule.
+        session: A SQLAlchemy session object.
+
+    Returns:
+        None
+    """
     async with session() as s:
         for _, rule in rules.iterrows():
             antecedent_id = list(rule["antecedent_id"])

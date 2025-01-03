@@ -35,6 +35,22 @@ async def get_hashtag_trends(
     limit: int = Query(50, description="Number of items to return"),
     offset: int = Query(0, description="Number of items to skip"),
 ) -> HashtagTrendsListResponse:
+    """
+    Fetches a list of hashtag trends, sorted by weekly growth rate descending.
+
+    Args:
+        min_growth: Optional minimum weekly growth rate filter. If specified,
+            only hashtags with a weekly growth rate greater than or equal to
+            this value will be returned.
+        limit: Number of items to return. Defaults to 50.
+        offset: Number of items to skip. Defaults to 0.
+
+    Returns:
+        A list of HashtagTrendResponse objects, containing the hashtag ID,
+        hashtag title (with '#' prefix), daily growth rate, weekly growth rate,
+        and monthly growth rate. The list is sorted by weekly growth rate
+        descending. The total count is also returned.
+    """
     async with session() as s:
         # Base query using the materialized view
         query = select(

@@ -6,6 +6,20 @@ from manager import TasksManager, logger
 
 
 async def main():
+    """
+    Main entry point of the tasks manager service.
+
+    Initializes the tasks manager and starts APScheduler to run scheduled tasks.
+
+    Tasks:
+    - Update hashtags to monitor every 30 minutes
+    - Send tasks to queue at 10:00 and 16:00
+    - Refresh posts_trends materialized view at 10:00, 16:00, and 22:00
+    - Compute related hashtag rules every 24 hours
+    - Refresh authors_trends materialized view at 10:05, 16:05, and 22:05
+
+    The service runs indefinitely until it is stopped.
+    """
     tasks_manager = TasksManager(
         os.getenv("RABBITMQ_SERVER"),
         os.getenv("RABBITMQ_PORT"),

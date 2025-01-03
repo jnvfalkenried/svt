@@ -19,6 +19,13 @@ async def get_authors(
     request: Annotated[PostsRequest, Query()],
     current_user: Users = Depends(verify_token),
 ) -> list[AuthorResponse]:
+    """
+    Fetches top authors based on follower counts within the specified date range and filters.
+
+    :param request: The request data with start_date, end_date, hashtag, category, and limit
+    :param current_user: The current user object
+    :return: A list of author dictionaries
+    """
     hashtag_mapping = {
         "Likes Collected": "max_heart_count",
         "Likes Given": "max_digg_count",

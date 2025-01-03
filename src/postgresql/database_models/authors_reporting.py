@@ -8,6 +8,18 @@ from .base import Base
 
 
 class AuthorsReporting(Base):
+    """
+    The AuthorsReporting model stores the trending data of authors at each snapshot time.
+
+    Attributes:
+        id (str): The unique identifier of the author.
+        collected_at (datetime): The time when the data was collected.
+        digg_count (int): The total number of diggs the author received.
+        follower_count (int): The total number of followers the author has.
+        following_count (int): The total number of users the author is following.
+        heart_count (int): The total number of hearts the author received.
+        video_count (int): The total number of videos the author has created.
+    """
     __tablename__ = "authors_reporting"
 
     id: Mapped[str] = mapped_column(String, primary_key=True)
@@ -23,6 +35,12 @@ class AuthorsReporting(Base):
     __table_args__ = (PrimaryKeyConstraint("id", "collected_at"),)
 
     def __repr__(self) -> str:
+        """
+        Return a string representation of the object.
+
+        Returns:
+            str: A string representation of the object.
+        """
         return (
             f"AuthorsReporting("
             f"id={self.id!r}, "

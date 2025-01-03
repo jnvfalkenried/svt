@@ -17,6 +17,15 @@ router = APIRouter()
 async def get_posts(
     request: Annotated[PostsRequest, Query()]
 ) -> Union[list[ReportFeedResponse], list[ReportPostResponse]]:
+    """
+    Fetches top posts based on play counts within the specified date range and filters.
+
+    Args:
+        request: The request data with start_date, end_date, hashtag, category, and limit
+
+    Returns:
+        A list of dictionaries representing the top posts.
+    """
     category_mapping = {
         "Views": "max_play_count",
         "Likes": "max_digg_count",

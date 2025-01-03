@@ -18,16 +18,35 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 # Hash the password with bcrypt
 def hash_password(password: str) -> str:
+    """
+    Hashes a given password with a random salt.
+
+    :param password: The password to be hashed.
+    :return: The hashed password as a string.
+    """
     return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
 
 
 # Verify the password with bcrypt
 def verify_password(password: str, hashed_password: str):
+    """
+    Verifies a given password against a hashed password.
+
+    :param password: The password to be verified.
+    :param hashed_password: The hashed password to compare against.
+    :return: True if the password matches the hashed password, False otherwise.
+    """
     return bcrypt.checkpw(password.encode("utf-8"), hashed_password.encode("utf-8"))
 
 
 # Function to create JWT token
 def create_access_token(data: dict):
+    """
+    Creates a JWT token with the given data and expiration time.
+
+    :param data: Data to be encoded in the JWT token.
+    :return: The encoded JWT token as a string.
+    """
     to_encode = data.copy()
     expire = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(
         minutes=int(JWT_EXPIRATION)
@@ -39,6 +58,13 @@ def create_access_token(data: dict):
 
 # Dependency function to verify JWT token
 def verify_token(token: str = Depends(oauth2_scheme)):
+    """
+    Verifies a JWT token and returns the decoded payload.
+
+    :param token: The JWT token to be verified.
+    :return: The decoded payload as a dictionary.
+    :raises HTTPException: If the token is invalid or expired.
+    """
     try:
         # Decode the JWT token
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])

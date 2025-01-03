@@ -33,6 +33,25 @@ async def get_related_hashtags(
     limit: int = Query(50, description="Number of items to return"),
     offset: int = Query(0, description="Number of items to skip"),
 ) -> RelatedHashtagListResponse:
+    """
+    Fetches a list of related hashtags based on the specified filters.
+
+    This endpoint retrieves related hashtags from the database, allowing optional
+    filtering by minimum support. The results can be paginated using the limit
+    and offset parameters and are ordered by support in descending order.
+
+    Args:
+        min_support: Optional minimum support filter. If specified, only related
+            hashtags with a support value greater than or equal to this value will
+            be returned.
+        limit: Number of items to return. Defaults to 50.
+        offset: Number of items to skip. Defaults to 0.
+
+    Returns:
+        A RelatedHashtagListResponse object containing a list of related hashtag
+        rules and the total number of rules matching the filter criteria.
+    """
+
     async with session() as s:
         # Base query using the materialized view
         query = (

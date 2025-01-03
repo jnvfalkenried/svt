@@ -48,6 +48,18 @@ async def get_post_trends(
     limit: int = Query(50),
     offset: int = Query(0),
 ) -> PostTrendsListResponse:
+    """
+    Fetches post trends data within the specified date range.
+
+    Args:
+        start_date: The start date for the query range
+        end_date: The end date for the query range
+        limit: Maximum number of records to return
+        offset: Number of records to skip
+
+    Returns:
+        PostTrendsListResponse: A response containing the list of post trends and total count
+    """
     async with session() as s:
         query = (
             select(

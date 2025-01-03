@@ -9,6 +9,11 @@ from .base import Base
 
 
 class PostTrends(Base):
+    """
+    Table to store trends for posts.
+
+    See https://www.postgresql.org/docs/current/rules-materializedviews.html
+    """
     __tablename__ = "post_trends"
 
     post_id: Mapped[str] = mapped_column(String, primary_key=True)
@@ -22,6 +27,16 @@ class PostTrends(Base):
     monthly_growth_rate: Mapped[float] = mapped_column(Numeric(10, 2))
 
     def __repr__(self) -> str:
+        """
+        Return a string representation of the PostTrends object.
+
+        This representation includes key attributes like post_id, collected_at,
+        current_views, daily_change, weekly_change, and monthly_change, which are
+        useful for debugging and logging.
+
+        Returns:
+            str: A string representation of the PostTrends object.
+        """
         return (
             f"PostTrends("
             f"post_id={self.post_id!r}, "
@@ -33,6 +48,8 @@ class PostTrends(Base):
 
     @staticmethod
     async def refresh_view(session: AsyncSession):
-        """Refresh the post_trends materialized view"""
+        """
+        Refresh the post_trends materialized view
+        """
         await session.execute(text("REFRESH MATERIALIZED VIEW post_trends;"))
         await session.commit()

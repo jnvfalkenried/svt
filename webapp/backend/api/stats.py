@@ -20,6 +20,15 @@ router = APIRouter()
 
 @router.get("/api/stats")
 async def get_stats() -> StatsResponse:
+    """
+    Fetches platform statistics including counts of authors, posts,
+    active hashtags, and challenges.
+
+    Returns:
+        StatsResponse: An object containing the counts of authors, posts,
+        active hashtags, and challenges.
+    """
+
     async with session() as s:
         author_count = await s.scalar(select(func.count()).select_from(Authors))
         post_count = await s.scalar(select(func.count()).select_from(Posts))
@@ -56,6 +65,15 @@ async def get_daily_growth(query, interval, db):
 async def get_growth_stats(
     request: Annotated[PlatformGrowthRequest, Query()]
 ) -> PlatformGrowthResponse:
+    """
+    Fetches the growth data of the platform, including authors, posts, active hashtags, challenges, and video embeddings.
+
+    Args:
+        request: The request data with interval
+
+    Returns:
+        PlatformGrowthResponse: A response containing the growth data of authors, posts, active hashtags, challenges, and video embeddings
+    """
     interval_mapping = {"Day": "day", "Week": "week", "Month": "month", "Year": "year"}
     interval_format = {
         "Day": "%Y-%m-%d",

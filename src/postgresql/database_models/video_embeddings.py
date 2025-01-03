@@ -8,6 +8,13 @@ from .base import Base
 
 
 class VideoEmbeddings(Base):
+    """
+    Model for storing video embeddings.
+
+    Each video embedding is associated with a post, and has an element_id
+    that is unique for that post.
+    """
+
     __tablename__ = "video_embeddings"
 
     post_id = Column(
@@ -18,9 +25,21 @@ class VideoEmbeddings(Base):
 
     posts = relationship("Posts", back_populates="video_embeddings")
 
-    # Helper method for finding similar videos
     @classmethod
     async def find_similar(cls, session, query_embedding, limit=10):
+        """
+        Find the top N most similar videos to the given query embedding.
+
+        We use cosine distance to measure similarity.
+
+        Args:
+            session: The database session to use.
+            query_embedding: The embedding to compare against.
+            limit: The maximum number of similar videos to return.
+
+        Returns:
+            A list of VideoEmbeddings objects, sorted by similarity.
+        """
         # Using cosine distance
         stmt = (
             sa.select(cls)

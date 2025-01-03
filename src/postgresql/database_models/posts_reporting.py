@@ -8,6 +8,21 @@ from .base import Base
 
 
 class PostsReporting(Base):
+    """
+    Table to store the reporting data of posts.
+
+    Attributes:
+        id (str): The unique identifier of the post.
+        collected_at (datetime): The time when the data was collected.
+        collect_count (int): The number of collections of the post.
+        comment_count (int): The number of comments of the post.
+        digg_count (int): The number of diggs of the post.
+        play_count (int): The number of plays of the post.
+        repost_count (int): The number of reposts of the post.
+        share_count (int): The number of shares of the post.
+        url (str): The URL of the post.
+    """
+
     __tablename__ = "posts_reporting"
 
     id: Mapped[str] = mapped_column(String, primary_key=True)
@@ -25,6 +40,12 @@ class PostsReporting(Base):
     __table_args__ = (PrimaryKeyConstraint("id", "collected_at"),)
 
     def __repr__(self) -> str:
+        """
+        Return a string representation of the PostsReporting object.
+
+        Returns:
+            str: A string representation of the PostsReporting object.
+        """
         return (
             f"PostsReporting("
             f"id={self.id!r}, "

@@ -7,6 +7,16 @@ from .base import Base
 
 
 class Music(Base):
+    """
+    Represents a Music object in the database.
+
+    Attributes:
+        id (str): Unique identifier for the music.
+        author_name (str): The name of the author of the music.
+        title (str): The title of the music.
+        original (bool): Whether the music is an original work.
+        duration (int): The duration of the music in seconds.
+    """
     __tablename__ = "music"
 
     id: Mapped[str] = mapped_column(String, primary_key=True, unique=True)
@@ -18,11 +28,19 @@ class Music(Base):
     posts = relationship("Posts", back_populates="music")
 
     __table_args__ = (
+        # Create an index on the id column for faster lookups.
         Index("music_id", "id"),
+        # Create an index on the author_name column for faster lookups.
         Index("music_author_name", "author_name"),
     )
 
     def __repr__(self):
+        """
+        Returns a string representation of the Music object.
+
+        Returns:
+            str: A string representation of the Music object.
+        """
         return (
             f"Music("
             f"id={self.id}, "

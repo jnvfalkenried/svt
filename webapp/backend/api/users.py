@@ -15,6 +15,18 @@ router = APIRouter()
 @router.post("/api/register")
 async def register(user: UserRequest) -> dict[str, str]:
     # Run a query to register a user
+    """
+    Register a new user.
+
+    Args:
+        user (UserRequest): The user to register.
+
+    Returns:
+        dict[str, str]: A dictionary with a message indicating the success of the registration.
+
+    Raises:
+        HTTPException: If the user already exists or if there is an error in the registration process.
+    """
     async with session() as s:
         # Check if the user already exists
         result = await s.execute(select(Users).where(Users.username == user.username))
@@ -46,6 +58,18 @@ async def register(user: UserRequest) -> dict[str, str]:
 @router.post("/api/login")
 async def login(login_request: LoginRequest) -> dict[str, str]:
     # Run a query to login a user
+    """
+    Logs in a user and returns a JWT token.
+
+    Args:
+        login_request (LoginRequest): The user to login.
+
+    Returns:
+        dict[str, str]: A dictionary with the JWT token and its type.
+
+    Raises:
+        HTTPException: If the user does not exist or if the password is incorrect.
+    """
     async with session() as s:
         # Check if the user exists
         result = await s.execute(

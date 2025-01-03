@@ -9,6 +9,18 @@ from .base import Base
 
 
 class Users(Base):
+    """
+    Represents a user in the database.
+
+    Attributes:
+        id (UUID): The unique identifier for the user.
+        username (str): The username of the user.
+        email (str): The email address of the user, must be unique.
+        password_hash (str): The hashed password of the user.
+        active (bool): Whether the user account is active.
+        roles (List[str]): The roles assigned to the user.
+    """
+
     __tablename__ = "users"
 
     id: Mapped[UUID] = mapped_column(
@@ -24,4 +36,7 @@ class Users(Base):
     active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     roles: Mapped[List[str]] = mapped_column(JSON, nullable=False)
 
-    __table_args__ = (Index("users_email", "email"),)
+    __table_args__ = (
+        # Create an index on the email column for faster lookups.
+        Index("users_email", "email"),
+    )

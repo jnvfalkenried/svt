@@ -13,6 +13,22 @@ async def insert_author_stats(
     video_count: int,
     session,
 ) -> None:
+    """
+    Insert author statistics into the authors_reporting table.
+
+    If a row with the same id and collected_at already exists, do nothing.
+
+    Args:
+        id (str): The unique identifier of the author.
+        collected_at (datetime): The time when the data was collected.
+        digg_count (int): The total number of diggs the author received.
+        follower_count (int): The total number of followers the author has.
+        following_count (int): The total number of users the author is following.
+        heart_count (int): The total number of hearts the author received.
+        video_count (int): The total number of videos the author has created.
+        session: The database session to use for the operation.
+    """
+    
     await session.execute(
         text(
             """

@@ -10,6 +10,11 @@ from postgresql.database_scripts.related_hashtags import save_rules_to_db
 
 
 async def fetch_last_processed_time():
+    """
+    Fetches the last processed time from the rule_mining_log table.
+    If the table is empty, it defaults to an hour ago.
+    """
+    
     async with session() as s:
         query = text(
             """
@@ -22,6 +27,22 @@ async def fetch_last_processed_time():
 
 
 async def fetch_posts_challenges(last_processed_time):
+    """
+    Fetches all posts and challenges from the database, with the condition that the
+    posts have been inserted after the given last_processed_time.
+
+    Args:
+        last_processed_time (datetime): The last time that the rule mining was ran.
+
+    Returns:
+        pd.DataFrame: A DataFrame containing the posts and challenges, with the following columns:
+            - post_id (int): The id of the post.
+            - description (str): The description of the post.
+            - challenge_id (int): The id of the hashtag.
+            - challenge_title (str): The title of the hashtag.
+            - hashtag_count (int): The number of hashtags in the post.
+    """
+    
     async with session() as s:
         query = text(
             """
@@ -46,6 +67,21 @@ async def fetch_posts_challenges(last_processed_time):
 
 
 async def fetch_previous_rules():
+    """
+    Fetches all the previously calculated rules from the database.
+
+    Returns:
+        pd.DataFrame: A DataFrame containing the rules, with the following columns:
+            - antecedent_id (int): The id(s) of the antecedent hashtag(s).
+            - antecedent_title (str): The title(s) of the antecedent hashtag(s).
+            - consequent_id (int): The id(s) of the consequent hashtag(s).
+            - consequent_title (str): The title(s) of the consequent hashtag(s).
+            - antecedent_support (float): The support of the antecedent hashtag(s).
+            - consequent_support (float): The support of the consequent hashtag(s).
+            - support (float): The support of the rule.
+            - confidence (float): The confidence of the rule.
+            - lift (float): The lift of the rule.
+    """
     async with session() as s:
         query = text(
             """
@@ -81,10 +117,38 @@ async def fetch_previous_rules():
 
 
 def merge_frequent_itemsets(old_rules_df, new_txn_df):
+    """
+    Merge frequent itemsets from old rules with new transactions.
+
+    Parameters
+    ----------
+    old_rules_df : pd.DataFrame
+        The DataFrame containing the old rules.
+    new_txn_df : pd.DataFrame
+        The DataFrame containing the new transactions.
+
+    Returns
+    -------
+    pd.DataFrame
+        The merged DataFrame containing the updated rules.
+    """
     print("Merging frequent itemsets...")
 
     def compute_support(titles):
         # Filter titles to include only those present in new_txn_df columns
+        """
+        Compute the support of a given list of titles in the new transactions DataFrame.
+        
+        Parameters
+        ----------
+        titles : list
+            A list of titles to compute the support of.
+        
+        Returns
+        -------
+        float
+            The support of the given list of titles.
+        """
         valid_titles = [title for title in titles if title in new_txn_df.columns]
         if valid_titles:  # If there are valid titles
             return new_txn_df[valid_titles].all(axis=1).mean()
@@ -123,6 +187,26 @@ def merge_frequent_itemsets(old_rules_df, new_txn_df):
 def detect_and_add_new_rules(
     new_txn_df, old_rules_df, posts_challenges_df, confidence_threshold
 ):
+    """
+    Detects and adds new rules to the existing rules DataFrame.
+
+    Parameters
+    ----------
+    new_txn_df : pd.DataFrame
+        The DataFrame containing the new transactions.
+    old_rules_df : pd.DataFrame
+        The DataFrame containing the existing rules.
+    posts_challenges_df : pd.DataFrame
+        The DataFrame containing the posts and challenges.
+    confidence_threshold : float
+        The minimum confidence threshold to consider a rule as valid.
+
+    Returns
+    -------
+    pd.DataFrame
+        The updated DataFrame containing the new rules.
+    """
+
     print("Detecting and adding new rules...")
     frequent_itemsets = apriori(new_txn_df, min_support=0.05, use_colnames=True)
 
@@ -137,6 +221,22 @@ def detect_and_add_new_rules(
     existing_consequents = old_rules_df["consequent_title"].apply(set).tolist()
 
     def is_new_rule(antecedent, consequent):
+        """
+        Determines if a rule with the given antecedent and consequent is new.
+
+        Parameters
+        ----------
+        antecedent : list
+            The antecedent part of the rule to be checked.
+        consequent : list
+            The consequent part of the rule to be checked.
+
+        Returns
+        -------
+        bool
+            True if the rule is not present in the existing rules, False otherwise.
+        """
+
         for existing_antecedent, existing_consequent in zip(
             existing_antecedents, existing_consequents
         ):
@@ -186,6 +286,22 @@ def detect_and_add_new_rules(
 
 
 def recompute_association_rules(merged_rules_df, confidence_threshold):
+    """
+    Recomputes the confidence and lift of the rules in the given merged rules DataFrame
+    and returns a new DataFrame containing the updated rules.
+
+    Parameters
+    ----------
+    merged_rules_df : pd.DataFrame
+        The DataFrame containing the merged rules.
+    confidence_threshold : float
+        The minimum confidence threshold to consider a rule as valid.
+
+    Returns
+    -------
+    pd.DataFrame
+        The updated DataFrame containing the recomputed rules.
+    """
     print("Recomputing association rules...")
     merged_rules_df["confidence"] = (
         merged_rules_df["support"] / merged_rules_df["antecedent_support"]
@@ -203,6 +319,25 @@ def recompute_association_rules(merged_rules_df, confidence_threshold):
 
 
 async def compute_related_hashtags():
+    """
+    Computes related hashtags based on the posts and challenges in the database.
+
+    The rules are computed using the apriori algorithm and the confidence and lift
+    metrics are computed for each rule. The rules are then saved to the database.
+
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    None
+
+    Notes
+    -----
+    This function is run once a day to update the related hashtags in the
+    database.
+    """
     confidence_threshold = 0.3
     last_processed_time = await fetch_last_processed_time()
     if last_processed_time.tzinfo is not None:
@@ -213,7 +348,6 @@ async def compute_related_hashtags():
         print("No new posts to process.")
         return
 
-    # df[["post_id", "challenge_id"]] = df[["post_id", "challenge_id"]].map(int)
     df[["challenge_title"]] = df[["challenge_title"]].map(str)
 
     new_transactions = df.groupby("post_id")["challenge_title"].apply(list).to_list()
