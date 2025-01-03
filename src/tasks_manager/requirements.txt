@@ -5,3 +5,5 @@ SQLAlchemy==2.0.30
 asyncpg==0.29.0
 pgvector==0.2.5
 loguru==0.7.2
+pandas==2.2.3
+mlxtend==0.23.2

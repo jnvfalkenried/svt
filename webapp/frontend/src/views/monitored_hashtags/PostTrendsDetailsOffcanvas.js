@@ -8,10 +8,11 @@ import {
   CCloseButton,
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
-import { cilMediaPlay, cilLink, cilCalendar } from '@coreui/icons'
+import { cilLink, cilCalendar, cilMediaPlay } from '@coreui/icons'
 
 const PostTrendsDetailsOffcanvas = ({ visible, onClose, post }) => {
   const tiktokUrl = `https://www.tiktok.com/@${post?.author_name}/video/${post?.post_id}`
+
   return (
     <COffcanvas placement="end" visible={visible} onHide={onClose} style={{ width: '30%' }}>
       <COffcanvasHeader>
@@ -31,18 +32,22 @@ const PostTrendsDetailsOffcanvas = ({ visible, onClose, post }) => {
               ))}
             </div>
             <p>
-              <strong>Author:</strong> {post.author_name}
+              <strong>Author:</strong>
+              {post.author_name}
             </p>
             <p>
-              <strong>Description:</strong> {post.post_description}
+              <strong>Description:</strong>
+              {post.post_description}
             </p>
             <p>
               <CIcon icon={cilMediaPlay} className="me-2" />
-              <strong>Views:</strong> {post.current_views.toLocaleString()}
+              <strong>Views:</strong>
+              {post.current_views.toLocaleString()}
             </p>
             <p>
               <CIcon icon={cilCalendar} className="me-2 text-muted" />
-              <strong>Last Updated:</strong> {new Date(post.collected_at).toLocaleString()}
+              <strong>Last Updated:</strong>
+              {new Date(post.collected_at).toLocaleString()}
             </p>
             <p>
               <CIcon icon={cilLink} className="me-2" />

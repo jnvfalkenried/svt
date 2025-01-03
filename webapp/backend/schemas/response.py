@@ -123,6 +123,13 @@ class StatsResponse(BaseModel):
     """The number of challenges on the platform."""
 
 
+class RelatedHashtagResponse(BaseModel):
+    active_hashtag_id: str
+    active_hashtag_title: str
+    related_hashtag_id: str
+    related_hashtag_title: str
+
+
 class ReportPostResponse(BaseModel):
     """
     Response schema for reported post data.
@@ -270,3 +277,31 @@ class HashtagTrendsListResponse(BaseModel):
     """A list of individual hashtag trend data."""
     total: int
     """The total number of hashtag trends available."""
+
+
+class HashtagPostsResponse(BaseModel):
+    related_hashtag_title: str
+    post_id: str
+    collected_at: datetime
+    current_views: float
+    daily_change: float
+    weekly_change: float
+    monthly_change: float
+    daily_growth_percentage: float
+    weekly_growth_percentage: float
+    monthly_growth_percentage: float
+
+
+class AuthorTrendsResponse(BaseModel):
+    author_id: str
+    collected_at: datetime
+    current_followers: int
+    current_hearts: int
+    current_diggs: int
+    current_videos: int
+    daily_followers_change: int
+    weekly_followers_change: int
+    monthly_followers_change: int
+    daily_followers_growth_rate: float
+    weekly_followers_growth_rate: float
+    monthly_followers_growth_rate: float

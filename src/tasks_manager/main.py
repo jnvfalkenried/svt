@@ -15,9 +15,8 @@ async def main():
 
     await tasks_manager.initialize()
 
-    # For development purposes, we can add some hashtags to monitor when the service starts
-    await tasks_manager.update_hashtags_to_monitor()
-    await tasks_manager.send_tasks_to_queue()
+    # await tasks_manager.update_hashtags_to_monitor()
+    # await tasks_manager.send_tasks_to_queue()
 
     scheduler = AsyncIOScheduler()
 
@@ -30,10 +29,27 @@ async def main():
     scheduler.add_job(tasks_manager.send_tasks_to_queue, "cron", hour=16, minute=1)
 
     # Run refresh right after tasks are sent
-    # This refreshes the db materialized view table posts_trends with growth data
+    # This refreshes the db materialized view table posts_trends and authors_trends with growth data
     scheduler.add_job(tasks_manager.refresh_post_trends_view, "cron", hour=1, minute=0)
     scheduler.add_job(tasks_manager.refresh_post_trends_view, "cron", hour=9, minute=0)
     scheduler.add_job(tasks_manager.refresh_post_trends_view, "cron", hour=17, minute=0)
+
+    # Compute related hashtag rules every 24 hours
+    scheduler.add_job(
+        tasks_manager.compute_related_hashtag_rules, "cron", hour=1, minute=30
+    )
+
+    # Run the scheduler
+
+    scheduler.add_job(
+        tasks_manager.refresh_author_trends_view, "cron", hour=1, minute=5
+    )
+    scheduler.add_job(
+        tasks_manager.refresh_author_trends_view, "cron", hour=9, minute=5
+    )
+    scheduler.add_job(
+        tasks_manager.refresh_author_trends_view, "cron", hour=17, minute=5
+    )
 
     scheduler.start()
 

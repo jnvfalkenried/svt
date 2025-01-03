@@ -1,14 +1,15 @@
-from typing import Annotated
+from typing import Annotated, Optional
 
 from core.auth import verify_token
 from fastapi import APIRouter, Depends, Query
 from schemas.request import PostsRequest
-from schemas.response import AuthorResponse
+from schemas.response import AuthorResponse, AuthorTrendsResponse
 from sqlalchemy.future import select
 
 from postgresql.config.db import session
 from postgresql.database_models import Users
 from postgresql.database_scripts.authors_reporting import get_top_authors
+from postgresql.database_scripts.authors_trends import get_author_trends
 
 router = APIRouter()
 
