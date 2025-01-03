@@ -2,13 +2,15 @@ from __future__ import annotations
 
 import json
 from datetime import datetime
-from typing import TYPE_CHECKING, AsyncIterator, ClassVar, Iterator, Optional, Union
+from typing import (TYPE_CHECKING, AsyncIterator, ClassVar, Iterator, Optional,
+                    Union)
 
 import httpx
 import requests
 
 from ..exceptions import InvalidResponseException
-from ..helpers import extract_video_id_from_url, requests_cookie_to_playwright_cookie
+from ..helpers import (extract_video_id_from_url,
+                       requests_cookie_to_playwright_cookie)
 
 if TYPE_CHECKING:
     from ..tiktok import TikTokApi
