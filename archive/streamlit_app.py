@@ -14,7 +14,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.future import select
 from sqlalchemy.orm import sessionmaker
 
-from src.postgresql_old.alchemy.models import Author, Challenge, Music, TikTokVideo
+from src.postgresql_old.alchemy.models import (Author, Challenge, Music,
+                                               TikTokVideo)
 
 load_dotenv()
 

@@ -3,22 +3,16 @@ from typing import List
 
 from fastapi import APIRouter, HTTPException
 from schemas.request import HashtagRequest
-from schemas.response import (
-    HashtagPostsResponse,
-    HashtagResponse,
-    RelatedHashtagResponse,
-)
+from schemas.response import (HashtagPostsResponse, HashtagResponse,
+                              RelatedHashtagResponse)
 from sqlalchemy import select
 from sqlalchemy.sql import text
 
 from postgresql.config.db import session
 from postgresql.database_models import Challenges
 from postgresql.database_scripts.active_hashtags import (
-    fetch_related_challenges,
-    fetch_related_hashtag_growth,
-    get_active_hashtags,
-    insert_or_update_active_hashtag,
-)
+    fetch_related_challenges, fetch_related_hashtag_growth,
+    get_active_hashtags, insert_or_update_active_hashtag)
 
 router = APIRouter()
 
@@ -92,20 +86,14 @@ from typing import List
 
 from fastapi import APIRouter, HTTPException
 from schemas.request import HashtagRequest
-from schemas.response import (
-    HashtagPostsResponse,
-    HashtagResponse,
-    RelatedHashtagResponse,
-)
+from schemas.response import (HashtagPostsResponse, HashtagResponse,
+                              RelatedHashtagResponse)
 from sqlalchemy.sql import text
 
 from postgresql.config.db import session
 from postgresql.database_scripts.active_hashtags import (
-    fetch_related_challenges,
-    fetch_related_hashtag_growth,
-    get_active_hashtags,
-    insert_or_update_active_hashtag,
-)
+    fetch_related_challenges, fetch_related_hashtag_growth,
+    get_active_hashtags, insert_or_update_active_hashtag)
 
 router = APIRouter()
 
