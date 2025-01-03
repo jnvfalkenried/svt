@@ -166,7 +166,7 @@ class TikTokVideoProcessor(RabbitMQClient):
 
     @sleep_and_retry
     @limits(calls=120, period=60)
-    def generate_embeddings(self, key_frames, description=None):
+    def generate_embeddings(self, key_frames):
         """
         Generate embeddings for the key frames
 
@@ -178,32 +178,19 @@ class TikTokVideoProcessor(RabbitMQClient):
         - embeddings: list: The list of embeddings
         """
         embeddings_lst = []
-        for i, key_frame in enumerate(key_frames):
+        for key_frame in key_frames:
             try:
                 # Embed the descitption only one time
-                if i == 0:
-                    description = description
-                else:
-                    description = None
                 image_embeddings, text_embeddings = (
                     self.get_image_video_text_embeddings(
-                        # project_id=self.google_project_id,
-                        # location=self.region,
                         frame=key_frame,
-                        contextual_text=description,
                         dimension=1408,
                     )
                 )
 
-                if text_embeddings:
-                    embeddings_lst.append(text_embeddings)
                 embeddings_lst.append(image_embeddings)
             except Exception as e:
                 print(f"Error generating embeddings: {e}")
-
-                # For testing purposes
-                print("Using dummy embeddings")
-                embeddings_lst = [[i for i in range(1408)], [i for i in range(1408)]]
 
         return embeddings_lst
 
