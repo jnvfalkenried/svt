@@ -1,57 +1,67 @@
-import React, { useState, useRef } from 'react';
-import { CCard, CCardBody, CCardHeader, CRow, CCol, CButton, CSpinner, CBadge, CAlert } from '@coreui/react';
-import CIcon from '@coreui/icons-react';
-import { cilSearch, cilImage, cilX } from '@coreui/icons';
+import React, { useState, useRef } from 'react'
+import {
+  CCard,
+  CCardBody,
+  CCardHeader,
+  CRow,
+  CCol,
+  CButton,
+  CSpinner,
+  CBadge,
+  CAlert,
+} from '@coreui/react'
+import CIcon from '@coreui/icons-react'
+import { cilSearch, cilImage, cilX } from '@coreui/icons'
 
 const MultimodalSearch = () => {
-  const [selectedImage, setSelectedImage] = useState(null);
-  const [previewUrl, setPreviewUrl] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [searchResults, setSearchResults] = useState([]);
-  const [error, setError] = useState('');
-  const fileInputRef = useRef(null);
+  const [selectedImage, setSelectedImage] = useState(null)
+  const [previewUrl, setPreviewUrl] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+  const [searchResults, setSearchResults] = useState([])
+  const [error, setError] = useState('')
+  const fileInputRef = useRef(null)
 
   const handleImageSelect = (event) => {
-    const file = event.target.files[0];
+    const file = event.target.files[0]
     if (file) {
-      setSelectedImage(file);
-      setPreviewUrl(URL.createObjectURL(file));
+      setSelectedImage(file)
+      setPreviewUrl(URL.createObjectURL(file))
     }
-  };
+  }
 
   const clearImage = () => {
-    setSelectedImage(null);
-    setPreviewUrl('');
+    setSelectedImage(null)
+    setPreviewUrl('')
     if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+      fileInputRef.current.value = ''
     }
-  };
+  }
 
   const formatDate = (timestamp) => {
-    if (!timestamp) return 'Unknown date';
-    const date = new Date(timestamp * 1000);
+    if (!timestamp) return 'Unknown date'
+    const date = new Date(timestamp * 1000)
     return date.toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
-    });
-  };
+    })
+  }
 
   const handleSearch = async () => {
     if (!selectedImage) {
-      setError('Please select an image');
-      return;
+      setError('Please select an image')
+      return
     }
 
-    setIsLoading(true);
-    setError('');
-    setSearchResults([]);
+    setIsLoading(true)
+    setError('')
+    setSearchResults([])
 
     try {
-      const formData = new FormData();
-      formData.append('image', selectedImage);
+      const formData = new FormData()
+      formData.append('image', selectedImage)
 
       const response = await fetch('/api/search/multimodal', {
         method: 'POST',
@@ -59,44 +69,44 @@ const MultimodalSearch = () => {
         headers: {
           Accept: 'application/json',
         },
-      });
+      })
 
-      let data;
-      const contentType = response.headers.get('content-type');
+      let data
+      const contentType = response.headers.get('content-type')
       if (contentType && contentType.includes('application/json')) {
-        data = await response.json();
+        data = await response.json()
       } else {
-        const text = await response.text();
-        console.error('Unexpected response format:', text);
-        throw new Error('Unexpected response format from server');
+        const text = await response.text()
+        console.error('Unexpected response format:', text)
+        throw new Error('Unexpected response format from server')
       }
 
       if (!response.ok) {
-        throw new Error(data.detail || 'Search failed');
+        throw new Error(data.detail || 'Search failed')
       }
 
       if (Array.isArray(data) && data.length === 0) {
-        setError('No results found');
+        setError('No results found')
       } else if (!Array.isArray(data)) {
-        console.error('Unexpected data format:', data);
-        throw new Error('Unexpected response format');
+        console.error('Unexpected data format:', data)
+        throw new Error('Unexpected response format')
       } else {
-        setSearchResults(data);
+        setSearchResults(data)
       }
     } catch (err) {
-      console.error('Search error:', err);
-      const errorMessage = err.message.includes('{') ? JSON.parse(err.message).detail : err.message;
-      setError(`Failed to perform search: ${errorMessage}`);
+      console.error('Search error:', err)
+      const errorMessage = err.message.includes('{') ? JSON.parse(err.message).detail : err.message
+      setError(`Failed to perform search: ${errorMessage}`)
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   const renderPostInfo = (post, author) => {
-    if (!author || !post) return 'Post information is not available';
+    if (!author || !post) return 'Post information is not available'
 
-    const authorUniqueId = author.author_unique_id || 'unknown-author';
-    const tiktokUrl = `https://www.tiktok.com/@${authorUniqueId}/video/${post.id || 'unknown-id'}`;
+    const authorUniqueId = author.author_unique_id || 'unknown-author'
+    const tiktokUrl = `https://www.tiktok.com/@${authorUniqueId}/video/${post.id || 'unknown-id'}`
 
     return (
       <div className="post-info">
@@ -154,8 +164,8 @@ const MultimodalSearch = () => {
           </a>
         </div>
       </div>
-    );
-  };
+    )
+  }
 
   return (
     <CCard className="mb-4">
@@ -178,10 +188,7 @@ const MultimodalSearch = () => {
                   ref={fileInputRef}
                   onChange={handleImageSelect}
                 />
-                <CButton
-                  color="secondary"
-                  onClick={() => fileInputRef.current?.click()}
-                >
+                <CButton color="secondary" onClick={() => fileInputRef.current?.click()}>
                   <CIcon icon={cilImage} className="me-2" />
                   Upload Image
                 </CButton>
@@ -207,7 +214,10 @@ const MultimodalSearch = () => {
         {previewUrl && (
           <CRow className="mb-4 justify-content-center">
             <CCol xs={12} md={6} className="text-center position-relative">
-              <div className="image-container" style={{ position: 'relative', display: 'inline-block' }}>
+              <div
+                className="image-container"
+                style={{ position: 'relative', display: 'inline-block' }}
+              >
                 <img
                   src={previewUrl}
                   alt="Preview"
@@ -290,7 +300,7 @@ const MultimodalSearch = () => {
         </CRow>
       </CCardBody>
     </CCard>
-  );
-};
+  )
+}
 
-export default MultimodalSearch;
+export default MultimodalSearch

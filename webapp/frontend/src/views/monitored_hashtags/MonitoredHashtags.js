@@ -178,18 +178,16 @@ const HashtagCard = ({ tag, onRemove }) => {
         {/* Related Tags */}
         {tag.related.length > 0 && (
           <div>
-            <small className="text-medium-emphasis d-block mb-2">
-              Related Hashtags
-            </small>
+            <small className="text-medium-emphasis d-block mb-2">Related Hashtags</small>
             <div className="d-flex flex-wrap gap-2">
               {tag.related.map((related) => (
-                <Link 
+                <Link
                   key={related.id}
                   to={`/monitored_hashtags/${related.title}`}
                   className="text-decoration-none"
                 >
-                  <CBadge 
-                    color="light" 
+                  <CBadge
+                    color="light"
                     className="px-3 py-2 text-primary hover:bg-primary hover:text-white transition-colors duration-200"
                     shape="rounded-pill"
                   >
@@ -298,7 +296,7 @@ const MonitoredHashtags = () => {
     <CRow className="justify-content-center">
       <CCol md={8}>
         <CAlert color="info" className="mb-3">
-           Add hashtags to monitor and explore their results
+          Add hashtags to monitor and explore their results
         </CAlert>
         <HashtagSearch onHashtagAdded={fetchHashtags} />
         <CCard className="mb-4">
