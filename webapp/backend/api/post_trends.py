@@ -7,8 +7,13 @@ from sqlalchemy import func, join
 from sqlalchemy.future import select
 
 from postgresql.config.db import session
-from postgresql.database_models import (Authors, Challenges, Posts,
-                                        PostsChallenges, PostTrends)
+from postgresql.database_models import (
+    Authors,
+    Challenges,
+    Posts,
+    PostsChallenges,
+    PostTrends,
+)
 
 router = APIRouter()
 
