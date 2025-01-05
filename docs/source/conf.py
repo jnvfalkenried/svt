@@ -9,7 +9,7 @@
 import os
 import sys
 
-project = 'TikTok Fakenews Detection'
+project = 'TikTok Data Intelligence Application'
 copyright = '2024, Elise, Rustam, Anand, Just'
 author = 'Elise, Rustam, Anand, Just'
 
@@ -55,6 +55,8 @@ autodoc_mock_imports = [
     "bcrypt",
     "jwt",
     "pydantic",
+    "pandas",
+    "mlxtend",
 ]
 
 autoapi_type = 'python'
