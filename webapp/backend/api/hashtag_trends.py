@@ -2,14 +2,15 @@ from typing import List, Optional
 
 from fastapi import APIRouter, Query
 from pydantic import BaseModel
+from schemas.response import HashtagTrendResponse, HashtagTrendsListResponse
 from sqlalchemy import func
 from sqlalchemy.future import select
 
 from postgresql.config.db import session
 from postgresql.database_models import ChallengeTrends
-from schemas.response import HashtagTrendResponse, HashtagTrendsListResponse
 
 router = APIRouter()
+
 
 @router.get("/api/hashtag-trends", response_model=HashtagTrendsListResponse)
 async def get_hashtag_trends(
@@ -22,20 +23,20 @@ async def get_hashtag_trends(
     """
     Retrieve the top trending hashtags based on growth metrics.
 
-    This endpoint fetches trending hashtags sorted by their weekly growth rate, 
-    with optional filters for minimum growth rate and pagination options 
-    (limit and offset). It returns a list of hashtags with their respective 
+    This endpoint fetches trending hashtags sorted by their weekly growth rate,
+    with optional filters for minimum growth rate and pagination options
+    (limit and offset). It returns a list of hashtags with their respective
     growth statistics: daily, weekly, and monthly growth rates.
 
     Args:
-        min_growth (Optional[float]): A minimum weekly growth rate to filter hashtags by. 
-                                       Only hashtags with a growth rate equal to or greater 
+        min_growth (Optional[float]): A minimum weekly growth rate to filter hashtags by.
+                                       Only hashtags with a growth rate equal to or greater
                                        than this value will be returned.
         limit (int): The maximum number of hashtag trends to return. Defaults to 50.
         offset (int): The number of items to skip, useful for pagination. Defaults to 0.
 
     Returns:
-        HashtagTrendsListResponse: A response object containing a list of hashtag trends, 
+        HashtagTrendsListResponse: A response object containing a list of hashtag trends,
                                    including the total count of hashtags matching the filter.
     """
     async with session() as s:

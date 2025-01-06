@@ -26,10 +26,11 @@ class EmbeddingsConsumer(RabbitMQClient):
     """
     EmbeddingsConsumer class to consume video embeddings from RabbitMQ and store in database.
     """
+
     def __init__(self, rabbitmq_server, rabbitmq_port, user, password):
         """
         Initialize the EmbeddingsConsumer with RabbitMQ connection details.
-        
+
         Args:
             rabbitmq_server (str): The RabbitMQ server hostname.
             rabbitmq_port (int): The RabbitMQ server port.
@@ -87,11 +88,11 @@ class EmbeddingsConsumer(RabbitMQClient):
     async def get_next_element_id(self, session, post_id):
         """
         This function gets the highest video embeddings id that exists in the DB, otherwise returns 0
-        
+
         Args:
             session (AsyncSession): The database session.
             post_id (str): The post ID.
-        
+
         Returns:
             int: The next element ID.
         """

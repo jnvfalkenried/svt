@@ -24,7 +24,7 @@ logger = setup_logger(f"producer_{replica_number}")
 class TikTokProducer(RabbitMQClient):
     """
     TikTokProducer class to produce TikTok data to RabbitMQ.
-    
+
     It can produce messages to the exchange and consume tasks from the tasks queue.
 
     Attributes:
@@ -32,6 +32,7 @@ class TikTokProducer(RabbitMQClient):
         exchange_name (str): The exchange name for the RabbitMQ exchange.
         tasks_queue (str): The tasks queue name for the RabbitMQ tasks queue.
     """
+
     def __init__(self, rabbitmq_server, rabbitmq_port, user, password):
         """
         Initialize the TikTokProducer with RabbitMQ connection details.

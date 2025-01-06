@@ -23,6 +23,7 @@ class TikTokConsumer(RabbitMQClient):
     """
     TikTokConsumer class to consume TikTok data from RabbitMQ and store in database.
     """
+
     def __init__(
         self,
         rabbitmq_server,
@@ -61,7 +62,7 @@ class TikTokConsumer(RabbitMQClient):
 
     async def consume_messages(self):
         """
-        Consume messages from the input queue and process them.        
+        Consume messages from the input queue and process them.
         """
         try:
             await self.queue.consume(callback=self.process_message)

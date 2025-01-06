@@ -22,13 +22,13 @@ router = APIRouter()
 async def get_stats() -> StatsResponse:
     """
     Retrieve the current statistics for the platform, including counts of authors, posts, active hashtags, and challenges.
-    
+
     This endpoint fetches the total count of the following entities:
     - Authors: The number of authors in the system.
     - Posts: The total number of posts.
     - Active Hashtags: The number of active hashtags.
     - Challenges: The total number of challenges available.
-    
+
     Returns:
         StatsResponse: A response object containing the counts of authors, posts, active hashtags, and challenges.
     """
@@ -51,15 +51,15 @@ async def get_stats() -> StatsResponse:
 async def get_daily_growth(query, interval, db):
     """
     Helper function to calculate growth statistics over a specified time interval (daily, weekly, monthly, or yearly).
-    
+
     This function calculates the number of records (e.g., authors, posts, challenges) created during each time period,
     based on the specified interval (day, week, month, year).
-    
+
     Args:
         query: The database model (e.g., Authors, Posts, Challenges) for which growth statistics are calculated.
         interval (str): The time interval for growth statistics (e.g., "day", "week", "month", "year").
         db (AsyncSession): The active database session to execute queries.
-    
+
     Returns:
         List: A list of tuples where each tuple represents a time interval and the corresponding record count.
     """
@@ -83,18 +83,18 @@ async def get_growth_stats(
 ) -> PlatformGrowthResponse:
     """
     Retrieve platform growth statistics over a specified time interval.
-    
+
     This endpoint calculates and returns the growth statistics for the following entities:
     - Authors: The number of authors created over the selected interval.
     - Posts: The number of posts created over the selected interval.
     - Challenges: The number of challenges created over the selected interval.
     (Optionally, other entities like active hashtags can be included.)
-    
+
     The growth statistics are based on the specified time interval (e.g., day, week, month, year).
-    
+
     Args:
         request (PlatformGrowthRequest): A request object containing the interval and other parameters.
-    
+
     Returns:
         PlatformGrowthResponse: A response object containing growth data for authors, posts, challenges, etc., formatted by the selected interval.
     """

@@ -6,9 +6,10 @@ from pydantic import BaseModel
 class HashtagRequest(BaseModel):
     """
     Schema for requesting data based on a specific hashtag.
-    
+
     This class represents a request that contains a hashtag to filter or search for posts related to that hashtag.
     """
+
     hashtag: str
     """The hashtag to filter posts or data by. Only posts containing this hashtag will be included."""
 
@@ -17,9 +18,10 @@ class UserRequest(BaseModel):
     """
     Schema for creating or updating a user account.
 
-    This class contains the necessary attributes for creating a new user or updating an existing user account, 
+    This class contains the necessary attributes for creating a new user or updating an existing user account,
     including their username, email, password, and assigned roles.
     """
+
     username: str
     """The unique username of the user. Used for login and identification."""
     email: str
@@ -34,9 +36,10 @@ class LoginRequest(BaseModel):
     """
     Schema for user login.
 
-    This class contains the necessary fields for a user to authenticate and log into the platform, 
+    This class contains the necessary fields for a user to authenticate and log into the platform,
     including their username and password.
     """
+
     username: str
     """The username of the user attempting to log in."""
     password: str
@@ -46,10 +49,11 @@ class LoginRequest(BaseModel):
 class PostsRequest(BaseModel):
     """
     Schema for filtering and sorting posts based on various criteria.
-    
-    This class represents the request parameters used for fetching posts, including filtering by date range, 
+
+    This class represents the request parameters used for fetching posts, including filtering by date range,
     hashtag, sorting by a specific category, and limiting the number of posts returned.
     """
+
     feed: bool
     """Indicates whether to sort the posts based on their appearance in the feed."""
     start_date: datetime
@@ -67,9 +71,10 @@ class PostsRequest(BaseModel):
 class PlatformGrowthRequest(BaseModel):
     """
     Schema for requesting platform growth data over a specified time interval.
-    
-    This class represents the parameters used to fetch platform growth data, with the ability to specify the time 
+
+    This class represents the parameters used to fetch platform growth data, with the ability to specify the time
     interval for the growth measurement (e.g., daily, weekly, or monthly).
     """
+
     interval: str
     """The time interval for measuring platform growth (e.g., "Day", "Week", "Month")."""

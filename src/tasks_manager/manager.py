@@ -25,6 +25,7 @@ class TasksManager(RabbitMQClient):
         exchange_name (str): The exchange name for the RabbitMQ exchange.
         hashtags_to_monitor (list): The list of hashtags to monitor.
     """
+
     def __init__(self, rabbitmq_server, rabbitmq_port, user, password):
         """
         Initialize the TasksManager with RabbitMQ connection details.

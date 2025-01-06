@@ -21,9 +21,9 @@ async def get_authors(
 ) -> list[AuthorResponse]:
     """
     Fetch a list of top authors based on selected metrics within a specified date range.
-    
-    This endpoint retrieves the top authors ranked by a given category (e.g., Likes Collected, Followers, Videos, etc.) 
-    within a specified date range, and returns a list of author details. 
+
+    This endpoint retrieves the top authors ranked by a given category (e.g., Likes Collected, Followers, Videos, etc.)
+    within a specified date range, and returns a list of author details.
 
     Args:
         request (PostsRequest): The request object containing filters such as the start and end dates,
@@ -32,7 +32,7 @@ async def get_authors(
                               (via token verification).
 
     Returns:
-        list[AuthorResponse]: A list of author response objects that include author information 
+        list[AuthorResponse]: A list of author response objects that include author information
                                sorted by the specified category (Likes Collected, Likes Given, Followers, etc.).
     """
     category_mapping = {

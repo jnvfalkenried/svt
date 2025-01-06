@@ -28,8 +28,8 @@ async def add_hashtag(hashtag_request: HashtagRequest) -> dict[str, str]:
     """
     Add a new hashtag to the active hashtags list.
 
-    This endpoint accepts a hashtag as input and adds it to the database 
-    as an active hashtag. If the hashtag already exists, it will be updated 
+    This endpoint accepts a hashtag as input and adds it to the database
+    as an active hashtag. If the hashtag already exists, it will be updated
     with the new information. The response will confirm the success of the operation.
 
     Args:
@@ -37,7 +37,7 @@ async def add_hashtag(hashtag_request: HashtagRequest) -> dict[str, str]:
 
     Returns:
         dict[str, str]: A dictionary containing a success message upon successful addition.
-    
+
     Raises:
         HTTPException: If there is an error in processing the request, a 500 error will be returned.
     """
@@ -59,7 +59,7 @@ async def get_hashtags() -> list[HashtagResponse]:
     """
     Retrieve a list of active hashtags.
 
-    This endpoint returns all the currently active hashtags from the database. 
+    This endpoint returns all the currently active hashtags from the database.
     It provides the hashtag title and its active status.
 
     Returns:
@@ -75,8 +75,8 @@ async def deactivate_hashtag(hashtag_id: str) -> dict[str, str]:
     """
     Deactivate a hashtag, making it no longer active.
 
-    This endpoint allows deactivating a hashtag by setting its active status to False. 
-    If the hashtag is already inactive or not found, it will return a 404 error. 
+    This endpoint allows deactivating a hashtag by setting its active status to False.
+    If the hashtag is already inactive or not found, it will return a 404 error.
     Otherwise, it will return a success message.
 
     Args:
@@ -84,7 +84,7 @@ async def deactivate_hashtag(hashtag_id: str) -> dict[str, str]:
 
     Returns:
         dict[str, str]: A dictionary containing a success message when the hashtag is deactivated.
-    
+
     Raises:
         HTTPException: If the hashtag is not found or already inactive, a 404 error is raised.
         HTTPException: If there is any other error, a 500 error is raised.

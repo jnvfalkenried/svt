@@ -8,9 +8,10 @@ class AuthorResponse(BaseModel):
     """
     Response schema for author data.
 
-    This class represents the details of an author, including their unique identifier, nickname, 
+    This class represents the details of an author, including their unique identifier, nickname,
     verification status, and metrics such as follower count, following count, likes, and videos.
     """
+
     id: str
     """The unique identifier for the author."""
     nickname: str = Field(default="Unknown")
@@ -39,9 +40,10 @@ class PostResponse(BaseModel):
     """
     Response schema for post data.
 
-    This class contains information about a specific post, including its metadata, 
-    engagement statistics (e.g., likes, shares), and related details. 
+    This class contains information about a specific post, including its metadata,
+    engagement statistics (e.g., likes, shares), and related details.
     """
+
     id: str
     """The unique identifier for the post."""
     created_at: int = Field(default=None)
@@ -77,6 +79,7 @@ class MatchResponse(BaseModel):
     This class represents the details of a post match, including the original post, its author,
     and the similarity score of the match.
     """
+
     post_id: str
     """The unique identifier for the post."""
     description: str = Field(default="Unknown")
@@ -95,9 +98,10 @@ class HashtagResponse(BaseModel):
     """
     Response schema for hashtag data.
 
-    This class represents the details of a hashtag, including its unique identifier, title, 
+    This class represents the details of a hashtag, including its unique identifier, title,
     and whether it's currently active.
     """
+
     id: str
     """The unique identifier for the hashtag."""
     title: str = Field(default="Unknown")
@@ -113,6 +117,7 @@ class StatsResponse(BaseModel):
     This class provides various statistics about the platform, including the number of authors,
     posts, active hashtags, and challenges.
     """
+
     author_count: int
     """The total number of authors on the platform."""
     post_count: int
@@ -137,6 +142,7 @@ class ReportPostResponse(BaseModel):
     This class provides detailed information about a reported post, including engagement metrics
     such as likes, shares, and comments, as well as information about whether the post is an advertisement.
     """
+
     id: str
     """The unique identifier for the post."""
     created_at: datetime
@@ -175,9 +181,10 @@ class ReportFeedResponse(ReportPostResponse):
     """
     Response schema for reported feed data.
 
-    This class extends the `ReportPostResponse` schema and adds information about 
+    This class extends the `ReportPostResponse` schema and adds information about
     the number of times the post appeared in feeds.
     """
+
     appearances_in_feed: int
     """The number of times the post has appeared in users' feeds."""
 
@@ -189,6 +196,7 @@ class PlatformGrowthResponse(BaseModel):
     This class represents the growth data of the platform across various categories,
     such as author growth, post growth, and challenge growth.
     """
+
     author_growth: list[dict]
     """A list of growth data related to authors."""
     post_growth: list[dict]
@@ -198,6 +206,7 @@ class PlatformGrowthResponse(BaseModel):
     """A list of growth data related to challenges."""
     # video_embeddings_growth: list[dict]
 
+
 class PostTrendResponse(BaseModel):
     """
     Response schema for post trend data.
@@ -205,6 +214,7 @@ class PostTrendResponse(BaseModel):
     This class contains the trend data for a post, including the number of views,
     changes in views over time, and growth rates.
     """
+
     post_id: str
     """The unique identifier for the post."""
     author_name: str
@@ -240,18 +250,21 @@ class PostTrendsListResponse(BaseModel):
 
     This class contains a list of post trends, including pagination details for the response.
     """
+
     items: List[PostTrendResponse]
     """A list of individual post trend data."""
     total: int
     """The total number of post trends available."""
 
+
 class HashtagTrendResponse(BaseModel):
     """
     Response schema for hashtag trend data.
 
-    This class contains trend data for a hashtag, including its growth rates over 
+    This class contains trend data for a hashtag, including its growth rates over
     different time intervals.
     """
+
     hashtag_id: str
     """The unique identifier for the hashtag."""
     hashtag_title: str
@@ -273,6 +286,7 @@ class HashtagTrendsListResponse(BaseModel):
 
     This class contains a list of hashtag trends, including pagination details for the response.
     """
+
     items: List[HashtagTrendResponse]
     """A list of individual hashtag trend data."""
     total: int

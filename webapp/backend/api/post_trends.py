@@ -3,6 +3,7 @@ from typing import List, Optional
 
 from fastapi import APIRouter, Query
 from pydantic import BaseModel
+from schemas.response import PostTrendResponse, PostTrendsListResponse
 from sqlalchemy import func, join
 from sqlalchemy.future import select
 
@@ -14,7 +15,6 @@ from postgresql.database_models import (
     PostsChallenges,
     PostTrends,
 )
-from schemas.response import PostTrendResponse, PostTrendsListResponse
 
 router = APIRouter()
 
@@ -29,8 +29,8 @@ async def get_post_trends(
     """
     Retrieve post trends based on growth and engagement metrics.
 
-    This endpoint returns a list of trending posts, including various metrics like views, 
-    growth rates (daily, weekly, monthly), and associated challenges. The results can be 
+    This endpoint returns a list of trending posts, including various metrics like views,
+    growth rates (daily, weekly, monthly), and associated challenges. The results can be
     filtered by a date range and support pagination through `limit` and `offset` parameters.
 
     Args:
@@ -40,9 +40,9 @@ async def get_post_trends(
         offset (int): The number of items to skip, used for pagination (default is 0).
 
     Returns:
-        PostTrendsListResponse: A response object containing a list of trending posts, 
+        PostTrendsListResponse: A response object containing a list of trending posts,
                                  along with the total count of matching records.
-    
+
     Raises:
         HTTPException: If there's an error while processing the query, an appropriate error message is raised.
     """

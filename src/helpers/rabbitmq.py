@@ -15,6 +15,7 @@ class RabbitMQClient:
         connection (aio_pika.Connection): Established RabbitMQ connection.
         channel (aio_pika.Channel): Active communication channel for the connection.
     """
+
     def __init__(self, rabbitmq_server, rabbitmq_port, user, password):
         """
         Initialize the RabbitMQ client with connection parameters.
@@ -59,9 +60,9 @@ class RabbitMQClient:
         """
         Gracefully close the existing RabbitMQ connection.
 
-        Safely terminates the connection if one exists. No-op if no 
+        Safely terminates the connection if one exists. No-op if no
         connection is active. Helps prevent resource leaks and ensures
         clean shutdown of RabbitMQ connections.
-     """
+        """
         if self.connection:
             await self.connection.close()
