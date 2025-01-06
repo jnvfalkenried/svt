@@ -214,7 +214,7 @@ class TikTokVideoProcessor(RabbitMQClient):
                 print(f"Error generating embeddings: {e}")
                 # Raise so we can requeue the message in main thread
                 raise e
-             
+
                 # For testing purposes
                 # print("Using dummy embeddings")
                 # embeddings_lst = [[i for i in range(1408)], [i for i in range(1408)]]
