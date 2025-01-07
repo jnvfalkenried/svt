@@ -78,4 +78,3 @@ class RelatedHashtags(Base):
             f"lift={self.lift!r}"
             f")"
         )
-

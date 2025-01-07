@@ -28,6 +28,7 @@ class Posts(Base):
         video_embeddings (List[VideoEmbeddings]): The video embeddings of the post.
         url (str): The URL of the post.
     """
+
     __tablename__ = "posts"
 
     id: Mapped[str] = mapped_column(String, primary_key=True, unique=True)

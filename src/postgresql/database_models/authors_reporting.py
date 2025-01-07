@@ -20,6 +20,7 @@ class AuthorsReporting(Base):
         heart_count (int): The total number of hearts the author received.
         video_count (int): The total number of videos the author has created.
     """
+
     __tablename__ = "authors_reporting"
 
     id: Mapped[str] = mapped_column(String, primary_key=True)

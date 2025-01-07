@@ -28,7 +28,7 @@ async def insert_author_stats(
         video_count (int): The total number of videos the author has created.
         session: The database session to use for the operation.
     """
-    
+
     await session.execute(
         text(
             """

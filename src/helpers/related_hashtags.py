@@ -14,7 +14,7 @@ async def fetch_last_processed_time():
     Fetches the last processed time from the rule_mining_log table.
     If the table is empty, it defaults to an hour ago.
     """
-    
+
     async with session() as s:
         query = text(
             """
@@ -42,7 +42,7 @@ async def fetch_posts_challenges(last_processed_time):
             - challenge_title (str): The title of the hashtag.
             - hashtag_count (int): The number of hashtags in the post.
     """
-    
+
     async with session() as s:
         query = text(
             """
@@ -138,12 +138,12 @@ def merge_frequent_itemsets(old_rules_df, new_txn_df):
         # Filter titles to include only those present in new_txn_df columns
         """
         Compute the support of a given list of titles in the new transactions DataFrame.
-        
+
         Parameters
         ----------
         titles : list
             A list of titles to compute the support of.
-        
+
         Returns
         -------
         float

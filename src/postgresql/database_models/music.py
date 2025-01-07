@@ -17,6 +17,7 @@ class Music(Base):
         original (bool): Whether the music is an original work.
         duration (int): The duration of the music in seconds.
     """
+
     __tablename__ = "music"
 
     id: Mapped[str] = mapped_column(String, primary_key=True, unique=True)

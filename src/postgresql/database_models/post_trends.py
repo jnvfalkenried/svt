@@ -14,6 +14,7 @@ class PostTrends(Base):
 
     See https://www.postgresql.org/docs/current/rules-materializedviews.html
     """
+
     __tablename__ = "post_trends"
 
     post_id: Mapped[str] = mapped_column(String, primary_key=True)

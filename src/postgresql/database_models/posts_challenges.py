@@ -16,5 +16,7 @@ class PostsChallenges(Base):
     )
 
     challenge_id: Mapped[str] = mapped_column(
-        ForeignKey("challenges.id"), primary_key=True, comment="The ID of the challenge."
+        ForeignKey("challenges.id"),
+        primary_key=True,
+        comment="The ID of the challenge.",
     )

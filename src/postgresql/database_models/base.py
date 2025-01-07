@@ -8,6 +8,7 @@ class Base(DeclarativeBase):
 
     Contains common column definitions like the "inserted_at" timestamp.
     """
+
     inserted_at = mapped_column(
         DateTime,
         default=func.now(),

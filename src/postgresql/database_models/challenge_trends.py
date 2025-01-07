@@ -14,6 +14,7 @@ class ChallengeTrends(Base):
         weekly_growth (float): The weekly growth rate of the hashtag.
         monthly_growth (float): The monthly growth rate of the hashtag.
     """
+
     __tablename__ = "challenge_trends"
 
     challenge_id = Column(String, primary_key=True)
@@ -24,4 +25,3 @@ class ChallengeTrends(Base):
 
     # Prevent SQLAlchemy from trying to modify the view
     __mapper_args__ = {"primary_key": [challenge_id]}
-

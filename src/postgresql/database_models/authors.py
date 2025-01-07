@@ -55,7 +55,7 @@ class Authors(Base):
         """
         Return a string representation of the Authors object.
 
-        This representation includes key attributes such as id, nickname, 
+        This representation includes key attributes such as id, nickname,
         and unique_id, which are useful for debugging and logging.
 
         Returns:

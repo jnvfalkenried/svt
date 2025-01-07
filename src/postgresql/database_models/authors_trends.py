@@ -14,6 +14,7 @@ class AuthorTrends(Base):
 
     See https://www.postgresql.org/docs/current/rules-materializedviews.html
     """
+
     __tablename__ = "author_trends"
 
     author_id: Mapped[str] = mapped_column(String, primary_key=True)
