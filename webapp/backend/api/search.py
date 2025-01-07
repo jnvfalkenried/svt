@@ -17,12 +17,19 @@ async def multimodal_search(
     limit: int = 3000,
 ) -> list[MatchResponse]:
     """
-    Perform a multimodal search using text and/or image embeddings.
+    Perform a multimodal search (text and/or image) for posts, retrieving the most similar posts
+    based on a query or an uploaded image.
 
-    Either `query` or `image` must be provided. If both are provided, the query embedding
-    will be combined with the image embedding using cosine similarity.
+    Args:
+        query (str): Optional textual query for search.
+        image (UploadFile): Optional image file for search.
+        limit (int): Number of top results to return (default: 3000).
 
-    The search results will be sorted by cosine similarity and limited to the first 3000 results.
+    Returns:
+        List[MatchResponse]: List of matched posts with their authors and similarity details.
+
+    Raises:
+        HTTPException: If either query or image is not provided, or if an error occurs.
     """
     print(f"Received request - query: {query}, image present: {image is not None}")
 

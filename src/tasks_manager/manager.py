@@ -15,29 +15,26 @@ logger = setup_logger("tasks_manager")
 
 
 class TasksManager(RabbitMQClient):
+    """
+    TasksManager class to manage tasks for the TikTok data pipeline.
+
+    It can produce messages to the exchange and consume tasks from the tasks queue.
+
+    Attributes:
+        connection_name (str): The connection name for the RabbitMQ connection.
+        exchange_name (str): The exchange name for the RabbitMQ exchange.
+        hashtags_to_monitor (list): The list of hashtags to monitor.
+    """
+
     def __init__(self, rabbitmq_server, rabbitmq_port, user, password):
         """
-        Initializes the TasksManager
+        Initialize the TasksManager with RabbitMQ connection details.
 
-        Parameters
-        ----------
-        rabbitmq_server : str
-            The RabbitMQ server URL
-        rabbitmq_port : int
-            The RabbitMQ server port
-        user : str
-            The RabbitMQ user
-        password : str
-            The RabbitMQ password
-
-        Attributes
-        ----------
-        connection_name : str
-            Name of the connection
-        exchange_name : str
-            Name of the exchange
-        hashtags_to_monitor : list
-            List of hashtags to monitor
+        Args:
+            rabbitmq_server (str): The RabbitMQ server hostname.
+            rabbitmq_port (int): The RabbitMQ server port.
+            user (str): The RabbitMQ server username.
+            password (str): The RabbitMQ server password.
         """
         super().__init__(rabbitmq_server, rabbitmq_port, user, password)
         self.connection_name = "tasks_manager"
@@ -46,14 +43,7 @@ class TasksManager(RabbitMQClient):
 
     async def initialize(self):
         """
-        Initializes the TasksManager
-
-        Connects to RabbitMQ, declares the exchange and sets up the prefetch count
-
-        Raises
-        ------
-        Exception
-            If there's an error initializing the TasksManager
+        Initialize the TasksManager by connecting to RabbitMQ and setting up the exchange.
         """
         try:
             await self.connect(self.connection_name)
@@ -69,19 +59,11 @@ class TasksManager(RabbitMQClient):
 
     async def produce_message(self, key, value):
         """
-        Produces a message to the exchange with the given key and value.
+        Produce a message to the exchange with the given key and value.
 
-        Parameters
-        ----------
-        key : str
-            The routing key for the message
-        value : str or bytes
-            The message body
-
-        Raises
-        ------
-        Exception
-            If there's an error producing the message
+        Args:
+            key (str): The routing key for the message.
+            value (str): The message value.
         """
         try:
             message = aio_pika.Message(
@@ -97,14 +79,7 @@ class TasksManager(RabbitMQClient):
 
     async def update_hashtags_to_monitor(self):
         """
-        Updates the list of hashtags to monitor from the database.
-
-        This function retrieves the list of active hashtags from the database
-        and updates the `hashtags_to_monitor` attribute of the class instance.
-
-        If there is an error retrieving the list of hashtags from the database,
-        the `hashtags_to_monitor` attribute is reset to an empty list.
-
+        Update the list of hashtags to monitor from the database.
         """
         try:
             async with session() as s:
@@ -118,18 +93,7 @@ class TasksManager(RabbitMQClient):
 
     async def send_tasks_to_queue(self):
         """
-        Sends tasks to the producer queue for each hashtag in the `hashtags_to_monitor`
-        list.
-
-        This function iterates over the `hashtags_to_monitor` list and for each
-        hashtag, it creates a task dictionary with the hashtag, number of videos
-        to retrieve, and a timestamp. The task dictionary is then
-        JSON-serialized and sent to the producer queue using the
-        `produce_message` method.
-
-        If there is an error sending the tasks to the queue, the error is
-        logged.
-
+        Send tasks to the tasks queue for each hashtag to monitor.
         """
         try:
             for hashtag in self.hashtags_to_monitor:
@@ -146,6 +110,9 @@ class TasksManager(RabbitMQClient):
             logger.error(f"Error sending tasks to queue: {e}", exc_info=True)
 
     async def refresh_post_trends_view(self):
+        """
+        Refresh the posts_trends materialized view in the database.
+        """
         # Refreshes posts_trends materialized DB view
         """
         Refreshes the post_trends materialized database view.

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useLocation } from 'react-router-dom'
 import {
   CTable,
   CTableBody,
@@ -25,9 +25,17 @@ const TrendingPosts = () => {
   const [showOffcanvas, setShowOffcanvas] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 10
+  const location = useLocation()
   const { hashtag_title } = useParams()
 
   useEffect(() => {
+    console.log('Component mounted with params:', {
+      hashtag_title,
+      pathname: location.pathname,
+      fullUrl: window.location.href
+    })
+
+    console.log('useEffect triggered. hashtag_title:', hashtag_title)
     const fetchTrends = async () => {
       try {
         setLoading(true)
@@ -47,7 +55,11 @@ const TrendingPosts = () => {
     }
 
     if (hashtag_title) {
+      console.log('Initiating fetch for hashtag:', hashtag_title)
       fetchTrends()
+    } else {
+      console.warn('No hashtag_title available')
+      setLoading(false)
     }
   }, [hashtag_title])
 
@@ -222,12 +234,14 @@ const TrendingPosts = () => {
           challenges: selectedPost ? [selectedPost.hashtag_title] : [],
           author_name: selectedPost?.author_nickname || 'N/A',
           post_description: selectedPost?.post_description || 'N/A',
-          current_views: selectedPost?.current_views?.toLocaleString() || 'N/A',
+          current_views: selectedPost?.current_views || 0, // Remove toLocaleString() here
           collected_at: selectedPost?.collected_at
             ? new Date(selectedPost.collected_at).toLocaleDateString()
             : 'N/A',
         }}
       />
+
+
     </div>
   )
 }

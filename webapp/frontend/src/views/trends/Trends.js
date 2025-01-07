@@ -50,7 +50,7 @@ const Trends = () => {
           </CTabPane>
           <CTabPane visible={activeTab === 2}>
             <CAlert color="info" className="mb-3">
-                Discover the authors that have increased most in number of followers
+              Discover the authors that have increased most in number of followers
             </CAlert>
             <AuthorTrendsTable />
           </CTabPane>
