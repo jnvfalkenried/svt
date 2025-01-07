@@ -59,6 +59,19 @@ async def get_author_trends(
     limit: int = Query(50),
     offset: int = Query(0),
 ) -> AuthorTrendsListResponse:
+    """
+    Fetches author trends data within the specified date range.
+
+    Args:
+        start_date: The start date for the query range
+        end_date: The end date for the query range
+        author_id: Optional author_id to filter for a specific author
+        limit: Maximum number of records to return
+        offset: Number of records to skip
+
+    Returns:
+        AuthorTrendsListResponse: A response containing the list of author trends and total count
+    """
     async with session() as s:
         query = (
             select(

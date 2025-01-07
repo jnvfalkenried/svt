@@ -114,6 +114,16 @@ class TasksManager(RabbitMQClient):
         Refresh the posts_trends materialized view in the database.
         """
         # Refreshes posts_trends materialized DB view
+        """
+        Refreshes the post_trends materialized database view.
+
+        This function refreshes the post_trends materialized view by calling the
+        refresh_view method of the PostTrends class.
+
+        Logs a success message if the refresh is successful, or an error message
+        if an exception occurs.
+
+        """
         try:
             async with session() as s:
                 # Import at the top of file
@@ -125,6 +135,17 @@ class TasksManager(RabbitMQClient):
             logger.error(f"Error refreshing post_trends view: {e}", exc_info=True)
 
     async def compute_related_hashtag_rules(self):
+        """
+        Computes related hashtag rules.
+
+        This method calls the compute_related_hashtags function which
+        computes the related hashtag rules using the apriori algorithm and
+        saves them to the database.
+
+        Logs a success message if the computation is successful, or an
+        error message if an exception occurs.
+
+        """
         try:
             await compute_related_hashtags()
             logger.info("Successfully computed related hashtag rules")

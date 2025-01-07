@@ -14,6 +14,22 @@ async def insert_post(
     url: str,
     session,
 ) -> None:
+    """
+    Inserts a post into the database. If the post already exists, this function does nothing.
+
+    Parameters:
+        id (str): The ID of the post.
+        created_at (int): The timestamp when the post was created.
+        description (str): The description of the post.
+        duet_enabled (bool): Whether the post allows duets.
+        duet_from_id (str): The ID of the original post that this post is a duet of.
+        is_ad (bool): Whether the post is an advertisement.
+        can_repost (bool): Whether the post can be reposted.
+        author_id (str): The ID of the author of the post.
+        music_id (str): The ID of the music used in the post.
+        url (str): The URL of the post.
+        session: The SQLAlchemy session to use for the database query.
+    """
     await session.execute(
         text(
             """
