@@ -268,6 +268,8 @@ services:
       - frontend
       - backend
     restart: always
+    ports:
+      - "80:80"
 
   ngrok:
     build:
@@ -279,3 +281,15 @@ services:
       - nginx
     ports:
       - ${NGROK_PORT_MAP}:4040
+    labels:
+      description: "Database API"
+
+  docs:
+    build:
+      context: .
+      dockerfile: ./docs/Dockerfile
+    ports:
+      - "8081:8081"
+    labels:
+      description: "Auto-generated Documentation with Sphinx"
+

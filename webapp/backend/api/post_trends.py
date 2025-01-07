@@ -3,6 +3,7 @@ from typing import List, Optional
 
 from fastapi import APIRouter, Query
 from pydantic import BaseModel
+from schemas.response import PostTrendResponse, PostTrendsListResponse
 from sqlalchemy import func, join
 from sqlalchemy.future import select
 
@@ -18,29 +19,6 @@ from postgresql.database_models import (
 router = APIRouter()
 
 
-class PostTrendResponse(BaseModel):
-    post_id: str
-    author_name: str
-    post_description: str
-    collected_at: datetime
-    current_views: int
-    daily_change: int
-    weekly_change: int
-    monthly_change: int
-    daily_growth_rate: float
-    weekly_growth_rate: float
-    monthly_growth_rate: float
-    challenges: List[str]
-
-    class Config:
-        from_attributes = True
-
-
-class PostTrendsListResponse(BaseModel):
-    items: List[PostTrendResponse]
-    total: int
-
-
 @router.get("/api/post-trends", response_model=PostTrendsListResponse)
 async def get_post_trends(
     start_date: Optional[datetime] = Query(None),
@@ -49,16 +27,24 @@ async def get_post_trends(
     offset: int = Query(0),
 ) -> PostTrendsListResponse:
     """
-    Fetches post trends data within the specified date range.
+    Retrieve post trends based on growth and engagement metrics.
+
+    This endpoint returns a list of trending posts, including various metrics like views,
+    growth rates (daily, weekly, monthly), and associated challenges. The results can be
+    filtered by a date range and support pagination through `limit` and `offset` parameters.
 
     Args:
-        start_date: The start date for the query range
-        end_date: The end date for the query range
-        limit: Maximum number of records to return
-        offset: Number of records to skip
+        start_date (Optional[datetime]): The start date to filter the post trends by their collection date.
+        end_date (Optional[datetime]): The end date to filter the post trends by their collection date.
+        limit (int): The maximum number of post trends to return (default is 50).
+        offset (int): The number of items to skip, used for pagination (default is 0).
 
     Returns:
-        PostTrendsListResponse: A response containing the list of post trends and total count
+        PostTrendsListResponse: A response object containing a list of trending posts,
+                                 along with the total count of matching records.
+
+    Raises:
+        HTTPException: If there's an error while processing the query, an appropriate error message is raised.
     """
     async with session() as s:
         query = (

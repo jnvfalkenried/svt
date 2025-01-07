@@ -20,13 +20,22 @@ async def get_authors(
     current_user: Users = Depends(verify_token),
 ) -> list[AuthorResponse]:
     """
-    Fetches top authors based on follower counts within the specified date range and filters.
+    Fetch a list of top authors based on selected metrics within a specified date range.
 
-    :param request: The request data with start_date, end_date, hashtag, category, and limit
-    :param current_user: The current user object
-    :return: A list of author dictionaries
+    This endpoint retrieves the top authors ranked by a given category (e.g., Likes Collected, Followers, Videos, etc.)
+    within a specified date range, and returns a list of author details.
+
+    Args:
+        request (PostsRequest): The request object containing filters such as the start and end dates,
+                                 hashtag, category, and the limit for the number of authors.
+        current_user (Users): The current user object, which is used for authorization and validation
+                              (via token verification).
+
+    Returns:
+        list[AuthorResponse]: A list of author response objects that include author information
+                               sorted by the specified category (Likes Collected, Likes Given, Followers, etc.).
     """
-    hashtag_mapping = {
+    category_mapping = {
         "Likes Collected": "max_heart_count",
         "Likes Given": "max_digg_count",
         "Followers": "max_follower_count",
@@ -40,7 +49,7 @@ async def get_authors(
             end_date=request.end_date.replace(tzinfo=None),
             session=s,
             hashtag=request.hashtag,
-            category=hashtag_mapping[request.category],
+            category=category_mapping[request.category],
             limit=request.limit,
         )
         return result
