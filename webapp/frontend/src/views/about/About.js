@@ -117,6 +117,7 @@ const About = () => {
               <li>Processing retrieved content at 00:01, 08:01, and 16:01</li>
               <li>Post trends view refresh at 01:00, 09:00, and 17:00</li>
               <li>Author trends view refresh at 01:05, 09:05, and 17:05</li>
+              <li>Compute hashtag associations at 01:15</li>
             </ul>
           </CCardBody>
         </CCard>
@@ -133,7 +134,7 @@ const About = () => {
             <h5 className="mt-3 mb-2">Resources</h5>
             <div className="d-flex gap-3">
               <a
-                href="https://github.com/yourorganization/hashtag-monitoring-app"
+                href="https://github.com/jnvfalkenried/svt"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-decoration-none"
