@@ -31,6 +31,9 @@ async def main():
 
     # await tasks_manager.update_hashtags_to_monitor()
     # await tasks_manager.send_tasks_to_queue()
+    await tasks_manager.compute_related_hashtag_rules()
+    # await tasks_manager.refresh_post_trends_view()
+    # await tasks_manager.refresh_author_trends_view()
 
     scheduler = AsyncIOScheduler()
 

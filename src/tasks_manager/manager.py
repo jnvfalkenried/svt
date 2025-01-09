@@ -156,8 +156,8 @@ class TasksManager(RabbitMQClient):
         """Refresh the author_trends materialized view"""
         logger.info("Refreshing author_trends materialized view")
         try:
-            async with self.session() as session:
-                await AuthorTrends.refresh_view(session)
+            async with session() as s:
+                await AuthorTrends.refresh_view(s)
             logger.info("Successfully refreshed author_trends materialized view")
         except Exception as e:
             logger.error(f"Error refreshing author_trends materialized view: {e}")

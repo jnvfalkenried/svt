@@ -32,7 +32,7 @@ const TrendingPosts = () => {
     console.log('Component mounted with params:', {
       hashtag_title,
       pathname: location.pathname,
-      fullUrl: window.location.href
+      fullUrl: window.location.href,
     })
 
     console.log('useEffect triggered. hashtag_title:', hashtag_title)
@@ -240,8 +240,6 @@ const TrendingPosts = () => {
             : 'N/A',
         }}
       />
-
-
     </div>
   )
 }

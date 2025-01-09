@@ -178,7 +178,7 @@ const About = () => {
               specified in the LICENSE file in our GitHub repository
             </p>
             <a
-              href="https://github.com/yourorganization/hashtag-monitoring-app/blob/main/LICENSE"
+              href="https://github.com/jnvfalkenried/svt/blob/dev/LICENSE"
               target="_blank"
               rel="noopener noreferrer"
             >
